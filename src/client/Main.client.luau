@@ -24,6 +24,14 @@ screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screen.Parent = player:WaitForChild("PlayerGui")
 
 Ui.initToasts(screen)
+
+-- Studio playtests: show script errors on screen too, so they're hard to miss
+if game:GetService("RunService"):IsStudio() then
+	game:GetService("ScriptContext").Error:Connect(function(message, _trace, source)
+		local where = if source then source:GetFullName() else "?"
+		Ui.toast(`[ERROR] {where}: {message}`, Color3.fromRGB(255, 90, 90))
+	end)
+end
 Hud.Build(screen)
 Panels.Build(screen)
 Followers.Start()
@@ -47,6 +55,7 @@ task.spawn(function()
 	local snapshot = Remotes.Function("GetSnapshot"):InvokeServer()
 	if snapshot then
 		State.Set("Data", snapshot)
+		print("[Mythic Tamers] Connected to server - data loaded")
 	end
 end)
 
