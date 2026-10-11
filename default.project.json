@@ -7,7 +7,8 @@
         "$path": "src/shared"
       },
       "CreatureMeshes": {
-        "$path": "assets/creatures"
+        "$path": "assets/creatures",
+        "$ignoreUnknownInstances": true
       }
     },
     "ServerScriptService": {
