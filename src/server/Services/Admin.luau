@@ -6,16 +6,27 @@
 	  !surge                     start a Mana Surge now
 	  !weather ManaStorm 10      force a weather for N minutes (Clear, Starfall, Aurora, Eclipse, ManaStorm)
 	  !announce Hello everyone   show a message to all players
+
+	Testing commands (only affect you, only on this server):
+	  !essence 1000000           give yourself Essence
+	  !give EmberFox             hatch a specific creature (add "Shiny" or "Rainbow" after the name)
+	  !giveall                   get one of every creature and equip your best
+
+	In Studio playtests you are always an admin, so you can use these straight away.
 ]]
 
 local MessagingService = game:GetService("MessagingService")
+local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Config = require(ReplicatedStorage.Shared.Config)
 local Weather = require(ReplicatedStorage.Shared.Weather)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local Creatures = require(ReplicatedStorage.Shared.Creatures)
 local Surge = require(script.Parent.Surge)
+local PlayerData = require(script.Parent.PlayerData)
+local Economy = require(script.Parent.Economy)
 local WorldService = require(script.Parent.WorldService)
 
 local Admin = {}
@@ -24,10 +35,59 @@ local TOPIC = "MythicTamersAdmin"
 local notify = Remotes.Event("Notify")
 
 local function isAdmin(player: Player): boolean
+	if RunService:IsStudio() then
+		return true
+	end
 	if table.find(Config.AdminUserIds, player.UserId) then
 		return true
 	end
 	return game.CreatorType == Enum.CreatorType.User and player.UserId == game.CreatorId
+end
+
+-- Personal testing commands: run only for the player who typed them
+local function runPersonal(player: Player, command: string, args: { string }): boolean
+	local data = PlayerData.Get(player)
+	if not data then
+		return false
+	end
+	if command == "essence" then
+		local amount = math.clamp(tonumber(args[1]) or 1e6, 0, 1e15)
+		Economy.AddEssence(player, amount)
+		notify:FireClient(player, `[TEST] +{amount} Essence`, Color3.fromRGB(140, 255, 200))
+	elseif command == "give" or command == "giveall" then
+		local list = {}
+		if command == "giveall" then
+			for _, def in Creatures.Ordered do
+				table.insert(list, def.Id)
+			end
+		else
+			-- accept any capitalisation: "!give emberfox"
+			local wanted = string.lower(args[1] or "")
+			for _, def in Creatures.Ordered do
+				if string.lower(def.Id) == wanted then
+					table.insert(list, def.Id)
+				end
+			end
+			if #list == 0 then
+				notify:FireClient(player, `[TEST] Unknown creature "{args[1] or ""}"`, Color3.fromRGB(255, 120, 120))
+				return true
+			end
+		end
+		local variant = args[2]
+		if variant ~= "Shiny" and variant ~= "Rainbow" then
+			variant = "Normal"
+		end
+		for _, id in list do
+			PlayerData.NewCreature(data, id, variant)
+			data.Bestiary[id] = true
+		end
+		Economy.EquipBest(player)
+		notify:FireClient(player, `[TEST] Gave {#list} creature(s)`, Color3.fromRGB(140, 255, 200))
+	else
+		return false
+	end
+	PlayerData.MarkChanged(player)
+	return true
 end
 
 local function run(command: string, args: { string })
@@ -70,6 +130,9 @@ function Admin.Start()
 		end
 		local words = string.split(string.sub(text, 2), " ")
 		local command = string.lower(table.remove(words, 1) or "")
+		if runPersonal(player, command, words) then
+			return
+		end
 		if command ~= "surge" and command ~= "weather" and command ~= "announce" then
 			return
 		end
