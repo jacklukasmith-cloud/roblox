@@ -2,7 +2,10 @@
 	All networking in one place. The server creates the remotes; clients wait for them.
 ]]
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+
+local FOLDER_NAME = "MythicTamersRemotes"
 
 local EVENTS = {
 	"DataChanged", -- server -> client: full player snapshot
@@ -29,7 +32,9 @@ local Remotes = {}
 local folder: Folder
 if RunService:IsServer() then
 	folder = Instance.new("Folder")
-	folder.Name = "Remotes"
+	-- Lives directly in ReplicatedStorage with a unique name. (It used to sit next to this
+	-- ModuleScript, also called "Remotes", and clients found the module instead of the folder.)
+	folder.Name = FOLDER_NAME
 	for _, name in EVENTS do
 		local remote = Instance.new("RemoteEvent")
 		remote.Name = name
@@ -40,9 +45,9 @@ if RunService:IsServer() then
 		remote.Name = name
 		remote.Parent = folder
 	end
-	folder.Parent = script.Parent
+	folder.Parent = ReplicatedStorage
 else
-	folder = script.Parent:WaitForChild("Remotes") :: Folder
+	folder = ReplicatedStorage:WaitForChild(FOLDER_NAME) :: Folder
 end
 
 function Remotes.Event(name: string): RemoteEvent
