@@ -7,6 +7,7 @@ compete in server-wide **Mana Surges** and a weekly cross-server **House War**.
 - **[docs/GAME_DESIGN.md](docs/GAME_DESIGN.md)**: every system, the economy numbers and the monetization plan
 - **[docs/MARKET_RESEARCH.md](docs/MARKET_RESEARCH.md)**: what makes the top simulators different, and which ideas we borrowed
 - **[docs/ICONS.md](docs/ICONS.md)**: generated icons for every game pass and product
+- **[docs/CREATURE_MESHES.md](docs/CREATURE_MESHES.md)**: 3D models (GLB) of all 25 creatures and how to import them
 
 ## Look
 
@@ -16,7 +17,8 @@ part geometry the game generates.
 ![All 25 creatures](docs/images/creatures.png)
 ![World objects](docs/images/world.png)
 
-Creatures animate (wings flap, tails wag, legs paddle, serpents slither), Shiny variants are gold-tinted with sparkles,
+Real textured 3D meshes for all 25 creatures are also ready to import; see [docs/CREATURE_MESHES.md](docs/CREATURE_MESHES.md).
+Built-in creatures animate (wings flap, tails wag, legs paddle, serpents slither), Shiny variants are gold-tinted with sparkles,
 Rainbow variants cycle colours, and Champion creatures wear crowns.
 
 ## Quick start

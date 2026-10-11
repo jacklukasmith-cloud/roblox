@@ -1238,6 +1238,134 @@ local function effects(ctx: Ctx, def: Creatures.CreatureDef, variant: string, pl
 	end
 end
 
+-- Imported meshes ----------------------------------------------------------------------------
+--[[
+	If ReplicatedStorage.CreatureMeshes contains a Model (or MeshPart) named after a creature Id
+	(e.g. "EmberFox"), that mesh is used instead of the procedural body. Import the Higgsfield GLB
+	files with Studio's 3D Importer - see docs/CREATURE_MESHES.md.
+
+	Optional attributes on the imported model:
+	  Yaw   (number, degrees)  rotate so the creature faces Roblox's front (-Z)
+	  Scale (number)           extra size multiplier
+	  Lift  (number, studs)    move the model up/down relative to its centre
+]]
+
+local function getMeshTemplate(id: string): Instance?
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local folder = ReplicatedStorage:FindFirstChild("CreatureMeshes")
+	local template = folder and folder:FindFirstChild(id)
+	if template and (template:IsA("Model") or template:IsA("BasePart")) then
+		return template
+	end
+	return nil
+end
+
+local function buildFromMesh(
+	template: Instance,
+	def: Creatures.CreatureDef,
+	variant: string,
+	plan: { [string]: any },
+	scale: number?
+): Rig
+	local rarity = Creatures.Rarities[def.Rarity]
+	local model: Model
+	if template:IsA("Model") then
+		model = template:Clone()
+	else
+		model = Instance.new("Model")
+		template:Clone().Parent = model
+	end
+	model.Name = def.Id
+
+	-- Normalise size: the longest side matches the procedural body length for this rarity
+	local S = rarity.Size * 0.72 * (scale or 1) * (tonumber(template:GetAttribute("Scale")) or 1)
+	local _, extents = model:GetBoundingBox()
+	local longest = math.max(extents.X, extents.Y, extents.Z, 0.01)
+	model:ScaleTo(model:GetScale() * (2.3 * S) / longest)
+
+	local boxCf, size = model:GetBoundingBox()
+	local yaw = math.rad(tonumber(template:GetAttribute("Yaw")) or 0)
+	local lift = tonumber(template:GetAttribute("Lift")) or 0
+	-- Pieces are stored relative to the box centre, so the creature hovers around its middle
+	local origin = CFrame.new(boxCf.Position + Vector3.new(0, -lift, 0))
+	local spin = CFrame.Angles(0, yaw, 0)
+
+	local pieces: { Piece } = {}
+	local root: BasePart? = nil
+	local biggest = 0
+	for _, d in model:GetDescendants() do
+		if d:IsA("BasePart") then
+			d.Anchored = true
+			d.CanCollide = false
+			d.CanQuery = false
+			d.CanTouch = false
+			d.CastShadow = false
+			d.Massless = true
+			if variant == "Shiny" then
+				d.Reflectance = 0.25
+			end
+			local static = spin * origin:Inverse() * d.CFrame
+			table.insert(pieces, {
+				Part = d,
+				Hinge = CFrame.identity,
+				Local = static,
+				Static = static,
+				Anim = "Sway",
+				Param = 0,
+				Side = 1,
+				Amp = S,
+				Tint = false,
+			})
+			local volume = d.Size.X * d.Size.Y * d.Size.Z
+			if volume > biggest then
+				biggest, root = volume, d
+			end
+		end
+	end
+	assert(root, "Creature mesh " .. def.Id .. " has no parts")
+
+	local ctx: Ctx = {
+		Model = model,
+		Pieces = pieces,
+		S = S,
+		Body = def.Color,
+		Accent = def.Accent,
+		Belly = def.Color,
+		Dark = def.Color,
+		AccentMaterial = Enum.Material.Neon,
+		Reflectance = 0,
+		HeadTop = nil,
+		Root = root,
+	}
+	effects(ctx, def, variant, plan, rarity.Order)
+	if variant == "Rainbow" then
+		-- Meshes keep their texture, so Rainbow gets a colour-cycling glow instead (see Pose)
+		local glow = Instance.new("Highlight")
+		glow.Name = "RainbowGlow"
+		glow.DepthMode = Enum.HighlightDepthMode.Occluded
+		glow.FillTransparency = 0.75
+		glow.OutlineTransparency = 0.2
+		glow.Parent = model
+	end
+
+	local parts, cframes = {}, {}
+	for i, piece in pieces do
+		parts[i] = piece.Part
+		cframes[i] = piece.Static
+		piece.Part.CFrame = piece.Static
+	end
+	model.PrimaryPart = root
+	return {
+		Model = model,
+		Pieces = pieces,
+		Parts = parts,
+		CFrames = cframes,
+		Radius = size.Magnitude / 2,
+		Rainbow = variant == "Rainbow",
+		LastTint = -1,
+	}
+end
+
 -- Public API -------------------------------------------------------------------------------
 
 -- scale multiplies the rarity-based size (1 = follower size)
@@ -1246,6 +1374,10 @@ function CreatureModels.Build(id: string, variant: string?, scale: number?): Rig
 	assert(def, "Unknown creature " .. tostring(id))
 	local v = variant or "Normal"
 	local plan = PLANS[id] or { Type = "Quadruped", Ears = "Pointy", Tail = "Bushy", Snout = "Short" }
+	local template = getMeshTemplate(id)
+	if template then
+		return buildFromMesh(template, def, v, plan, scale)
+	end
 	local rarity = Creatures.Rarities[def.Rarity]
 	local order = rarity.Order
 
@@ -1330,6 +1462,8 @@ function CreatureModels.Pose(rig: Rig, root: CFrame, t: number)
 					math.sin(t * 3 - p.Param * 0.8) * 0.16 * p.Amp,
 					0
 				)
+			elseif anim == "Sway" then
+				a = CFrame.Angles(math.sin(t * 2.2) * 0.07, math.sin(t * 1.3) * 0.08, math.sin(t * 1.7) * 0.05)
 			elseif anim == "Orbit" then
 				a = CFrame.Angles(0, t * 2.5 + p.Param, 0)
 			else
@@ -1341,6 +1475,12 @@ function CreatureModels.Pose(rig: Rig, root: CFrame, t: number)
 	-- Rainbow variants slowly cycle through the colour wheel
 	if rig.Rainbow and t - rig.LastTint > 0.1 then
 		rig.LastTint = t
+		local glow = rig.Model:FindFirstChild("RainbowGlow") :: Highlight?
+		if glow then
+			local hue = Color3.fromHSV((t * 0.15) % 1, 0.7, 1)
+			glow.FillColor = hue
+			glow.OutlineColor = hue
+		end
 		for i, p in rig.Pieces do
 			if p.Tint then
 				p.Part.Color = Color3.fromHSV((t * 0.15 + i * 0.03) % 1, 0.55, 1)
@@ -1387,6 +1527,10 @@ function CreatureModels.Viewport(id: string, variant: string?, props: { [string]
 	camera.Parent = viewport
 	viewport.CurrentCamera = camera
 	return viewport
+end
+
+function CreatureModels.HasMesh(id: string): boolean
+	return getMeshTemplate(id) ~= nil
 end
 
 function CreatureModels.HasPlan(id: string): boolean
