@@ -1,0 +1,100 @@
+--[[
+	Mythic Tamers - client entry point.
+]]
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextChatService = game:GetService("TextChatService")
+
+local Remotes = require(ReplicatedStorage.Shared.Remotes)
+local Modules = script.Parent:WaitForChild("Modules")
+local State = require(Modules.State)
+local Ui = require(Modules.Ui)
+local Hud = require(Modules.Hud)
+local Panels = require(Modules.Panels)
+local Followers = require(Modules.Followers)
+
+local player = Players.LocalPlayer
+
+local screen = Instance.new("ScreenGui")
+screen.Name = "MythicTamers"
+screen.ResetOnSpawn = false
+screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screen.Parent = player:WaitForChild("PlayerGui")
+
+Ui.initToasts(screen)
+Hud.Build(screen)
+Panels.Build(screen)
+Followers.Start()
+
+-- Networking ------------------------------------------------------------------------------
+Remotes.Event("DataChanged").OnClientEvent:Connect(function(snapshot)
+	State.Set("Data", snapshot)
+end)
+Remotes.Event("SurgeUpdate").OnClientEvent:Connect(function(surge)
+	State.Set("Surge", surge)
+end)
+Remotes.Event("WorldState").OnClientEvent:Connect(function(world)
+	State.Set("World", world)
+end)
+Remotes.Event("Notify").OnClientEvent:Connect(function(text, color)
+	Ui.toast(text, color)
+end)
+
+task.spawn(function()
+	local snapshot = Remotes.Function("GetSnapshot"):InvokeServer()
+	if snapshot then
+		State.Set("Data", snapshot)
+	end
+end)
+
+-- Gates: open the ones you've unlocked (only on your screen) ------------------------------
+local function refreshGates()
+	local d = State.Data
+	local world = workspace:FindFirstChild("World")
+	if not d or not world then
+		return
+	end
+	for _, gate in world:GetDescendants() do
+		if gate.Name == "Gate" and gate:IsA("BasePart") then
+			local open = d.ZonesUnlocked >= (gate:GetAttribute("ZoneIndex") or math.huge)
+			gate.CanCollide = not open
+			gate.Transparency = if open then 1 else 0.2
+			for _, child in gate:GetDescendants() do
+				if child:IsA("SurfaceGui") then
+					child.Enabled = not open
+				elseif child:IsA("ProximityPrompt") then
+					child.Enabled = not open
+				elseif child:IsA("BasePart") then
+					child.Transparency = if open then 1 else 0
+					child.CanCollide = not open
+				end
+			end
+		end
+	end
+end
+
+local lastZones = -1
+State.Changed:Connect(function(key)
+	if key == "Data" and State.Data and State.Data.ZonesUnlocked ~= lastZones then
+		lastZones = State.Data.ZonesUnlocked
+		refreshGates()
+	end
+end)
+workspace.ChildAdded:Connect(function(child)
+	if child.Name == "World" then
+		task.wait(1)
+		refreshGates()
+	end
+end)
+
+-- VIP chat tag ---------------------------------------------------------------------------
+TextChatService.OnIncomingMessage = function(message: TextChatMessage)
+	local props = Instance.new("TextChatMessageProperties")
+	local source = message.TextSource
+	local speaker = source and Players:GetPlayerByUserId(source.UserId)
+	if speaker and speaker:GetAttribute("VIP") then
+		props.PrefixText = `<font color="#FFD250">[VIP]</font> ` .. message.PrefixText
+	end
+	return props
+end

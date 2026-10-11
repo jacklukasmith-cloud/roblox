@@ -1,0 +1,56 @@
+--[[
+	All networking in one place. The server creates the remotes; clients wait for them.
+]]
+
+local RunService = game:GetService("RunService")
+
+local EVENTS = {
+	"DataChanged", -- server -> client: full player snapshot
+	"Notify", -- server -> client: toast message (text, color?)
+	"HatchResult", -- server -> client: eggId, { {Id, Variant} }
+	"SurgeUpdate", -- server -> client: surge state
+	"WorldState", -- server -> client: weather / house war / merchant info
+}
+
+local FUNCTIONS = {
+	"GetSnapshot",
+	"Equip",
+	"Unequip",
+	"EquipBest",
+	"Release",
+	"Rebirth",
+	"SetAutoCollect",
+	"ChooseHouse",
+	"BuyMerchantItem",
+}
+
+local Remotes = {}
+
+local folder: Folder
+if RunService:IsServer() then
+	folder = Instance.new("Folder")
+	folder.Name = "Remotes"
+	for _, name in EVENTS do
+		local remote = Instance.new("RemoteEvent")
+		remote.Name = name
+		remote.Parent = folder
+	end
+	for _, name in FUNCTIONS do
+		local remote = Instance.new("RemoteFunction")
+		remote.Name = name
+		remote.Parent = folder
+	end
+	folder.Parent = script.Parent
+else
+	folder = script.Parent:WaitForChild("Remotes") :: Folder
+end
+
+function Remotes.Event(name: string): RemoteEvent
+	return folder:WaitForChild(name) :: RemoteEvent
+end
+
+function Remotes.Function(name: string): RemoteFunction
+	return folder:WaitForChild(name) :: RemoteFunction
+end
+
+return Remotes

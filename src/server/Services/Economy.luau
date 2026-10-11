@@ -1,0 +1,342 @@
+--[[
+	All the maths for power, multipliers, rewards and creature management,
+	plus the snapshot sent to each client.
+]]
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Shared = ReplicatedStorage.Shared
+local Config = require(Shared.Config)
+local Creatures = require(Shared.Creatures)
+local Zones = require(Shared.Zones)
+local Format = require(Shared.Format)
+local Remotes = require(Shared.Remotes)
+
+local PlayerData = require(script.Parent.PlayerData)
+local Monetization = require(script.Parent.Monetization)
+local WorldService = require(script.Parent.WorldService)
+local HouseWar = require(script.Parent.HouseWar)
+local Surge = require(script.Parent.Surge)
+
+local Economy = {}
+
+local notify = Remotes.Event("Notify")
+local bonuses = Config.GamePassBonuses
+
+local function boostActive(data: PlayerData.Data, name: string): boolean
+	return (data.Boosts[name] or 0) > os.time()
+end
+
+function Economy.GetEquipSlots(player: Player): number
+	return Config.BaseEquipSlots + (if Monetization.Owns(player, "ExtraEquip") then bonuses.ExtraEquipSlots else 0)
+end
+
+function Economy.GetPower(data: PlayerData.Data): number
+	local power = Config.BaseClickPower
+	for _, entry in data.Creatures do
+		if entry.Equipped then
+			power += Creatures.GetPower(entry.Id, entry.Variant)
+		end
+	end
+	return power
+end
+
+function Economy.GetRebirthMultiplier(data: PlayerData.Data): number
+	return 1 + data.Rebirths * Config.Rebirth.MultiplierPerRebirth
+end
+
+function Economy.GetBestiaryMultiplier(data: PlayerData.Data): number
+	local count = 0
+	for _ in data.Bestiary do
+		count += 1
+	end
+	return 1 + count * Config.BestiaryBonusPerSpecies
+end
+
+function Economy.GetEssenceMultiplier(player: Player, data: PlayerData.Data): number
+	local m = Economy.GetRebirthMultiplier(data) * Economy.GetBestiaryMultiplier(data)
+	if Monetization.Owns(player, "VIP") then
+		m *= 1 + bonuses.VIPEssence
+	end
+	if Monetization.Owns(player, "DoubleEssence") then
+		m *= bonuses.DoubleEssence
+	end
+	if boostActive(data, "Essence") then
+		m *= Config.Boosts.Essence
+	end
+	m *= WorldService.GetWeatherDef().Essence
+	if Surge.IsActive() then
+		m *= Config.Surge.EssenceMultiplier
+	end
+	return m
+end
+
+function Economy.GetLuck(player: Player, data: PlayerData.Data): number
+	local luck = 1
+	if Monetization.Owns(player, "LuckyHatch") then
+		luck *= bonuses.LuckyHatchLuck
+	end
+	if boostActive(data, "Luck") then
+		luck *= Config.Boosts.Luck
+	end
+	return luck * WorldService.GetWeatherDef().Luck
+end
+
+function Economy.GetShinyMultiplier(data: PlayerData.Data): number
+	local m = WorldService.GetWeatherDef().Shiny
+	if boostActive(data, "Shiny") then
+		m *= Config.Boosts.Shiny
+	end
+	return m
+end
+
+function Economy.GetRebirthCost(data: PlayerData.Data): number
+	return math.floor(Config.Rebirth.BaseCost * Config.Rebirth.CostGrowth ^ data.Rebirths)
+end
+
+function Economy.AddEssence(player: Player, amount: number)
+	local data = PlayerData.Get(player)
+	if not data or amount <= 0 then
+		return
+	end
+	data.Essence += amount
+	data.TotalEssence += amount
+	PlayerData.MarkChanged(player)
+end
+
+-- Called when a crystal breaks. share = fraction of the crystal's HP this player dealt.
+function Economy.AwardCrystal(player: Player, zoneIndex: number, share: number)
+	local data = PlayerData.Get(player)
+	local zone = Zones.Get(zoneIndex)
+	if not data or not zone then
+		return
+	end
+	local base = zone.CrystalReward * share
+	Economy.AddEssence(player, base * Economy.GetEssenceMultiplier(player, data))
+	data.Stats.CrystalsBroken += share
+	-- Competitive scoring ignores paid boosts on purpose.
+	Surge.AddScore(player, base * Economy.GetRebirthMultiplier(data))
+	HouseWar.AddPoints(player, share * zoneIndex)
+end
+
+-- Essence for developer products: N crystals' worth from your best zone.
+function Economy.GetProductEssence(player: Player, crystalRewards: number): number
+	local data = PlayerData.Get(player)
+	if not data then
+		return 0
+	end
+	local zone = Zones.Get(data.ZonesUnlocked) or Zones.List[1]
+	return zone.CrystalReward * crystalRewards * Economy.GetRebirthMultiplier(data)
+end
+
+function Economy.AddBoost(player: Player, name: string, seconds: number)
+	local data = PlayerData.Get(player)
+	if not data then
+		return
+	end
+	local now = os.time()
+	data.Boosts[name] = math.max(now, data.Boosts[name] or 0) + seconds
+	PlayerData.MarkChanged(player)
+end
+
+-- Creature management ------------------------------------------------------------
+
+function Economy.Equip(player: Player, uid: string): (boolean, string?)
+	local data = PlayerData.Get(player)
+	local entry = data and data.Creatures[uid]
+	if not data or not entry then
+		return false, "Creature not found"
+	end
+	local _, equipped = PlayerData.CountCreatures(data)
+	if not entry.Equipped and equipped >= Economy.GetEquipSlots(player) then
+		return false, "All creature slots are full"
+	end
+	entry.Equipped = true
+	PlayerData.MarkChanged(player)
+	return true
+end
+
+function Economy.Unequip(player: Player, uid: string): (boolean, string?)
+	local data = PlayerData.Get(player)
+	local entry = data and data.Creatures[uid]
+	if not data or not entry then
+		return false, "Creature not found"
+	end
+	entry.Equipped = false
+	PlayerData.MarkChanged(player)
+	return true
+end
+
+function Economy.EquipBest(player: Player)
+	local data = PlayerData.Get(player)
+	if not data then
+		return
+	end
+	local list = {}
+	for uid, entry in data.Creatures do
+		entry.Equipped = false
+		table.insert(list, { Uid = uid, Power = Creatures.GetPower(entry.Id, entry.Variant) })
+	end
+	table.sort(list, function(a, b)
+		return a.Power > b.Power
+	end)
+	for i = 1, math.min(#list, Economy.GetEquipSlots(player)) do
+		data.Creatures[list[i].Uid].Equipped = true
+	end
+	PlayerData.MarkChanged(player)
+end
+
+function Economy.Release(player: Player, uids: { string }): (boolean, string?)
+	local data = PlayerData.Get(player)
+	if not data then
+		return false, "No data"
+	end
+	local released = 0
+	for _, uid in uids do
+		if type(uid) == "string" and data.Creatures[uid] then
+			data.Creatures[uid] = nil
+			released += 1
+		end
+	end
+	PlayerData.MarkChanged(player)
+	return true, `Released {released} creature{if released == 1 then "" else "s"}`
+end
+
+-- Rebirth: reset Essence + zones for a permanent multiplier. Creatures are kept.
+function Economy.Rebirth(player: Player): (boolean, string?)
+	local data = PlayerData.Get(player)
+	if not data then
+		return false, "No data"
+	end
+	local cost = Economy.GetRebirthCost(data)
+	if data.Essence < cost then
+		return false, `You need {Format.Number(cost)} Essence to rebirth`
+	end
+	data.Essence = 0
+	data.ZonesUnlocked = 1
+	data.Rebirths += 1
+	PlayerData.MarkChanged(player)
+	notify:FireClient(
+		player,
+		`Reborn! Essence multiplier is now x{Economy.GetRebirthMultiplier(data)}`,
+		Color3.fromRGB(255, 140, 255)
+	)
+	return true
+end
+
+function Economy.UnlockZone(player: Player, zoneIndex: number): (boolean, string?)
+	local data = PlayerData.Get(player)
+	local zone = Zones.Get(zoneIndex)
+	if not data or not zone then
+		return false, "Unknown zone"
+	end
+	if data.ZonesUnlocked >= zoneIndex then
+		return false, "Already unlocked"
+	end
+	if data.ZonesUnlocked < zoneIndex - 1 then
+		return false, "Unlock the previous zone first"
+	end
+	if data.Essence < zone.UnlockCost then
+		return false, `You need {Format.Number(zone.UnlockCost)} Essence`
+	end
+	data.Essence -= zone.UnlockCost
+	data.ZonesUnlocked = zoneIndex
+	PlayerData.MarkChanged(player)
+	notify:FireClient(player, `{zone.Name} unlocked!`, zone.CrystalColor)
+	return true
+end
+
+-- Offline earnings: creatures keep gathering while you're away (idle-game hook).
+function Economy.GrantOffline(player: Player)
+	local data = PlayerData.Get(player)
+	if not data or data.LastOnline <= 0 then
+		return
+	end
+	local away = os.time() - data.LastOnline
+	if away < Config.Offline.MinSeconds then
+		return
+	end
+	local maxHours = if Monetization.Owns(player, "LongerOffline")
+		then bonuses.LongerOfflineHours
+		else Config.Offline.MaxHours
+	local seconds = math.min(away, maxHours * 3600)
+	local zone = Zones.Get(data.ZonesUnlocked) or Zones.List[1]
+	local damagePerHit = math.min(Economy.GetPower(data), zone.CrystalHP)
+	local perSecond = Config.Offline.Efficiency * damagePerHit * (zone.CrystalReward / zone.CrystalHP)
+	local amount = perSecond * seconds * Economy.GetRebirthMultiplier(data)
+	if amount >= 1 then
+		Economy.AddEssence(player, amount)
+		notify:FireClient(
+			player,
+			`Your creatures gathered {Format.Number(amount)} Essence while you were away ({Format.Time(seconds)})!`,
+			Color3.fromRGB(150, 200, 255)
+		)
+	end
+end
+
+-- Snapshot sent to the client -----------------------------------------------------
+
+function Economy.BuildSnapshot(player: Player)
+	local data = PlayerData.Get(player)
+	if not data then
+		return nil
+	end
+	local total = PlayerData.CountCreatures(data)
+	return {
+		Essence = data.Essence,
+		TotalEssence = data.TotalEssence,
+		Trophies = data.Trophies,
+		Rebirths = data.Rebirths,
+		ZonesUnlocked = data.ZonesUnlocked,
+		Creatures = data.Creatures,
+		CreatureCount = total,
+		Bestiary = data.Bestiary,
+		Boosts = data.Boosts,
+		AutoCollectEnabled = data.AutoCollectEnabled,
+		House = data.House,
+		HouseContribution = data.HouseContribution,
+		Merchant = data.Merchant,
+		Stats = data.Stats,
+		Power = Economy.GetPower(data),
+		EquipSlots = Economy.GetEquipSlots(player),
+		MaxInventory = Config.MaxInventory,
+		EssenceMultiplier = Economy.GetEssenceMultiplier(player, data),
+		Luck = Economy.GetLuck(player, data),
+		ShinyMultiplier = Economy.GetShinyMultiplier(data),
+		RebirthCost = Economy.GetRebirthCost(data),
+		RebirthMultiplier = Economy.GetRebirthMultiplier(data),
+		NextRebirthMultiplier = 1 + (data.Rebirths + 1) * Config.Rebirth.MultiplierPerRebirth,
+		BestiaryMultiplier = Economy.GetBestiaryMultiplier(data),
+		OwnedPasses = Monetization.GetOwned(player),
+	}
+end
+
+-- Equipped creature list as an attribute so every client can render followers.
+function Economy.UpdateFollowerAttribute(player: Player)
+	local data = PlayerData.Get(player)
+	if not data then
+		return
+	end
+	local list = {}
+	for _, entry in data.Creatures do
+		if entry.Equipped then
+			table.insert(
+				list,
+				{ Id = entry.Id, Variant = entry.Variant, Power = Creatures.GetPower(entry.Id, entry.Variant) }
+			)
+		end
+	end
+	table.sort(list, function(a, b)
+		return a.Power > b.Power
+	end)
+	local parts = {}
+	for _, item in list do
+		table.insert(parts, item.Id .. ":" .. item.Variant)
+	end
+	local value = table.concat(parts, ",")
+	if player:GetAttribute("Followers") ~= value then
+		player:SetAttribute("Followers", value)
+	end
+end
+
+return Economy
