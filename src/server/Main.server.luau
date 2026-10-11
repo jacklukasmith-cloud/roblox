@@ -52,9 +52,10 @@ do
 			end
 		end
 	end
-	if adopted > 0 then
-		print(`[Mythic Tamers] Using {adopted} imported creature model(s) from Workspace`)
-	end
+	print(
+		`[Mythic Tamers] Creature 3D models ready: {#folder:GetChildren()} ({adopted} picked up from Workspace). `
+			.. "Creatures without one use the built-in model."
+	)
 end
 
 -- World ----------------------------------------------------------------------------

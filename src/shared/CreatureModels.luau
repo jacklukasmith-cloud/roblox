@@ -1260,6 +1260,8 @@ local function getMeshTemplate(id: string): Instance?
 	return nil
 end
 
+local announced: { [string]: boolean } = {}
+
 local function buildFromMesh(
 	template: Instance,
 	def: Creatures.CreatureDef,
@@ -1267,6 +1269,10 @@ local function buildFromMesh(
 	plan: { [string]: any },
 	scale: number?
 ): Rig
+	if not announced[def.Id] then
+		announced[def.Id] = true
+		print(`[Mythic Tamers] {def.Id} is using your imported 3D model`)
+	end
 	local rarity = Creatures.Rarities[def.Rarity]
 	local model: Model
 	if template:IsA("Model") then
