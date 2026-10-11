@@ -25,6 +25,38 @@ local notify = Remotes.Event("Notify")
 local dataChanged = Remotes.Event("DataChanged")
 local worldState = Remotes.Event("WorldState")
 
+-- Imported creature meshes ------------------------------------------------------------
+-- Models imported with Studio's "Import 3D" land in Workspace, named after their file
+-- (e.g. "EmberFox"). Move any that match a creature into ReplicatedStorage.CreatureMeshes
+-- so the game uses them - no manual filing needed.
+do
+	local Creatures = require(Shared.Creatures)
+	local folder = ReplicatedStorage:FindFirstChild("CreatureMeshes")
+	if not folder then
+		folder = Instance.new("Folder")
+		folder.Name = "CreatureMeshes"
+		folder.Parent = ReplicatedStorage
+	end
+	local adopted = 0
+	for _, obj in workspace:GetChildren() do
+		if obj:IsA("Model") or obj:IsA("MeshPart") then
+			local clean = string.lower((string.gsub(obj.Name, "[^%w]", "")))
+			for _, def in Creatures.Ordered do
+				local id = def.Id
+				if string.sub(clean, 1, #id) == string.lower(id) and not folder:FindFirstChild(id) then
+					obj.Name = id
+					obj.Parent = folder
+					adopted += 1
+					break
+				end
+			end
+		end
+	end
+	if adopted > 0 then
+		print(`[Mythic Tamers] Using {adopted} imported creature model(s) from Workspace`)
+	end
+end
+
 -- World ----------------------------------------------------------------------------
 local world = WorldBuilder.Build()
 

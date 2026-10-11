@@ -52,8 +52,10 @@ With the live sync running (see README):
 2. **Import them.** In Studio: **Home → Import 3D**, go to `Documents\roblox\creature-models`, select **all** the `.glb` files
    (Ctrl+A) and import. If your Studio only lets you pick one file at a time, repeat for each.
    Leave the default settings; each creature appears in the Workspace as a model named after its file.
-3. **File them.** Open **View → Command Bar**, paste the contents of `scripts/organize-creatures.lua` (one line), press Enter.
-   Output tells you how many were moved into `ReplicatedStorage.CreatureMeshes` and lists any that are missing.
+3. That's it. You can leave the models where the importer put them (in Workspace): when the game starts it
+   automatically moves any model named after a creature into `ReplicatedStorage.CreatureMeshes`.
+   (Optional, to keep the Workspace tidy: drag them into that folder yourself, or paste
+   `scripts/organize-creatures.lua` into **View → Command Bar**.)
 4. **Save the place** (Ctrl+S, or File → Publish to Roblox). Press Play: your creatures now use the 3D models.
 
 Rojo leaves the `CreatureMeshes` folder's contents alone, so the meshes stay put while syncing.
