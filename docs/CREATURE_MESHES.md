@@ -39,20 +39,26 @@ Creatures without one keep the built-in part model, so you can import them one a
 
 > The links are on Higgsfield's CDN. You can also download every model from your Higgsfield library.
 
-## Import into Roblox (about 1 minute per creature)
+## Import into Roblox (about 2 minutes for all 25)
 
-1. Open the place in Roblox Studio (it must be **published**, since imported meshes are uploaded to your account).
-2. **Home → Import 3D** (or File → Import 3D) and pick the `.glb`.
-3. In the importer: keep **Anchored** on and make sure the preview faces the same way as the green front arrow, then **Import**.
-4. A Model appears in the Workspace. Rename it to the **Name to use** column exactly (e.g. `EmberFox`).
-5. Drag it into **ReplicatedStorage → CreatureMeshes**.
-6. Press Play. The creature now uses the mesh everywhere.
+With the live sync running (see README):
 
-### Keep the meshes when you rebuild with Rojo
+1. **Download them all, already named.** In PowerShell, in the `roblox` folder:
+   ```
+   git pull
+   powershell -ExecutionPolicy Bypass -File scripts\download-creatures.ps1
+   ```
+   (Mac: `./scripts/download-creatures.sh`.) This creates a `creature-models` folder with `EmberFox.glb`, `Phoenix.glb`, and so on.
+2. **Import them.** In Studio: **Home → Import 3D**, go to `Documents\roblox\creature-models`, select **all** the `.glb` files
+   (Ctrl+A) and import. If your Studio only lets you pick one file at a time, repeat for each.
+   Leave the default settings; each creature appears in the Workspace as a model named after its file.
+3. **File them.** Open **View → Command Bar**, paste the contents of `scripts/organize-creatures.lua` (one line), press Enter.
+   Output tells you how many were moved into `ReplicatedStorage.CreatureMeshes` and lists any that are missing.
+4. **Save the place** (Ctrl+S, or File → Publish to Roblox). Press Play: your creatures now use the 3D models.
 
-`rojo build` makes a fresh place, so save each imported model into the repo:
-right-click the model → **Save to File…** → `assets/creatures/EmberFox.rbxm`.
-Rojo puts everything in `assets/creatures/` into `ReplicatedStorage.CreatureMeshes` automatically.
+Rojo leaves the `CreatureMeshes` folder's contents alone, so the meshes stay put while syncing.
+If you ever rebuild the place from scratch with `rojo build`, save each model as `assets/creatures/<Name>.rbxm`
+(right-click → Save to File) so it's included automatically.
 
 ### Fine-tuning (optional attributes on the model)
 
