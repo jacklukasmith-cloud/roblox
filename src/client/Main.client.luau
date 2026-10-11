@@ -13,6 +13,7 @@ local Ui = require(Modules.Ui)
 local Hud = require(Modules.Hud)
 local Panels = require(Modules.Panels)
 local Followers = require(Modules.Followers)
+local Ambient = require(Modules.Ambient)
 
 local player = Players.LocalPlayer
 
@@ -26,6 +27,7 @@ Ui.initToasts(screen)
 Hud.Build(screen)
 Panels.Build(screen)
 Followers.Start()
+Ambient.Start()
 
 -- Networking ------------------------------------------------------------------------------
 Remotes.Event("DataChanged").OnClientEvent:Connect(function(snapshot)

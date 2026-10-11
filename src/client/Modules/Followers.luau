@@ -1,6 +1,7 @@
 --[[
 	Renders every player's equipped creatures floating behind them. Done on each client
 	(not the server) so movement is smooth and costs the server nothing.
+	All parts are moved with a single workspace:BulkMoveTo call per frame.
 ]]
 
 local Players = game:GetService("Players")
@@ -8,113 +9,25 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local Creatures = require(ReplicatedStorage.Shared.Creatures)
+local CreatureModels = require(ReplicatedStorage.Shared.CreatureModels)
 local State = require(script.Parent.State)
 
 local Followers = {}
 
-type Follower = { Model: Model, Root: BasePart, Offset: Vector3, Phase: number }
+type Follower = { Rig: CreatureModels.Rig, Offset: Vector3, Phase: number, Position: Vector3? }
 
 local folder = Instance.new("Folder")
 folder.Name = "Followers"
 folder.Parent = workspace
 
 local byPlayer: { [Player]: { Key: string, List: { Follower } } } = {}
-
-local function weld(a: BasePart, b: BasePart)
-	local w = Instance.new("WeldConstraint")
-	w.Part0 = a
-	w.Part1 = b
-	w.Parent = a
-end
-
-local function makePart(props: { [string]: any }): Part
-	local p = Instance.new("Part")
-	p.CanCollide = false
-	p.CanQuery = false
-	p.CanTouch = false
-	p.CastShadow = false
-	p.Massless = true
-	p.TopSurface = Enum.SurfaceType.Smooth
-	p.BottomSurface = Enum.SurfaceType.Smooth
-	for k, v in props do
-		(p :: any)[k] = v
-	end
-	return p
-end
-
--- Simple stylised creature: body orb, eyes, ears/horns tinted with the accent colour.
-local function build(id: string, variant: string): (Model, BasePart)
-	local def = Creatures.Get(id) :: Creatures.CreatureDef
-	local rarity = Creatures.Rarities[def.Rarity]
-	local size = rarity.Size
-	local model = Instance.new("Model")
-	model.Name = id
-
-	local bodyColor = def.Color
-	if variant == "Shiny" then
-		bodyColor = def.Color:Lerp(Color3.fromRGB(255, 230, 120), 0.45)
-	end
-	local body = makePart({
-		Name = "Body",
-		Shape = Enum.PartType.Ball,
-		Size = Vector3.one * size,
-		Color = bodyColor,
-		Material = if rarity.Order >= 5 then Enum.Material.Neon else Enum.Material.SmoothPlastic,
-		Anchored = true,
-		Parent = model,
-	})
-	for _, side in { -1, 1 } do
-		local eye = makePart({
-			Shape = Enum.PartType.Ball,
-			Size = Vector3.one * size * 0.22,
-			Color = Color3.new(0.05, 0.05, 0.1),
-			Material = Enum.Material.SmoothPlastic,
-			CFrame = body.CFrame * CFrame.new(side * size * 0.2, size * 0.1, -size * 0.42),
-			Parent = model,
-		})
-		weld(body, eye)
-		local ear = makePart({
-			Size = Vector3.new(size * 0.18, size * 0.45, size * 0.18),
-			Color = def.Accent,
-			Material = Enum.Material.SmoothPlastic,
-			CFrame = body.CFrame * CFrame.new(side * size * 0.28, size * 0.5, 0) * CFrame.Angles(0, 0, -side * 0.35),
-			Parent = model,
-		})
-		weld(body, ear)
-	end
-	if rarity.Order >= 4 then
-		local light = Instance.new("PointLight")
-		light.Color = def.Accent
-		light.Range = 6 + rarity.Order
-		light.Brightness = 1
-		light.Parent = body
-	end
-	if variant ~= "Normal" then
-		local sparkle = Instance.new("ParticleEmitter")
-		sparkle.Rate = if variant == "Rainbow" then 14 else 6
-		sparkle.Lifetime = NumberRange.new(0.6, 1.1)
-		sparkle.Speed = NumberRange.new(0.5, 1.5)
-		sparkle.Size = NumberSequence.new(0.25, 0)
-		sparkle.LightEmission = 1
-		sparkle.Color = if variant == "Rainbow"
-			then ColorSequence.new({
-				ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 80, 80)),
-				ColorSequenceKeypoint.new(0.33, Color3.fromRGB(255, 240, 80)),
-				ColorSequenceKeypoint.new(0.66, Color3.fromRGB(80, 220, 255)),
-				ColorSequenceKeypoint.new(1, Color3.fromRGB(220, 90, 255)),
-			})
-			else ColorSequence.new(Color3.fromRGB(255, 235, 140))
-		sparkle.Parent = body
-	end
-	model.PrimaryPart = body
-	return model, body
-end
+local DRAW_DISTANCE = 160
 
 local function clear(player: Player)
 	local entry = byPlayer[player]
 	if entry then
 		for _, f in entry.List do
-			f.Model:Destroy()
+			f.Rig.Model:Destroy()
 		end
 	end
 	byPlayer[player] = nil
@@ -130,21 +43,35 @@ local function rebuild(player: Player)
 		return
 	end
 	clear(player)
-	local list = {}
-	local index = 0
+
+	local rigs = {}
 	for _, token in string.split(value, ",") do
 		local parts = string.split(token, ":")
 		local id, variant = parts[1], parts[2] or "Normal"
 		if Creatures.Get(id) then
-			index += 1
-			local model, root = build(id, variant)
-			model.Parent = folder
-			-- Arrange in rows of 4 behind the player
-			local row = (index - 1) // 4
-			local col = (index - 1) % 4
-			local offset = Vector3.new((col - 1.5) * 3.2, 1.5, 4 + row * 3.2)
-			table.insert(list, { Model = model, Root = root, Offset = offset, Phase = index * 0.7 })
+			local rig = CreatureModels.Build(id, variant)
+			rig.Model.Parent = folder
+			table.insert(rigs, rig)
 		end
+	end
+
+	-- Arrange in rows of 4 behind the player, spaced by the biggest creature in each row
+	local list = {}
+	local z = 3
+	for rowStart = 1, #rigs, 4 do
+		local rowSize = math.min(4, #rigs - rowStart + 1)
+		local radius = 1
+		for i = rowStart, rowStart + rowSize - 1 do
+			radius = math.max(radius, rigs[i].Radius)
+		end
+		local spacing = radius * 1.8 + 0.4
+		z += radius
+		for i = rowStart, rowStart + rowSize - 1 do
+			local col = i - rowStart
+			local x = (col - (rowSize - 1) / 2) * spacing
+			table.insert(list, { Rig = rigs[i], Offset = Vector3.new(x, radius * 0.6 + 0.5, z), Phase = i * 0.9 })
+		end
+		z += radius + 0.6
 	end
 	byPlayer[player] = { Key = value, List = list }
 end
@@ -170,24 +97,46 @@ function Followers.Start()
 		end
 	end)
 
+	local allParts: { BasePart } = {}
+	local allCFrames: { CFrame } = {}
+
 	RunService.RenderStepped:Connect(function(dt)
 		local t = os.clock()
-		local alpha = 1 - math.exp(-dt * 8)
+		local alpha = 1 - math.exp(-dt * 7)
+		local camera = workspace.CurrentCamera
+		local camPos = if camera then camera.CFrame.Position else Vector3.zero
+		local count = 0
 		for player, entry in byPlayer do
 			local character = player.Character
 			local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
-			for _, f in entry.List do
-				if root then
-					local bob = math.sin(t * 3 + f.Phase) * 0.35
-					local target = root.CFrame * CFrame.new(f.Offset + Vector3.new(0, bob, 0))
-					local current = f.Root.CFrame
-					if (current.Position - target.Position).Magnitude > 60 then
-						current = target -- teleported / respawned
+			if root and (root.Position - camPos).Magnitude < DRAW_DISTANCE then
+				for _, f in entry.List do
+					local bob = math.sin(t * 2.5 + f.Phase) * 0.3
+					local target = (root.CFrame * CFrame.new(f.Offset + Vector3.new(0, bob, 0))).Position
+					local pos = f.Position
+					if not pos or (pos - target).Magnitude > 60 then
+						pos = target -- first frame / teleported / respawned
 					end
-					local pos = current.Position:Lerp(target.Position, alpha)
-					f.Root.CFrame = CFrame.lookAt(pos, pos + root.CFrame.LookVector)
+					pos = (pos :: Vector3):Lerp(target, alpha)
+					f.Position = pos
+					-- Face where the player is heading
+					local look = root.CFrame.LookVector
+					local rig = f.Rig
+					CreatureModels.Pose(rig, CFrame.lookAt(pos, pos + Vector3.new(look.X, 0, look.Z)), t + f.Phase)
+					for i, part in rig.Parts do
+						count += 1
+						allParts[count] = part
+						allCFrames[count] = rig.CFrames[i]
+					end
 				end
 			end
+		end
+		for i = count + 1, #allParts do
+			allParts[i] = nil
+			allCFrames[i] = nil
+		end
+		if count > 0 then
+			workspace:BulkMoveTo(allParts, allCFrames, Enum.BulkMoveMode.FireCFrameChanged)
 		end
 	end)
 end

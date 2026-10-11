@@ -207,7 +207,7 @@ local defs: { CreatureDef } = {
 		Name = "Star Dragon",
 		Rarity = "Legendary",
 		Power = 25000,
-		Color = rgb(40, 30, 90),
+		Color = rgb(70, 60, 160),
 		Accent = rgb(255, 230, 120),
 	},
 	{
@@ -215,8 +215,8 @@ local defs: { CreatureDef } = {
 		Name = "Void Leviathan",
 		Rarity = "Mythic",
 		Power = 90000,
-		Color = rgb(30, 10, 50),
-		Accent = rgb(190, 60, 255),
+		Color = rgb(85, 35, 140),
+		Accent = rgb(200, 90, 255),
 	},
 	-- Champion Egg (Trophies only - the competitive reward track)
 	{

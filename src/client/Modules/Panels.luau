@@ -12,6 +12,7 @@ local Eggs = require(Shared.Eggs)
 local Merchant = require(Shared.Merchant)
 local Format = require(Shared.Format)
 local Remotes = require(Shared.Remotes)
+local CreatureModels = require(Shared.CreatureModels)
 local Ui = require(script.Parent.Ui)
 local State = require(script.Parent.State)
 
@@ -50,6 +51,12 @@ local function scrolling(parent: Instance, props: { [string]: any }?): Scrolling
 	return Ui.new("ScrollingFrame", defaults)
 end
 
+local function Debris(inst: Instance, seconds: number)
+	task.delay(seconds, function()
+		inst:Destroy()
+	end)
+end
+
 local function clearChildren(parent: Instance, className: string)
 	for _, child in parent:GetChildren() do
 		if child:IsA(className) then
@@ -58,26 +65,110 @@ local function clearChildren(parent: Instance, className: string)
 	end
 end
 
-local function creatureIcon(parent: Instance, def: Creatures.CreatureDef, variant: string?, size: number)
+-- A rounded tile with a live 3D model of the creature inside.
+local function creatureIcon(
+	parent: Instance,
+	def: Creatures.CreatureDef,
+	variant: string?,
+	size: number,
+	silhouette: boolean?
+)
+	local rarityColor = Creatures.Rarities[def.Rarity].Color
 	local icon = Ui.new("Frame", {
 		Size = UDim2.fromOffset(size, size),
-		BackgroundColor3 = def.Color,
+		BackgroundColor3 = Color3.new(1, 1, 1),
 		Parent = parent,
-	}, { Ui.corner(size // 2), Ui.stroke(def.Accent, 3) })
+	}, { Ui.corner(size // 4) })
+	Ui.new("UIGradient", {
+		Color = if silhouette
+			then ColorSequence.new(Color3.fromRGB(45, 35, 70), Color3.fromRGB(25, 18, 40))
+			else ColorSequence.new(
+				rarityColor:Lerp(Color3.new(1, 1, 1), 0.35),
+				rarityColor:Lerp(Color3.new(0, 0, 0), 0.55)
+			),
+		Rotation = 90,
+		Parent = icon,
+	})
 	if variant == "Shiny" or variant == "Rainbow" then
-		Ui.new("UIGradient", {
-			Color = if variant == "Rainbow"
-				then ColorSequence.new({
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 120, 120)),
-					ColorSequenceKeypoint.new(0.5, Color3.fromRGB(140, 255, 160)),
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 140, 255)),
-				})
-				else ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(255, 225, 120)),
-			Rotation = 45,
+		Ui.new("UIStroke", {
+			Color = if variant == "Rainbow" then Color3.fromRGB(255, 120, 220) else Color3.fromRGB(255, 225, 120),
+			Thickness = 2.5,
 			Parent = icon,
 		})
 	end
+	local viewport = CreatureModels.Viewport(def.Id, variant, { Size = UDim2.fromScale(1, 1) })
+	if silhouette then
+		viewport.ImageColor3 = Color3.new(0, 0, 0)
+		viewport.ImageTransparency = 0.15
+	end
+	viewport.Parent = icon
 	return icon
+end
+
+-- A small egg model in a viewport; returns a function that shakes it (0 = still, 1 = wild).
+local function eggViewport(parent: Instance, color: Color3, size: number): (Frame, (number, number) -> ())
+	local holder = Ui.new("Frame", { Size = UDim2.fromOffset(size, size), BackgroundTransparency = 1, Parent = parent })
+	local viewport = Ui.new("ViewportFrame", {
+		Size = UDim2.fromScale(1, 1),
+		BackgroundTransparency = 1,
+		Ambient = Color3.fromRGB(170, 170, 190),
+		LightDirection = Vector3.new(-1, -1.5, -1),
+		Parent = holder,
+	})
+	local model = Instance.new("Model")
+	local function piece(props: { [string]: any }): BasePart
+		local p = Instance.new("Part")
+		p.Anchored = true
+		for k, v in props do
+			(p :: any)[k] = v
+		end
+		p.Parent = model
+		return p
+	end
+	local shell = piece({ Size = Vector3.new(2, 2.6, 2), Color = color, Material = Enum.Material.SmoothPlastic })
+	Instance.new("SpecialMesh", shell).MeshType = Enum.MeshType.Sphere
+	local band = piece({
+		Shape = Enum.PartType.Cylinder,
+		Size = Vector3.new(0.18, 2.03, 2.03),
+		CFrame = CFrame.new(0, -0.25, 0) * CFrame.Angles(0, 0, math.pi / 2),
+		Color = color:Lerp(Color3.new(1, 1, 1), 0.55),
+		Material = Enum.Material.Neon,
+	})
+	local spots = {}
+	for i = 0, 4 do
+		local a = i * 1.25
+		local spot = piece({
+			Size = Vector3.new(0.5, 0.5, 0.14),
+			CFrame = CFrame.lookAt(
+				Vector3.new(math.cos(a) * 0.93, 0.5 - (i % 2) * 0.5, math.sin(a) * 0.93),
+				Vector3.new(math.cos(a) * 2, 0.5 - (i % 2) * 0.5, math.sin(a) * 2)
+			),
+			Color = color:Lerp(Color3.new(1, 1, 1), 0.55),
+		})
+		Instance.new("SpecialMesh", spot).MeshType = Enum.MeshType.Sphere
+		table.insert(spots, spot)
+	end
+	local parts = { shell, band }
+	for _, spot in spots do
+		table.insert(parts, spot)
+	end
+	local base = {}
+	for i, p in parts do
+		base[i] = p.CFrame
+	end
+	model.Parent = viewport
+	local camera = Instance.new("Camera")
+	camera.FieldOfView = 30
+	camera.CFrame = CFrame.lookAt(Vector3.new(1.6, 1, -6.2), Vector3.zero)
+	camera.Parent = viewport
+	viewport.CurrentCamera = camera
+	local function shake(amount: number, t: number)
+		local tilt = CFrame.Angles(0, t * 1.5, math.sin(t * 38) * 0.35 * amount)
+		for i, p in parts do
+			p.CFrame = tilt * base[i]
+		end
+	end
+	return holder, shake
 end
 
 -- Menu ---------------------------------------------------------------------------------
@@ -234,7 +325,7 @@ local function buildCreatures(screen: ScreenGui)
 					Ui.corner(10),
 					Ui.stroke(if selected[item.Uid] then T.Bad else rarityColor, if selected[item.Uid] then 4 else 2),
 				})
-				local icon = creatureIcon(card, def, item.Entry.Variant, 54)
+				local icon = creatureIcon(card, def, item.Entry.Variant, 58)
 				icon.AnchorPoint = Vector2.new(0.5, 0)
 				icon.Position = UDim2.new(0.5, 0, 0, 8)
 				Ui.text({
@@ -580,12 +671,9 @@ local function buildBestiary(screen: ScreenGui)
 				Ui.corner(10),
 				Ui.stroke(if known then Creatures.Rarities[def.Rarity].Color else T.Background, 2),
 			})
-			local icon = creatureIcon(card, def, nil, 50)
+			local icon = creatureIcon(card, def, nil, 52, not known)
 			icon.AnchorPoint = Vector2.new(0.5, 0)
-			icon.Position = UDim2.new(0.5, 0, 0, 8)
-			if not known then
-				icon.BackgroundColor3 = Color3.fromRGB(20, 15, 30)
-			end
+			icon.Position = UDim2.new(0.5, 0, 0, 6)
 			Ui.text({
 				Text = if known then def.Name else "???",
 				Position = UDim2.fromOffset(4, 62),
@@ -624,7 +712,7 @@ local function buildSettings(screen: ScreenGui)
 		potato.Text = "Low Graphics: " .. (if State.PotatoMode then "ON" else "OFF")
 		-- Strip particles & lights for low-end devices (PS99's "Potato Mode")
 		for _, inst in workspace:GetDescendants() do
-			if inst:IsA("ParticleEmitter") or inst:IsA("PointLight") then
+			if inst:IsA("ParticleEmitter") or inst:IsA("PointLight") or inst:IsA("Fire") then
 				inst.Enabled = not State.PotatoMode
 			end
 		end
@@ -664,7 +752,7 @@ local function buildHatchDisplay(screen: ScreenGui)
 		Name = "Hatch",
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.45),
-		Size = UDim2.fromOffset(520, 240),
+		Size = UDim2.fromOffset(560, 260),
 		BackgroundTransparency = 1,
 		Visible = false,
 		Parent = screen,
@@ -672,7 +760,7 @@ local function buildHatchDisplay(screen: ScreenGui)
 	local title = Ui.text({ Size = UDim2.new(1, 0, 0, 40), Text = "", Parent = overlay })
 	local row = Ui.new("Frame", {
 		Position = UDim2.fromOffset(0, 50),
-		Size = UDim2.new(1, 0, 0, 180),
+		Size = UDim2.new(1, 0, 0, 205),
 		BackgroundTransparency = 1,
 		Parent = overlay,
 	}, {
@@ -692,52 +780,82 @@ local function buildHatchDisplay(screen: ScreenGui)
 		overlay.Visible = true
 		title.Text = (if egg then egg.Name else "Egg") .. " hatched!"
 		local best = 0
+		local eggColor = if egg then egg.Color else T.Accent
 		for i, result in results do
 			local def = Creatures.Get(result.Id)
 			if def then
 				local rarity = Creatures.Rarities[def.Rarity]
 				best = math.max(best, rarity.Order)
-				local card = Ui.new(
-					"Frame",
-					{ LayoutOrder = i, Size = UDim2.fromOffset(150, 170), BackgroundColor3 = T.Panel, Parent = row },
-					{
-						Ui.corner(14),
-						Ui.stroke(rarity.Color, 3),
-					}
-				)
+				local card = Ui.new("Frame", {
+					LayoutOrder = i,
+					Size = UDim2.fromOffset(160, 200),
+					BackgroundColor3 = T.Panel,
+					Parent = row,
+				}, { Ui.corner(14) })
+				local stroke = Ui.stroke(eggColor, 3)
+				stroke.Parent = card
 				local scale = Ui.new("UIScale", { Scale = 0, Parent = card })
-				local icon = creatureIcon(card, def, result.Variant, 70)
-				icon.AnchorPoint = Vector2.new(0.5, 0)
-				icon.Position = UDim2.new(0.5, 0, 0, 12)
-				Ui.text({
-					Text = Creatures.DisplayName(def.Id, result.Variant),
-					Position = UDim2.fromOffset(6, 90),
-					Size = UDim2.new(1, -12, 0, 26),
-					TextColor3 = rarity.Color,
-					Parent = card,
-				})
-				Ui.text({
-					Text = def.Rarity,
-					Position = UDim2.fromOffset(6, 118),
-					Size = UDim2.new(1, -12, 0, 20),
-					TextColor3 = T.SubText,
-					Parent = card,
-				})
-				Ui.text({
-					Text = "Power " .. Format.Number(Creatures.GetPower(def.Id, result.Variant)),
-					Position = UDim2.fromOffset(6, 140),
-					Size = UDim2.new(1, -12, 0, 20),
-					Parent = card,
-				})
-				task.delay((i - 1) * 0.25, function()
-					TweenService:Create(scale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+				TweenService:Create(scale, TweenInfo.new(0.3, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+
+				-- 1) the egg wobbles harder and harder...
+				local eggHolder, shake = eggViewport(card, eggColor, 120)
+				eggHolder.AnchorPoint = Vector2.new(0.5, 0)
+				eggHolder.Position = UDim2.new(0.5, 0, 0, 20)
+				task.spawn(function()
+					local start = os.clock()
+					local duration = 0.9 + (i - 1) * 0.3
+					while os.clock() - start < duration and token == myToken do
+						local p = (os.clock() - start) / duration
+						shake(p * p, os.clock())
+						task.wait()
+					end
+					if token ~= myToken then
+						return
+					end
+					-- 2) ...flash...
+					eggHolder:Destroy()
+					local flash = Ui.new("Frame", {
+						Size = UDim2.fromScale(1, 1),
+						BackgroundColor3 = Color3.new(1, 1, 1),
+						ZIndex = 5,
+						Parent = card,
+					}, { Ui.corner(14) })
+					TweenService:Create(flash, TweenInfo.new(0.45), { BackgroundTransparency = 1 }):Play()
+					Debris(flash, 0.5)
+					-- 3) ...and the creature appears
+					stroke.Color = rarity.Color
+					local icon = creatureIcon(card, def, result.Variant, 104)
+					icon.AnchorPoint = Vector2.new(0.5, 0)
+					icon.Position = UDim2.new(0.5, 0, 0, 10)
+					local iconScale = Ui.new("UIScale", { Scale = 0.3, Parent = icon })
+					TweenService:Create(iconScale, TweenInfo.new(0.4, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+					Ui.text({
+						Text = Creatures.DisplayName(def.Id, result.Variant),
+						Position = UDim2.fromOffset(6, 120),
+						Size = UDim2.new(1, -12, 0, 26),
+						TextColor3 = rarity.Color,
+						Parent = card,
+					})
+					Ui.text({
+						Text = def.Rarity,
+						Position = UDim2.fromOffset(6, 148),
+						Size = UDim2.new(1, -12, 0, 20),
+						TextColor3 = T.SubText,
+						Parent = card,
+					})
+					Ui.text({
+						Text = "Power " .. Format.Number(Creatures.GetPower(def.Id, result.Variant)),
+						Position = UDim2.fromOffset(6, 170),
+						Size = UDim2.new(1, -12, 0, 20),
+						Parent = card,
+					})
 				end)
 			end
 		end
 		if best >= Creatures.LuckyRarityOrder then
 			title.Text = "WOW! " .. title.Text
 		end
-		task.delay(3, function()
+		task.delay(4.2, function()
 			if token == myToken then
 				overlay.Visible = false
 			end

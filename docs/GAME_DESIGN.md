@@ -75,5 +75,6 @@ receipts are recorded in the save file, so purchases can't be granted twice.
 4. **Limited-time event eggs** (Halloween, Winter) with exclusive creatures that never return.
 5. **Boss raids**: a giant crystal golem every hour that everyone in the server fights together.
 6. **Skill minigame** (Fisch style): a timing bar on Legendary crystals for bonus rewards.
-7. **Real creature models** in place of the placeholder orbs, plus a game thumbnail and Bestiary art.
+7. **Hand-made meshes**: the procedural creatures can be swapped for Blender/Studio meshes later. `CreatureModels.Build`
+   is the only place that needs to change. A game thumbnail is also still needed.
 8. **Rewarded video ads**, if eligible, for a free potion, and **subscriptions** (monthly VIP perks).

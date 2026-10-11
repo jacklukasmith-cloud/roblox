@@ -29,7 +29,7 @@ local worldState = Remotes.Event("WorldState")
 local world = WorldBuilder.Build()
 
 for _, crystal in world.Crystals do
-	Crystals.Register(crystal.Part, crystal.Zone)
+	Crystals.Register(crystal.Model, crystal.Zone)
 end
 
 local function report(player: Player, ok: boolean, message: string?)
@@ -40,7 +40,7 @@ end
 
 for _, stand in world.EggStands do
 	local eggId = stand:GetAttribute("EggId") :: string
-	local egg = stand:FindFirstChild("Egg") :: BasePart
+	local egg = stand:FindFirstChild("Egg", true) :: BasePart
 	for name, count in { Hatch1 = 1, Hatch3 = 3 } do
 		local prompt = egg:FindFirstChild(name) :: ProximityPrompt
 		prompt.Triggered:Connect(function(player)

@@ -18,6 +18,13 @@
           "$path": "src/client"
         }
       }
+    },
+    "Lighting": {
+      "$properties": {
+        "Technology": "Future",
+        "GlobalShadows": true,
+        "ClockTime": 14.5
+      }
     }
   }
 }

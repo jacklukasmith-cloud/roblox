@@ -8,6 +8,17 @@ compete in server-wide **Mana Surges** and a weekly cross-server **House War**.
 - **[docs/MARKET_RESEARCH.md](docs/MARKET_RESEARCH.md)**: what makes the top simulators different, and which ideas we borrowed
 - **[docs/ICONS.md](docs/ICONS.md)**: generated icons for every game pass and product
 
+## Look
+
+Everything is built in code from Roblox parts: no mesh uploads needed. The previews below are rendered from the actual
+part geometry the game generates.
+
+![All 25 creatures](docs/images/creatures.png)
+![World objects](docs/images/world.png)
+
+Creatures animate (wings flap, tails wag, legs paddle, serpents slither), Shiny variants are gold-tinted with sparkles,
+Rainbow variants cycle colours, and Champion creatures wear crowns.
+
 ## Quick start
 
 1. Install [Rokit](https://github.com/rojo-rbx/rokit), then run `rokit install` in this folder (installs Rojo + StyLua).
@@ -47,6 +58,7 @@ src/
   shared/            ReplicatedStorage.Shared: data & pure logic used by both sides
     Config.luau      ← all balance numbers + game pass / product IDs
     Creatures.luau   creatures, rarities, Shiny/Rainbow variants
+    CreatureModels.luau  procedural 3D creature models + animation + UI viewports
     Eggs.luau        eggs, drop tables, luck-aware rolling
     Zones.luau       the 4 realms
     Weather.luau     global weather schedule (same in every server)
@@ -60,7 +72,7 @@ src/
                      Monetization, Leaderboards, WorldService, WorldBuilder, Admin
   client/            StarterPlayerScripts.Client
     Main.client.luau boot, gates, VIP chat tag
-    Modules/         Ui toolkit, Hud, Panels, Followers, State
+    Modules/         Ui toolkit, Hud, Panels, Followers, Ambient (spin/bob/squish), State
 ```
 
 Format code with `stylua src`.
