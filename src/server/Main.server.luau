@@ -103,7 +103,7 @@ for _, stand in world.EggStands do
 	local eggId = stand:GetAttribute("EggId") :: string
 	local egg = stand:FindFirstChild("Egg", true) :: BasePart
 	for name, count in { Hatch1 = 1, Hatch3 = 3 } do
-		local prompt = egg:FindFirstChild(name) :: ProximityPrompt
+		local prompt = egg:FindFirstChild(name, true) :: ProximityPrompt
 		prompt.Triggered:Connect(function(player)
 			report(player, Hatching.Hatch(player, eggId, count))
 		end)

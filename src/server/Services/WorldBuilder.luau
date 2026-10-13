@@ -458,7 +458,7 @@ local function makeEggStand(parent: Instance, eggId: string, position: Vector3):
 	-- sits in the world like a sign (shrinks with distance) instead of covering the screen.
 	local columns = 3
 	local rows = math.ceil(#egg.Drops / columns)
-	local W, PAD, GAP, HEADER, FOOTER = 10, 0.35, 0.22, 2.2, 0.75
+	local W, PAD, GAP, HEADER, FOOTER = 9, 0.32, 0.2, 2, 0.7
 	local cellSize = (W - PAD * 2 - GAP * (columns - 1)) / columns
 	local gridW = W - PAD * 2
 	local gridH = rows * cellSize + (rows - 1) * GAP
@@ -472,7 +472,7 @@ local function makeEggStand(parent: Instance, eggId: string, position: Vector3):
 	local priceColor = if egg.Currency == "Trophies" then rgb(84, 210, 255) else rgb(96, 232, 190)
 	local priceIcon = if egg.Currency == "Trophies" then "🏆" else "💎"
 
-	local gui = billboard(eggPart, UDim2.fromScale(W, H), Vector3.new(0, 3.3 + 0.9 + H / 2, 0), 70)
+	local gui = billboard(eggPart, UDim2.fromScale(W, H), Vector3.new(0, 3.3 + 2.2 + H / 2, 0), 70)
 	gui.Name = "OddsGui"
 	local panel = Instance.new("Frame")
 	panel.Size = UDim2.fromScale(1, 1)
@@ -616,6 +616,11 @@ local function makeEggStand(parent: Instance, eggId: string, position: Vector3):
 		TextColor3 = rgb(168, 176, 210),
 	})
 
+	-- Prompts sit down on the pedestal so they don't cover the sign
+	local promptPoint = Instance.new("Attachment")
+	promptPoint.Name = "PromptPoint"
+	promptPoint.Position = Vector3.new(0, -3.6, 0)
+	promptPoint.Parent = eggPart
 	local one = Instance.new("ProximityPrompt")
 	one.Name = "Hatch1"
 	one.ActionText = "Hatch x1"
@@ -624,13 +629,13 @@ local function makeEggStand(parent: Instance, eggId: string, position: Vector3):
 	one.HoldDuration = 0
 	one.MaxActivationDistance = 13
 	one.RequiresLineOfSight = false
-	one.Parent = eggPart
+	one.Parent = promptPoint
 	local three = one:Clone()
 	three.Name = "Hatch3"
 	three.ActionText = "Hatch x3"
 	three.KeyboardKeyCode = Enum.KeyCode.R
 	three.UIOffset = Vector2.new(0, 80)
-	three.Parent = eggPart
+	three.Parent = promptPoint
 
 	stand:SetAttribute("EggId", eggId)
 	stand.Parent = parent
