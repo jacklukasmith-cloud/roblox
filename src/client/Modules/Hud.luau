@@ -148,7 +148,7 @@ function Hud.Build(root: Frame)
 	local top = Ui.new("Frame", {
 		Name = "TopCenter",
 		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.new(0.5, 0, 0, 8),
+		Position = UDim2.new(0.5, 0, 0, 2),
 		Size = UDim2.fromOffset(440, 100),
 		BackgroundTransparency = 1,
 		Parent = root,
@@ -159,34 +159,59 @@ function Hud.Build(root: Frame)
 			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),
 	})
-	local banner = Ui.glass({ LayoutOrder = 1, Size = UDim2.fromOffset(420, 44), Parent = top }, { Ui.round() })
+	-- Slim, low-key pill; click it to show/hide the surge leaderboard
+	local banner = Ui.glass({
+		LayoutOrder = 1,
+		Size = UDim2.fromOffset(300, 30),
+		BackgroundTransparency = 0.4,
+		Parent = top,
+	}, { Ui.round() })
+	local showTop = false
+	local refreshSurge: () -> ()
+	local bannerButton = Ui.new("TextButton", {
+		Name = "Toggle",
+		Text = "",
+		BackgroundTransparency = 1,
+		AutoButtonColor = false,
+		Selectable = true,
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 3,
+		Parent = banner,
+	})
+	bannerButton.Activated:Connect(function()
+		showTop = not showTop
+		refreshSurge()
+	end)
 	local bannerDot = Ui.new("Frame", {
-		Size = UDim2.fromOffset(10, 10),
+		Size = UDim2.fromOffset(8, 8),
 		AnchorPoint = Vector2.new(0, 0.5),
-		Position = UDim2.new(0, 18, 0.5, 0),
+		Position = UDim2.new(0, 14, 0.5, 0),
 		BackgroundColor3 = T.Accent,
 		Parent = banner,
 	}, { Ui.round() })
 	local bannerText = Ui.text({
-		Size = UDim2.new(1, -56, 1, -14),
-		Position = UDim2.fromOffset(38, 7),
+		Size = UDim2.new(1, -44, 1, -12),
+		Position = UDim2.fromOffset(30, 6),
 		Text = "",
-		MaxTextSize = 22,
+		Font = T.Font,
+		MaxTextSize = 16,
 		Parent = banner,
 	})
 	local weatherText = Ui.text({
 		LayoutOrder = 2,
-		Size = UDim2.fromOffset(420, 18),
+		Size = UDim2.fromOffset(420, 14),
 		Font = T.FontRegular,
 		Text = "",
 		TextColor3 = T.SubText,
-		MaxTextSize = 15,
+		TextTransparency = 0.15,
+		MaxTextSize = 13,
 		Parent = top,
 	})
 	local topList = Ui.glass({
 		LayoutOrder = 3,
-		Size = UDim2.fromOffset(280, 20),
+		Size = UDim2.fromOffset(240, 20),
 		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundTransparency = 0.35,
 		Visible = false,
 		Parent = top,
 	}, {
@@ -198,10 +223,10 @@ function Hud.Build(root: Frame)
 	for i = 1, 5 do
 		topRows[i] = Ui.text({
 			LayoutOrder = i,
-			Size = UDim2.new(1, 0, 0, 22),
+			Size = UDim2.new(1, 0, 0, 18),
 			Text = "",
 			TextXAlignment = Enum.TextXAlignment.Left,
-			MaxTextSize = 18,
+			MaxTextSize = 15,
 			Parent = topList,
 		})
 	end
@@ -312,11 +337,11 @@ function Hud.Build(root: Frame)
 		div1.Visible, div2.Visible = true, true
 		multLabel.Visible = not c
 		bottom.Position = UDim2.new(0.5, 0, 1, if c then -6 else -14)
-		top.Position = UDim2.new(0.5, 0, 0, if c then 4 else 10)
-		banner.Size = UDim2.fromOffset(if c then 330 else 420, if c then 38 else 44)
-		weatherText.Visible = true
-		weatherText.Size = UDim2.fromOffset(if c then 330 else 420, if c then 14 else 18)
-		topList.Size = UDim2.fromOffset(if c then 220 else 280, 20)
+		top.Position = UDim2.new(0.5, 0, 0, if c then 2 else 4)
+		banner.Size = UDim2.fromOffset(if c then 240 else 300, if c then 26 else 30)
+		weatherText.Visible = not c -- phones: keep the top of the screen clear
+		weatherText.Size = UDim2.fromOffset(420, 14)
+		topList.Size = UDim2.fromOffset(if c then 200 else 240, 20)
 		house.Size = UDim2.fromOffset(if c then 190 else 230, 40)
 		house.Position = UDim2.new(1, if c then -8 else -14, if c then 0.3 else 0.5, 0)
 		setExpanded(not c) -- phones start collapsed; tap the header to open
@@ -374,7 +399,7 @@ function Hud.Build(root: Frame)
 		end
 	end
 
-	local function refreshSurge()
+	function refreshSurge()
 		local s = State.Surge
 		if not s then
 			bannerText.Text = "Mana Surge"
@@ -383,10 +408,12 @@ function Hud.Build(root: Frame)
 		local left = Format.Time(s.EndsAt - State.Now())
 		if s.Active then
 			local rank = if s.MyRank then `#{s.MyRank}` else "–"
-			bannerText.Text = `MANA SURGE  {left}   ·   You {Format.Number(s.MyScore)} ({rank})`
+			local arrow = if showTop then "▴" else "▾"
+			bannerText.Text = `Mana Surge  {left}  ·  {rank}  {arrow}`
 			bannerText.TextColor3 = Color3.fromRGB(226, 200, 255)
 			bannerDot.BackgroundColor3 = Color3.fromRGB(200, 120, 255)
-			topList.Visible = #s.Top > 0
+			banner.BackgroundTransparency = 0.3
+			topList.Visible = showTop and #s.Top > 0
 			for i = 1, 5 do
 				local entry = s.Top[i]
 				topRows[i].Visible = entry ~= nil
@@ -400,9 +427,10 @@ function Hud.Build(root: Frame)
 			tint.TintColor = Color3.fromRGB(235, 215, 255)
 			tint.Saturation = 0.25
 		else
-			bannerText.Text = `Next Mana Surge in {left}`
-			bannerText.TextColor3 = T.Text
+			bannerText.Text = `Next surge in {left}`
+			bannerText.TextColor3 = T.SubText
 			bannerDot.BackgroundColor3 = T.Accent
+			banner.BackgroundTransparency = 0.55
 			topList.Visible = false
 			tint.TintColor = Color3.new(1, 1, 1)
 			tint.Saturation = 0
