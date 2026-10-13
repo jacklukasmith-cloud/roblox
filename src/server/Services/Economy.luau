@@ -17,6 +17,7 @@ local Monetization = require(script.Parent.Monetization)
 local WorldService = require(script.Parent.WorldService)
 local HouseWar = require(script.Parent.HouseWar)
 local Surge = require(script.Parent.Surge)
+local DailyRewards = require(script.Parent.DailyRewards)
 
 local Economy = {}
 
@@ -311,6 +312,7 @@ function Economy.BuildSnapshot(player: Player)
 		NextRebirthMultiplier = 1 + (data.Rebirths + 1) * Config.Rebirth.MultiplierPerRebirth,
 		BestiaryMultiplier = Economy.GetBestiaryMultiplier(data),
 		OwnedPasses = Monetization.GetOwned(player),
+		Daily = DailyRewards.Snapshot(data),
 	}
 end
 

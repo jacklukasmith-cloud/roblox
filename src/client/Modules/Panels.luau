@@ -15,6 +15,7 @@ local Format = require(Shared.Format)
 local Remotes = require(Shared.Remotes)
 local CreatureModels = require(Shared.CreatureModels)
 local Ui = require(script.Parent.Ui)
+local DailyPanel = require(script.Parent.DailyPanel)
 local Layout = require(script.Parent.Layout)
 local State = require(script.Parent.State)
 
@@ -110,6 +111,7 @@ local MENU = {
 	{ Panel = "Rebirth", Label = "Rebirth", Icon = "🌀", Color = Color3.fromRGB(255, 110, 215) },
 	{ Panel = "Bestiary", Label = "Index", Icon = "📖", Color = Color3.fromRGB(90, 215, 120) },
 	{ Panel = "Settings", Label = "Settings", Icon = "⚙️", Color = Color3.fromRGB(150, 150, 190) },
+	{ Panel = "Daily", Label = "Daily", Icon = "🎁", Color = Color3.fromRGB(255, 196, 64) },
 }
 Panels.MenuButtons = {} :: { TextButton }
 
@@ -202,6 +204,34 @@ local function buildMenu(root: Frame)
 				Parent = badge,
 			})
 		)
+		if entry.Panel == "Daily" then
+			-- red bubble with the number of rewards waiting to be claimed
+			local bubble = Ui.new("Frame", {
+				Name = "Ready",
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.new(1, -4, 0, 4),
+				Size = UDim2.fromOffset(22, 22),
+				BackgroundColor3 = T.Bad,
+				Visible = false,
+				ZIndex = 5,
+				Parent = tile,
+			}, { Ui.round(), Ui.stroke(Color3.new(1, 1, 1), 1.5, 0.2) })
+			local count = Ui.text({
+				Size = UDim2.fromScale(1, 1),
+				Text = "",
+				Font = T.FontHeavy,
+				ZIndex = 6,
+				MaxTextSize = 13,
+				Parent = bubble,
+			})
+			State.Changed:Connect(function(key)
+				local d = State.Data
+				if key == "Data" and d and d.Daily then
+					bubble.Visible = d.Daily.ReadyCount > 0
+					count.Text = tostring(d.Daily.ReadyCount)
+				end
+			end)
+		end
 		table.insert(Panels.MenuButtons, tile)
 	end
 	-- Gamepad hint (outside the grid so it isn't laid out as a tile)
@@ -216,10 +246,10 @@ local function buildMenu(root: Frame)
 	})
 	local function arrange()
 		local c = Layout.Compact
-		-- Phones: 3x2 block; everything else: 2x3. Touch devices keep it in the top-left (clear of the
+		-- Phones: 4 per row; everything else: 2 per row. Touch devices keep it in the top-left (clear of the
 		-- thumbstick); PC/console keep it left-centre (clear of the chat window).
 		local tileSize = if c then 54 else 70
-		local cols = if c then 3 else 2
+		local cols = if c then 4 else 2
 		grid.CellSize = UDim2.fromOffset(tileSize, tileSize)
 		local rows = math.ceil(#MENU / cols)
 		local size = UDim2.fromOffset(cols * tileSize + (cols - 1) * 8, rows * tileSize + (rows - 1) * 8)
@@ -242,7 +272,7 @@ local function buildMenu(root: Frame)
 	arrange()
 end
 
--- Keyboard shortcuts (1-6) and controller buttons (Y = menu, B = close)
+-- Keyboard shortcuts (1-7) and controller buttons (Y = menu, B = close)
 local function bindInput()
 	local keys = {
 		Enum.KeyCode.One,
@@ -251,6 +281,7 @@ local function bindInput()
 		Enum.KeyCode.Four,
 		Enum.KeyCode.Five,
 		Enum.KeyCode.Six,
+		Enum.KeyCode.Seven,
 	}
 	UserInputService.InputBegan:Connect(function(input, processed)
 		if processed or UserInputService:GetFocusedTextBox() then
@@ -855,6 +886,7 @@ function Panels.Build(screen: Frame)
 	buildRebirth(screen)
 	buildBestiary(screen)
 	buildSettings(screen)
+	DailyPanel.Build(screen)
 
 	-- The merchant stall in the hub opens the panel
 	task.spawn(function()

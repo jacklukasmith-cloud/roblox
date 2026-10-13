@@ -15,6 +15,7 @@ local Remotes = require(Shared.Remotes)
 
 local PlayerData = require(script.Parent.PlayerData)
 local Economy = require(script.Parent.Economy)
+local DailyRewards = require(script.Parent.DailyRewards)
 local Monetization = require(script.Parent.Monetization)
 local WorldService = require(script.Parent.WorldService)
 
@@ -31,6 +32,11 @@ local function addCreature(player: Player, data: PlayerData.Data, creatureId: st
 	local isNew = not data.Bestiary[creatureId]
 	data.Bestiary[creatureId] = true
 	data.Stats.CreaturesHatched += 1
+	DailyRewards.Track(player, "HatchEggs", 1)
+	local def = Creatures.Get(creatureId)
+	if def and Creatures.Rarities[def.Rarity].Order >= 3 then
+		DailyRewards.Track(player, "HatchRare", 1)
+	end
 	-- Auto-equip into a free slot
 	local _, equipped = PlayerData.CountCreatures(data)
 	if equipped < Economy.GetEquipSlots(player) then
@@ -129,18 +135,31 @@ function Hatching.BuyMerchantItem(player: Player, itemId: string): (boolean, str
 	end
 	data.Essence -= price
 	data.Merchant.Bought[itemId] = bought + 1
+	DailyRewards.Track(player, "BuyMerchant", 1)
 	if item.Kind == "Boost" then
 		Economy.AddBoost(player, item.Boost :: string, item.Seconds :: number)
 		notify:FireClient(player, `{item.Name} activated!`, Color3.fromRGB(120, 255, 160))
 	else
-		local zone = Zones.Get(data.ZonesUnlocked) or Zones.List[1]
-		local egg = Eggs.Get(zone.EggId) :: Eggs.EggDef
-		local creatureId = Eggs.Roll(egg, Economy.GetLuck(player, data), rng, Creatures.LuckyRarityOrder)
-		local result = addCreature(player, data, creatureId)
-		announceRare(player, result)
-		hatchResult:FireClient(player, egg.Id, { result })
+		Hatching.MysticHatch(player)
 	end
 	PlayerData.MarkChanged(player)
+	return true
+end
+
+-- Hatch your best zone's egg with a guaranteed Rare or better (Mystic Egg). Returns false if
+-- storage is full.
+function Hatching.MysticHatch(player: Player): boolean
+	local data = PlayerData.Get(player)
+	if not data or PlayerData.CountCreatures(data) >= Config.MaxInventory then
+		return false
+	end
+	local zone = Zones.Get(data.ZonesUnlocked) or Zones.List[1]
+	local egg = Eggs.Get(zone.EggId) :: Eggs.EggDef
+	local creatureId = Eggs.Roll(egg, Economy.GetLuck(player, data), rng, Creatures.LuckyRarityOrder)
+	local result = addCreature(player, data, creatureId)
+	announceRare(player, result)
+	PlayerData.MarkChanged(player)
+	hatchResult:FireClient(player, egg.Id, { result })
 	return true
 end
 

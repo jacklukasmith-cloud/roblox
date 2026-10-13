@@ -27,6 +27,8 @@ local FUNCTIONS = {
 	"SetAutoCollect",
 	"ChooseHouse",
 	"BuyMerchantItem",
+	"ClaimDaily",
+	"ClaimQuest",
 }
 
 local Remotes = {}

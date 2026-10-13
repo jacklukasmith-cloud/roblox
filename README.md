@@ -53,7 +53,7 @@ the Lighting settings. Anything else you build in Studio is left alone, includin
 
 The HUD scales to the screen and keeps clear of Roblox's own UI (top bar, chat, player list, mobile thumbstick/jump):
 phones get a compact layout with big touch targets, tablets a touch-sized layout, PC/console the full layout.
-Controllers: **Y** opens the menu, d-pad to move, **A** to select, **B** to close. PC: keys **1-6** open the menus.
+Controllers: **Y** opens the menu, d-pad to move, **A** to select, **B** to close. PC: keys **1-7** open the menus.
 
 | PC | Phone | Tablet |
 |---|---|---|
@@ -88,6 +88,29 @@ Broadcast to **every server** at once, like Grow a Garden's "admin abuse" events
 | `!surge` | Start a Mana Surge right now |
 | `!weather ManaStorm 10` | Force a weather for N minutes (`Clear`, `Starfall`, `Aurora`, `Eclipse`, `ManaStorm`) |
 | `!announce Double luck weekend!` | Message every player |
+
+Testing commands (only affect you; everyone is an admin in Studio):
+
+| Command | Effect |
+|---|---|
+| `!essence 1000000` | Give yourself Essence |
+| `!give EmberFox Shiny` | Add a creature (optional `Shiny` / `Rainbow`) |
+| `!giveall` | One of every creature |
+| `!hatchtest Phoenix Rainbow` | Play the hatch animation for up to 3 creatures (nothing is added) |
+
+## Daily rewards & quests
+
+The **🎁 Daily** menu (key **7**) opens by itself when a reward is waiting; a red bubble on the
+tile counts rewards ready to claim. Days roll over at midnight UTC.
+
+- **7-day login streak:** Essence → Luck Potion → Essence → Essence Potion → 5 Trophies → Shiny
+  Elixir → **Mystic Egg + big Essence**, then the cycle repeats. Miss a day and it starts over.
+- **3 daily quests** (same for everyone that day), e.g. "Break 50 crystals", "Hatch 10 eggs",
+  "Open 2 Mana Chests". Each pays Essence; finishing all three unlocks a bonus Luck Potion.
+
+![Daily](docs/images/ui-daily.png)
+
+Rewards and the quest pool live in `src/shared/Daily.luau`; Essence rewards scale with your best zone.
 
 ## Project layout
 

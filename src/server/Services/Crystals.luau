@@ -20,6 +20,7 @@ local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local PlayerData = require(script.Parent.PlayerData)
 local Economy = require(script.Parent.Economy)
 local Monetization = require(script.Parent.Monetization)
+local DailyRewards = require(script.Parent.DailyRewards)
 
 local Crystals = {}
 
@@ -93,6 +94,7 @@ local function breakCrystal(state: CrystalState)
 			local share = math.min(dealt / state.MaxHP, 1)
 			local earned = Economy.AwardCrystal(player, state.Zone, share, state.RewardMultiplier)
 			crystalBroken:FireClient(player, state.Model, earned, math.max(1, math.round(orbs * math.max(share, 0.3))))
+			DailyRewards.Track(player, if state.Kind == "Chest" then "BreakChests" else "BreakCrystals", 1)
 		end
 	end
 	-- Creatures attacking this crystal go back to their owners

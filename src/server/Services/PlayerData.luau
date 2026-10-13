@@ -38,6 +38,8 @@ export type Data = {
 	LastOnline: number,
 	ProcessedReceipts: { string },
 	Stats: { CreaturesHatched: number, SurgeWins: number, CrystalsBroken: number },
+	Daily: { Streak: number, LastClaimDay: number },
+	Quests: { Day: number, Progress: { [string]: number }, Claimed: { [string]: boolean }, BonusClaimed: boolean },
 }
 
 local function defaultData(): Data
@@ -61,6 +63,8 @@ local function defaultData(): Data
 		LastOnline = 0,
 		ProcessedReceipts = {},
 		Stats = { CreaturesHatched = 0, SurgeWins = 0, CrystalsBroken = 0 },
+		Daily = { Streak = 0, LastClaimDay = -1 },
+		Quests = { Day = -1, Progress = {}, Claimed = {}, BonusClaimed = false },
 	}
 end
 

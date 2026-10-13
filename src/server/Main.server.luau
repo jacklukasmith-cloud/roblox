@@ -21,6 +21,7 @@ local Hatching = require(Services.Hatching)
 local Leaderboards = require(Services.Leaderboards)
 local Admin = require(Services.Admin)
 local WorldBuilder = require(Services.WorldBuilder)
+local DailyRewards = require(Services.DailyRewards)
 
 local notify = Remotes.Event("Notify")
 local dataChanged = Remotes.Event("DataChanged")
@@ -277,6 +278,17 @@ bind("ChooseHouse", function(player, houseId)
 	return HouseWar.Choose(player, houseId)
 end)
 
+bind("ClaimDaily", function(player)
+	return DailyRewards.ClaimStreak(player)
+end)
+
+bind("ClaimQuest", function(player, key)
+	if type(key) ~= "string" then
+		return false
+	end
+	return DailyRewards.ClaimQuest(player, key)
+end)
+
 bind("BuyMerchantItem", function(player, itemId)
 	if type(itemId) ~= "string" then
 		return false
@@ -285,6 +297,7 @@ bind("BuyMerchantItem", function(player, itemId)
 end)
 
 Leaderboards.Start()
+DailyRewards.Start()
 Admin.Start()
 
 print("[Mythic Tamers] Server ready")
