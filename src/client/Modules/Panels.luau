@@ -1,6 +1,9 @@
 --[[ Menu buttons + every pop-up panel + the hatch reveal. ]]
 
+local ContextActionService = game:GetService("ContextActionService")
+local GuiService = game:GetService("GuiService")
 local MarketplaceService = game:GetService("MarketplaceService")
+local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -14,6 +17,7 @@ local Format = require(Shared.Format)
 local Remotes = require(Shared.Remotes)
 local CreatureModels = require(Shared.CreatureModels)
 local Ui = require(script.Parent.Ui)
+local Layout = require(script.Parent.Layout)
 local Sound = require(script.Parent.Sound)
 local State = require(script.Parent.State)
 
@@ -173,40 +177,160 @@ local function eggViewport(parent: Instance, color: Color3, size: number): (Fram
 end
 
 -- Menu ---------------------------------------------------------------------------------
-local function buildMenu(screen: ScreenGui)
+local MENU = {
+	{ Panel = "Creatures", Label = "Pets", Icon = "🐾", Color = Color3.fromRGB(90, 170, 255) },
+	{ Panel = "Shop", Label = "Shop", Icon = "🛒", Color = Color3.fromRGB(255, 200, 60) },
+	{ Panel = "Merchant", Label = "Merchant", Icon = "🧙", Color = Color3.fromRGB(255, 145, 70) },
+	{ Panel = "Rebirth", Label = "Rebirth", Icon = "🌀", Color = Color3.fromRGB(255, 110, 215) },
+	{ Panel = "Bestiary", Label = "Index", Icon = "📖", Color = Color3.fromRGB(90, 215, 120) },
+	{ Panel = "Settings", Label = "Settings", Icon = "⚙️", Color = Color3.fromRGB(150, 150, 190) },
+}
+Panels.MenuButtons = {} :: { TextButton }
+
+-- Left-side menu: big icon tiles (one column on PC/tablet, two columns on phones)
+local function buildMenu(root: Frame)
+	local holder = Ui.new("Frame", {
+		Name = "MenuHolder",
+		BackgroundTransparency = 1,
+		Parent = root,
+	})
 	local menu = Ui.new("Frame", {
 		Name = "Menu",
-		AnchorPoint = Vector2.new(0, 0.5),
-		Position = UDim2.new(0, 12, 0.55, 0),
-		Size = UDim2.fromOffset(130, 320),
 		BackgroundTransparency = 1,
-		Parent = screen,
-	}, { Ui.new("UIListLayout", { Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder }) })
-	local entries = {
-		{ "Creatures", "Creatures", Color3.fromRGB(120, 200, 255) },
-		{ "Shop", "Shop", T.Gold },
-		{ "Merchant", "Merchant", Color3.fromRGB(255, 170, 90) },
-		{ "Rebirth", "Rebirth", Color3.fromRGB(255, 120, 230) },
-		{ "Bestiary", "Bestiary", T.Good },
-		{ "Settings", "Settings", Color3.fromRGB(170, 170, 200) },
-	}
-	for i, entry in entries do
-		Ui.button({
-			Text = entry[2],
+		Parent = holder,
+	})
+	local grid = Ui.new("UIGridLayout", {
+		CellPadding = UDim2.fromOffset(8, 8),
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		Parent = menu,
+	})
+	local hints: { TextLabel } = {}
+	for i, entry in MENU do
+		local tile = Ui.button({
+			Name = entry.Panel .. "Button",
+			Text = "",
 			LayoutOrder = i,
-			Size = UDim2.new(1, 0, 0, 44),
-			BackgroundColor3 = entry[3],
-			TextColor3 = Color3.fromRGB(30, 20, 50),
+			BackgroundColor3 = entry.Color,
 			Parent = menu,
 		}, function()
-			Ui.toggle(entry[1])
+			Ui.toggle(entry.Panel)
 		end)
+		Ui.text({
+			Text = entry.Icon,
+			Size = UDim2.fromScale(1, 0.6),
+			MaxTextSize = 40,
+			Parent = tile,
+		})
+		Ui.text({
+			Text = entry.Label,
+			Size = UDim2.fromScale(1.15, 0.32),
+			Position = UDim2.fromScale(-0.075, 0.66),
+			MaxTextSize = 18,
+			Parent = tile,
+		})
+		-- Keyboard shortcut badge (PC only)
+		local badge = Ui.new("Frame", {
+			Size = UDim2.fromOffset(20, 20),
+			Position = UDim2.fromOffset(-14, -12),
+			BackgroundColor3 = T.Background,
+			ZIndex = 3,
+			Parent = tile,
+		}, { Ui.round(), Ui.stroke(T.Outline, 1.5) })
+		table.insert(
+			hints,
+			Ui.text({ Text = tostring(i), Size = UDim2.fromScale(1, 1), ZIndex = 4, MaxTextSize = 14, Parent = badge })
+		)
+		table.insert(Panels.MenuButtons, tile)
 	end
+	-- Gamepad hint (outside the grid so it isn't laid out as a tile)
+	local padHint = Ui.text({
+		Text = "Ⓨ Menu   Ⓑ Close",
+		Size = UDim2.new(1, 60, 0, 18),
+		Position = UDim2.new(0, 0, 1, 6),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = T.SubText,
+		MaxTextSize = 16,
+		Parent = holder,
+	})
+	local function arrange()
+		local c = Layout.Compact
+		-- Phones: 3x2 block; everything else: 2x3. Touch devices keep it in the top-left (clear of the
+		-- thumbstick); PC/console keep it left-centre (clear of the chat window).
+		local tileSize = if c then 52 else 66
+		local cols = if c then 3 else 2
+		grid.CellSize = UDim2.fromOffset(tileSize, tileSize)
+		local rows = math.ceil(#MENU / cols)
+		local size = UDim2.fromOffset(cols * tileSize + (cols - 1) * 8, rows * tileSize + (rows - 1) * 8)
+		menu.Size = size
+		holder.Size = size
+		local top = Layout.Touch or c
+		holder.AnchorPoint = Vector2.new(0, if top then 0 else 0.5)
+		holder.Position = UDim2.new(0, if c then 10 else 16, if top then 0 else 0.6, if top then 8 else 0)
+		for _, hint in hints do
+			(hint.Parent :: GuiObject).Visible = not Layout.Touch and not Layout.Gamepad
+		end
+		padHint.Visible = Layout.Gamepad
+		-- Gamepad: d-pad moves through the menu in order
+		for i, button in Panels.MenuButtons do
+			button.NextSelectionDown = Panels.MenuButtons[i + cols]
+			button.NextSelectionUp = Panels.MenuButtons[i - cols]
+		end
+	end
+	Layout.Changed:Connect(arrange)
+	arrange()
+end
+
+-- Keyboard shortcuts (1-6) and controller buttons (Y = menu, B = close)
+local function bindInput()
+	local keys = {
+		Enum.KeyCode.One,
+		Enum.KeyCode.Two,
+		Enum.KeyCode.Three,
+		Enum.KeyCode.Four,
+		Enum.KeyCode.Five,
+		Enum.KeyCode.Six,
+	}
+	UserInputService.InputBegan:Connect(function(input, processed)
+		if processed or UserInputService:GetFocusedTextBox() then
+			return
+		end
+		local index = table.find(keys, input.KeyCode)
+		if index and MENU[index] then
+			Ui.toggle(MENU[index].Panel)
+		end
+	end)
+	ContextActionService:BindAction("MythicMenu", function(_, inputState, input)
+		if inputState ~= Enum.UserInputState.Begin then
+			return Enum.ContextActionResult.Pass
+		end
+		if input.KeyCode == Enum.KeyCode.ButtonY then
+			if Ui.openPanel() then
+				Ui.closeAll()
+				GuiService.SelectedObject = nil
+			elseif GuiService.SelectedObject then
+				GuiService.SelectedObject = nil
+			else
+				GuiService.SelectedObject = Panels.MenuButtons[1]
+			end
+			return Enum.ContextActionResult.Sink
+		elseif input.KeyCode == Enum.KeyCode.ButtonB then
+			local open = Ui.openPanel()
+			if open then
+				Ui.toggle(open, false)
+				GuiService.SelectedObject = Panels.MenuButtons[1]
+				return Enum.ContextActionResult.Sink
+			elseif GuiService.SelectedObject then
+				GuiService.SelectedObject = nil
+				return Enum.ContextActionResult.Sink
+			end
+		end
+		return Enum.ContextActionResult.Pass
+	end, false, Enum.KeyCode.ButtonY, Enum.KeyCode.ButtonB)
 end
 
 -- Creatures panel ------------------------------------------------------------------------
-local function buildCreatures(screen: ScreenGui)
-	local _, content = Ui.panel(screen, "Creatures", "Your Creatures")
+local function buildCreatures(screen: Frame)
+	local _, content = Ui.panel(screen, "Creatures", "Your Creatures", nil, "🐾")
 	local releaseMode = false
 	local selected: { [string]: boolean } = {}
 	local lastKey = ""
@@ -262,12 +386,7 @@ local function buildCreatures(screen: ScreenGui)
 	end)
 
 	local grid = scrolling(content, { Position = UDim2.fromOffset(0, 48), Size = UDim2.new(1, 0, 1, -48) })
-	Ui.new("UIGridLayout", {
-		CellSize = UDim2.fromOffset(112, 138),
-		CellPadding = UDim2.fromOffset(8, 8),
-		SortOrder = Enum.SortOrder.LayoutOrder,
-		Parent = grid,
-	})
+	Ui.autoGrid(grid, 112, 138)
 
 	refresh = function(force: boolean)
 		local d = State.Data
@@ -427,8 +546,8 @@ local function shopCard(parent: Instance, order: number, item, owned: boolean, o
 	return card
 end
 
-local function buildShop(screen: ScreenGui)
-	local _, content = Ui.panel(screen, "Shop", "Shop")
+local function buildShop(screen: Frame)
+	local _, content = Ui.panel(screen, "Shop", "Shop", nil, "🛒")
 	local list = scrolling(content)
 	Ui.new("UIListLayout", { Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder, Parent = list })
 
@@ -473,8 +592,8 @@ local function buildShop(screen: ScreenGui)
 end
 
 -- Merchant panel ------------------------------------------------------------------------
-local function buildMerchant(screen: ScreenGui)
-	local _, content = Ui.panel(screen, "Merchant", "Wandering Merchant")
+local function buildMerchant(screen: Frame)
+	local _, content = Ui.panel(screen, "Merchant", "Wandering Merchant", nil, "🧙")
 	local timer = Ui.text({ Size = UDim2.new(1, 0, 0, 26), Text = "", TextColor3 = T.SubText, Parent = content })
 	local list = scrolling(content, { Position = UDim2.fromOffset(0, 34), Size = UDim2.new(1, 0, 1, -34) })
 	Ui.new("UIListLayout", { Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder, Parent = list })
@@ -588,8 +707,8 @@ local function buildMerchant(screen: ScreenGui)
 end
 
 -- Rebirth panel --------------------------------------------------------------------------
-local function buildRebirth(screen: ScreenGui)
-	local _, content = Ui.panel(screen, "Rebirth", "Rebirth", UDim2.fromScale(0.4, 0.45))
+local function buildRebirth(screen: Frame)
+	local _, content = Ui.panel(screen, "Rebirth", "Rebirth", UDim2.fromOffset(520, 340), "🌀")
 	Ui.new("UIListLayout", {
 		Padding = UDim.new(0, 10),
 		HorizontalAlignment = Enum.HorizontalAlignment.Center,
@@ -645,16 +764,11 @@ local function buildRebirth(screen: ScreenGui)
 end
 
 -- Bestiary panel -------------------------------------------------------------------------
-local function buildBestiary(screen: ScreenGui)
-	local _, content = Ui.panel(screen, "Bestiary", "Bestiary")
+local function buildBestiary(screen: Frame)
+	local _, content = Ui.panel(screen, "Bestiary", "Bestiary", nil, "📖")
 	local header = Ui.text({ Size = UDim2.new(1, 0, 0, 26), Text = "", TextColor3 = T.Good, Parent = content })
 	local grid = scrolling(content, { Position = UDim2.fromOffset(0, 34), Size = UDim2.new(1, 0, 1, -34) })
-	Ui.new("UIGridLayout", {
-		CellSize = UDim2.fromOffset(112, 110),
-		CellPadding = UDim2.fromOffset(8, 8),
-		SortOrder = Enum.SortOrder.LayoutOrder,
-		Parent = grid,
-	})
+	Ui.autoGrid(grid, 112, 110)
 
 	local function render()
 		local d = State.Data
@@ -698,8 +812,8 @@ local function buildBestiary(screen: ScreenGui)
 end
 
 -- Settings panel -------------------------------------------------------------------------
-local function buildSettings(screen: ScreenGui)
-	local _, content = Ui.panel(screen, "Settings", "Settings", UDim2.fromScale(0.4, 0.55))
+local function buildSettings(screen: Frame)
+	local _, content = Ui.panel(screen, "Settings", "Settings", UDim2.fromOffset(460, 420), "⚙️")
 	Ui.new("UIListLayout", { Padding = UDim.new(0, 10), SortOrder = Enum.SortOrder.LayoutOrder, Parent = content })
 	local potato
 	potato = Ui.button({
@@ -770,7 +884,7 @@ local function buildSettings(screen: ScreenGui)
 end
 
 -- Hatch reveal ---------------------------------------------------------------------------
-local function buildHatchDisplay(screen: ScreenGui)
+local function buildHatchDisplay(screen: Frame)
 	local overlay = Ui.new("Frame", {
 		Name = "Hatch",
 		AnchorPoint = Vector2.new(0.5, 0.5),
@@ -778,6 +892,7 @@ local function buildHatchDisplay(screen: ScreenGui)
 		Size = UDim2.fromOffset(560, 260),
 		BackgroundTransparency = 1,
 		Visible = false,
+		ZIndex = 25,
 		Parent = screen,
 	})
 	local title = Ui.text({ Size = UDim2.new(1, 0, 0, 40), Text = "", Parent = overlay })
@@ -894,8 +1009,9 @@ local function buildHatchDisplay(screen: ScreenGui)
 	end)
 end
 
-function Panels.Build(screen: ScreenGui)
+function Panels.Build(screen: Frame)
 	buildMenu(screen)
+	bindInput()
 	buildCreatures(screen)
 	buildShop(screen)
 	buildMerchant(screen)

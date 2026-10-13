@@ -9,6 +9,7 @@ local TextChatService = game:GetService("TextChatService")
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Modules = script.Parent:WaitForChild("Modules")
 local State = require(Modules.State)
+local Layout = require(Modules.Layout)
 local Ui = require(Modules.Ui)
 local Hud = require(Modules.Hud)
 local Panels = require(Modules.Panels)
@@ -23,9 +24,17 @@ local screen = Instance.new("ScreenGui")
 screen.Name = "MythicTamers"
 screen.ResetOnSpawn = false
 screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+-- Keep clear of Roblox's top bar, the notch and other core UI on every device
+screen.ScreenInsets = Enum.ScreenInsets.CoreUISafeInsets
 screen.Parent = player:WaitForChild("PlayerGui")
 
-Ui.initToasts(screen)
+-- No tools in this game: hide the backpack bar (frees the bottom of the screen + number keys)
+pcall(function()
+	game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)
+end)
+
+local root = Layout.Init(screen)
+Ui.initToasts(root)
 
 -- Studio playtests: show script errors on screen too, so they're hard to miss
 if game:GetService("RunService"):IsStudio() then
@@ -34,8 +43,8 @@ if game:GetService("RunService"):IsStudio() then
 		Ui.toast(`[ERROR] {where}: {message}`, Color3.fromRGB(255, 90, 90))
 	end)
 end
-Hud.Build(screen)
-Panels.Build(screen)
+Hud.Build(root)
+Panels.Build(root)
 Followers.Start()
 Ambient.Start()
 Breaking.Start()

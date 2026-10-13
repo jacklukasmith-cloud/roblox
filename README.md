@@ -49,6 +49,18 @@ What Rojo controls: the scripts (`ServerScriptService.Server`, `StarterPlayerScr
 the Lighting settings. Anything else you build in Studio is left alone, including the creature meshes you import into
 `ReplicatedStorage.CreatureMeshes`. Edit the scripts here, not in Studio: Rojo overwrites Studio-side script edits.
 
+## UI on every device
+
+The HUD scales to the screen and keeps clear of Roblox's own UI (top bar, chat, player list, mobile thumbstick/jump):
+phones get a compact layout with big touch targets, tablets a touch-sized layout, PC/console the full layout.
+Controllers: **Y** opens the menu, d-pad to move, **A** to select, **B** to close. PC: keys **1-6** open the menus.
+
+| PC | Phone | Tablet |
+|---|---|---|
+| ![PC](docs/images/ui-pc.png) | ![Phone](docs/images/ui-phone.png) | ![Tablet](docs/images/ui-tablet.png) |
+
+(Previews are generated from the UI code; red boxes mark areas Roblox reserves.)
+
 ## Quick start (one-off build)
 
 If you just want a file: `rojo build -o MythicTamers.rbxl`, open it in Studio and press **Play**.
