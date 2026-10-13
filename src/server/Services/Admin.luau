@@ -11,6 +11,8 @@
 	  !essence 1000000           give yourself Essence
 	  !give EmberFox             hatch a specific creature (add "Shiny" or "Rainbow" after the name)
 	  !giveall                   get one of every creature and equip your best
+	  !hatchtest Phoenix Rainbow play the hatch animation for any creatures (up to 3, nothing is
+	                             added to your inventory), e.g. !hatchtest GlowSprite MoonRabbit Shiny
 
 	In Studio playtests you are always an admin, so you can use these straight away.
 ]]
@@ -24,6 +26,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 local Weather = require(ReplicatedStorage.Shared.Weather)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Creatures = require(ReplicatedStorage.Shared.Creatures)
+local Eggs = require(ReplicatedStorage.Shared.Eggs)
 local Surge = require(script.Parent.Surge)
 local PlayerData = require(script.Parent.PlayerData)
 local Economy = require(script.Parent.Economy)
@@ -33,6 +36,7 @@ local Admin = {}
 
 local TOPIC = "MythicTamersAdmin"
 local notify = Remotes.Event("Notify")
+local hatchResult = Remotes.Event("HatchResult")
 
 local function isAdmin(player: Player): boolean
 	if RunService:IsStudio() then
@@ -83,6 +87,40 @@ local function runPersonal(player: Player, command: string, args: { string }): b
 		end
 		Economy.EquipBest(player)
 		notify:FireClient(player, `[TEST] Gave {#list} creature(s)`, Color3.fromRGB(140, 255, 200))
+	elseif command == "hatchtest" then
+		-- Only plays the animation: "!hatchtest GlowSprite MoonRabbit Shiny Phoenix Rainbow"
+		local results = {}
+		for _, word in args do
+			local lower = string.lower(word)
+			if (lower == "shiny" or lower == "rainbow") and #results > 0 then
+				results[#results].Variant = if lower == "shiny" then "Shiny" else "Rainbow"
+			else
+				for _, def in Creatures.Ordered do
+					if string.lower(def.Id) == lower and #results < 3 then
+						table.insert(results, { Id = def.Id, Variant = "Normal", New = not data.Bestiary[def.Id] })
+					end
+				end
+			end
+		end
+		if #results == 0 then
+			notify:FireClient(
+				player,
+				"[TEST] Usage: !hatchtest Phoenix Rainbow  (up to 3 creatures)",
+				Color3.fromRGB(255, 200, 120)
+			)
+			results = { { Id = "Phoenix", Variant = "Rainbow", New = true } }
+		end
+		-- Use an egg that actually contains the first creature, so the egg colour matches
+		local eggId = Eggs.Order[1]
+		for _, id in Eggs.Order do
+			for _, drop in (Eggs.Get(id) :: any).Drops do
+				if drop.Creature == results[1].Id then
+					eggId = id
+				end
+			end
+		end
+		hatchResult:FireClient(player, eggId, results)
+		return true
 	else
 		return false
 	end
