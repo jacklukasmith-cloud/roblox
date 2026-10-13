@@ -17,8 +17,9 @@ Config.MaxReceiptHistory = 50
 -- Collecting (Pet Simulator style) -------------------------------------------------
 -- Click a crystal to send your creatures at it; they deal your Power as damage every tick.
 Config.BaseClickPower = 1
-Config.PetAttackInterval = 0.5 -- seconds between creature attack ticks
-Config.PetDamageMultiplier = 1.5 -- damage per tick = Power * this
+Config.PetAttackInterval = 0.25 -- seconds between creature attack ticks
+Config.PetDamageMultiplier = 0.75 -- damage per tick = Power * this (3 Power/sec)
+Config.PetTravelTime = 0.6 -- creatures fly to the target first; damage starts after this
 Config.MaxHitDistance = 45 -- studs from character to crystal when choosing a target
 Config.MaxAttackDistance = 70 -- creatures give up if you walk further than this away
 Config.CrystalRespawnTime = 4

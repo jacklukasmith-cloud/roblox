@@ -43,6 +43,7 @@ type CrystalState = {
 
 local states: { [Model]: CrystalState } = {}
 local targets: { [Player]: Model } = {}
+local targetSince: { [Player]: number } = {}
 local lastWarn: { [Player]: number } = {}
 local notify = Remotes.Event("Notify")
 local crystalHit = Remotes.Event("CrystalHit")
@@ -66,6 +67,9 @@ local function targetValue(player: Player): ObjectValue
 end
 
 local function setTarget(player: Player, model: Model?)
+	if targets[player] ~= model then
+		targetSince[player] = os.clock()
+	end
 	targets[player] = model
 	local value = targetValue(player)
 	if value.Value ~= model then
@@ -167,20 +171,13 @@ local function canAttack(player: Player, state: CrystalState, maxDistance: numbe
 	return pos ~= nil and (pos - state.Main.Position).Magnitude <= maxDistance
 end
 
--- Player clicked a crystal: send their creatures at it (and land one hit straight away).
+-- Player clicked a crystal: send their creatures at it. Damage starts once they arrive.
 function Crystals.Target(player: Player, model: Model)
 	local state = states[model]
 	if not state or not canAttack(player, state, Config.MaxHitDistance, true) then
 		return
 	end
-	if targets[player] == model then
-		return
-	end
 	setTarget(player, model)
-	local data = PlayerData.Get(player)
-	if data then
-		damage(player, state, Economy.GetPower(data) * Config.PetDamageMultiplier)
-	end
 end
 
 function Crystals.Register(model: Model, zoneIndex: number, options: Options?)
@@ -260,7 +257,8 @@ function Crystals.Tick()
 					state = states[nearest]
 				end
 			end
-			if state then
+			-- Creatures need a moment to fly over before they start hitting
+			if state and os.clock() - (targetSince[player] or 0) >= Config.PetTravelTime then
 				damage(player, state, Economy.GetPower(data) * Config.PetDamageMultiplier)
 			end
 		end
@@ -281,6 +279,7 @@ end
 
 Players.PlayerRemoving:Connect(function(player)
 	targets[player] = nil
+	targetSince[player] = nil
 	lastWarn[player] = nil
 	for _, state in states do
 		state.Damage[player] = nil
