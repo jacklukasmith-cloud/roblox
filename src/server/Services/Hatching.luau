@@ -28,6 +28,7 @@ local lastHatch: { [Player]: number } = {}
 local function addCreature(player: Player, data: PlayerData.Data, creatureId: string)
 	local variant = Creatures.RollVariant(rng, Economy.GetShinyMultiplier(data))
 	local uid = PlayerData.NewCreature(data, creatureId, variant)
+	local isNew = not data.Bestiary[creatureId]
 	data.Bestiary[creatureId] = true
 	data.Stats.CreaturesHatched += 1
 	-- Auto-equip into a free slot
@@ -35,7 +36,7 @@ local function addCreature(player: Player, data: PlayerData.Data, creatureId: st
 	if equipped < Economy.GetEquipSlots(player) then
 		data.Creatures[uid].Equipped = true
 	end
-	return { Id = creatureId, Variant = variant }
+	return { Id = creatureId, Variant = variant, New = isNew }
 end
 
 local function announceRare(player: Player, result)

@@ -6,19 +6,16 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TweenService = game:GetService("TweenService")
 
 local Shared = ReplicatedStorage.Shared
 local Config = require(Shared.Config)
 local Creatures = require(Shared.Creatures)
-local Eggs = require(Shared.Eggs)
 local Merchant = require(Shared.Merchant)
 local Format = require(Shared.Format)
 local Remotes = require(Shared.Remotes)
 local CreatureModels = require(Shared.CreatureModels)
 local Ui = require(script.Parent.Ui)
 local Layout = require(script.Parent.Layout)
-local Sound = require(script.Parent.Sound)
 local State = require(script.Parent.State)
 
 local Panels = {}
@@ -54,12 +51,6 @@ local function scrolling(parent: Instance, props: { [string]: any }?): Scrolling
 		defaults[k] = v
 	end
 	return Ui.new("ScrollingFrame", defaults)
-end
-
-local function Debris(inst: Instance, seconds: number)
-	task.delay(seconds, function()
-		inst:Destroy()
-	end)
 end
 
 local function clearChildren(parent: Instance, className: string)
@@ -111,71 +102,6 @@ local function creatureIcon(
 end
 
 -- A small egg model in a viewport; returns a function that shakes it (0 = still, 1 = wild).
-local function eggViewport(parent: Instance, color: Color3, size: number): (Frame, (number, number) -> ())
-	local holder = Ui.new("Frame", { Size = UDim2.fromOffset(size, size), BackgroundTransparency = 1, Parent = parent })
-	local viewport = Ui.new("ViewportFrame", {
-		Size = UDim2.fromScale(1, 1),
-		BackgroundTransparency = 1,
-		Ambient = Color3.fromRGB(170, 170, 190),
-		LightDirection = Vector3.new(-1, -1.5, -1),
-		Parent = holder,
-	})
-	local model = Instance.new("Model")
-	local function piece(props: { [string]: any }): BasePart
-		local p = Instance.new("Part")
-		p.Anchored = true
-		for k, v in props do
-			(p :: any)[k] = v
-		end
-		p.Parent = model
-		return p
-	end
-	local shell = piece({ Size = Vector3.new(2, 2.6, 2), Color = color, Material = Enum.Material.SmoothPlastic })
-	Instance.new("SpecialMesh", shell).MeshType = Enum.MeshType.Sphere
-	local band = piece({
-		Shape = Enum.PartType.Cylinder,
-		Size = Vector3.new(0.18, 2.03, 2.03),
-		CFrame = CFrame.new(0, -0.25, 0) * CFrame.Angles(0, 0, math.pi / 2),
-		Color = color:Lerp(Color3.new(1, 1, 1), 0.55),
-		Material = Enum.Material.Neon,
-	})
-	local spots = {}
-	for i = 0, 4 do
-		local a = i * 1.25
-		local spot = piece({
-			Size = Vector3.new(0.5, 0.5, 0.14),
-			CFrame = CFrame.lookAt(
-				Vector3.new(math.cos(a) * 0.93, 0.5 - (i % 2) * 0.5, math.sin(a) * 0.93),
-				Vector3.new(math.cos(a) * 2, 0.5 - (i % 2) * 0.5, math.sin(a) * 2)
-			),
-			Color = color:Lerp(Color3.new(1, 1, 1), 0.55),
-		})
-		Instance.new("SpecialMesh", spot).MeshType = Enum.MeshType.Sphere
-		table.insert(spots, spot)
-	end
-	local parts = { shell, band }
-	for _, spot in spots do
-		table.insert(parts, spot)
-	end
-	local base = {}
-	for i, p in parts do
-		base[i] = p.CFrame
-	end
-	model.Parent = viewport
-	local camera = Instance.new("Camera")
-	camera.FieldOfView = 30
-	camera.CFrame = CFrame.lookAt(Vector3.new(1.6, 1, -6.2), Vector3.zero)
-	camera.Parent = viewport
-	viewport.CurrentCamera = camera
-	local function shake(amount: number, t: number)
-		local tilt = CFrame.Angles(0, t * 1.5, math.sin(t * 38) * 0.35 * amount)
-		for i, p in parts do
-			p.CFrame = tilt * base[i]
-		end
-	end
-	return holder, shake
-end
-
 -- Menu ---------------------------------------------------------------------------------
 local MENU = {
 	{ Panel = "Creatures", Label = "Pets", Icon = "🐾", Color = Color3.fromRGB(90, 170, 255) },
@@ -920,131 +846,6 @@ local function buildSettings(screen: Frame)
 end
 
 -- Hatch reveal ---------------------------------------------------------------------------
-local function buildHatchDisplay(screen: Frame)
-	local overlay = Ui.new("Frame", {
-		Name = "Hatch",
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		Position = UDim2.fromScale(0.5, 0.45),
-		Size = UDim2.fromOffset(560, 260),
-		BackgroundTransparency = 1,
-		Visible = false,
-		ZIndex = 25,
-		Parent = screen,
-	})
-	local title = Ui.text({ Size = UDim2.new(1, 0, 0, 40), Text = "", Parent = overlay })
-	local row = Ui.new("Frame", {
-		Position = UDim2.fromOffset(0, 50),
-		Size = UDim2.new(1, 0, 0, 205),
-		BackgroundTransparency = 1,
-		Parent = overlay,
-	}, {
-		Ui.new("UIListLayout", {
-			FillDirection = Enum.FillDirection.Horizontal,
-			HorizontalAlignment = Enum.HorizontalAlignment.Center,
-			Padding = UDim.new(0, 12),
-		}),
-	})
-	local token = 0
-
-	Remotes.Event("HatchResult").OnClientEvent:Connect(function(eggId, results)
-		token += 1
-		local myToken = token
-		local egg = Eggs.Get(eggId)
-		clearChildren(row, "Frame")
-		overlay.Visible = true
-		title.Text = (if egg then egg.Name else "Egg") .. " hatched!"
-		local best = 0
-		local eggColor = if egg then egg.Color else T.Accent
-		for i, result in results do
-			local def = Creatures.Get(result.Id)
-			if def then
-				local rarity = Creatures.Rarities[def.Rarity]
-				best = math.max(best, rarity.Order)
-				local card = Ui.new("Frame", {
-					LayoutOrder = i,
-					Size = UDim2.fromOffset(160, 200),
-					BackgroundColor3 = T.Panel,
-					Parent = row,
-				}, { Ui.corner(14) })
-				local stroke = Ui.stroke(eggColor, 3)
-				stroke.Parent = card
-				local scale = Ui.new("UIScale", { Scale = 0, Parent = card })
-				TweenService:Create(scale, TweenInfo.new(0.3, Enum.EasingStyle.Back), { Scale = 1 }):Play()
-
-				-- 1) the egg wobbles harder and harder...
-				local eggHolder, shake = eggViewport(card, eggColor, 120)
-				eggHolder.AnchorPoint = Vector2.new(0.5, 0)
-				eggHolder.Position = UDim2.new(0.5, 0, 0, 20)
-				task.spawn(function()
-					local start = os.clock()
-					local duration = 0.9 + (i - 1) * 0.3
-					local nextTick = 0
-					while os.clock() - start < duration and token == myToken do
-						local p = (os.clock() - start) / duration
-						shake(p * p, os.clock())
-						if os.clock() >= nextTick then
-							-- rattles faster and higher as the egg is about to crack
-							Sound.Play("EggShake", Sound.Pitch("EggShake", 0.9 + p * 0.6), 0.6 + p * 0.6)
-							nextTick = os.clock() + 0.22 - p * 0.14
-						end
-						task.wait()
-					end
-					if token ~= myToken then
-						return
-					end
-					-- 2) ...flash...
-					eggHolder:Destroy()
-					local flash = Ui.new("Frame", {
-						Size = UDim2.fromScale(1, 1),
-						BackgroundColor3 = Color3.new(1, 1, 1),
-						ZIndex = 5,
-						Parent = card,
-					}, { Ui.corner(14) })
-					TweenService:Create(flash, TweenInfo.new(0.45), { BackgroundTransparency = 1 }):Play()
-					Debris(flash, 0.5)
-					-- 3) ...and the creature appears
-					Sound.Play("Break", Sound.Pitch("Break", 1.3), 0.7)
-					Sound.Reveal(rarity.Order + (if result.Variant ~= "Normal" then 2 else 0))
-					stroke.Color = rarity.Color
-					local icon = creatureIcon(card, def, result.Variant, 104)
-					icon.AnchorPoint = Vector2.new(0.5, 0)
-					icon.Position = UDim2.new(0.5, 0, 0, 10)
-					local iconScale = Ui.new("UIScale", { Scale = 0.3, Parent = icon })
-					TweenService:Create(iconScale, TweenInfo.new(0.4, Enum.EasingStyle.Back), { Scale = 1 }):Play()
-					Ui.text({
-						Text = Creatures.DisplayName(def.Id, result.Variant),
-						Position = UDim2.fromOffset(6, 120),
-						Size = UDim2.new(1, -12, 0, 26),
-						TextColor3 = rarity.Color,
-						Parent = card,
-					})
-					Ui.text({
-						Text = def.Rarity,
-						Position = UDim2.fromOffset(6, 148),
-						Size = UDim2.new(1, -12, 0, 20),
-						TextColor3 = T.SubText,
-						Parent = card,
-					})
-					Ui.text({
-						Text = "Power " .. Format.Number(Creatures.GetPower(def.Id, result.Variant)),
-						Position = UDim2.fromOffset(6, 170),
-						Size = UDim2.new(1, -12, 0, 20),
-						Parent = card,
-					})
-				end)
-			end
-		end
-		if best >= Creatures.LuckyRarityOrder then
-			title.Text = "WOW! " .. title.Text
-		end
-		task.delay(4.2, function()
-			if token == myToken then
-				overlay.Visible = false
-			end
-		end)
-	end)
-end
-
 function Panels.Build(screen: Frame)
 	buildMenu(screen)
 	bindInput()
@@ -1054,7 +855,6 @@ function Panels.Build(screen: Frame)
 	buildRebirth(screen)
 	buildBestiary(screen)
 	buildSettings(screen)
-	buildHatchDisplay(screen)
 
 	-- The merchant stall in the hub opens the panel
 	task.spawn(function()
