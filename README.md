@@ -100,7 +100,7 @@ Testing commands (only affect you; everyone is an admin in Studio):
 
 ## Daily rewards & quests
 
-The **🎁 Daily** menu (key **7**) opens by itself when a reward is waiting; a red bubble on the
+The **🎁 Daily** button (top-right, key **7**) opens by itself when a reward is waiting; a red bubble on the
 tile counts rewards ready to claim. Days roll over at midnight UTC.
 
 - **7-day login streak:** Essence → Luck Potion → Essence → Essence Potion → 5 Trophies → Shiny

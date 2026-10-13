@@ -5,6 +5,7 @@ local GuiService = game:GetService("GuiService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage.Shared
@@ -111,7 +112,8 @@ local MENU = {
 	{ Panel = "Rebirth", Label = "Rebirth", Icon = "🌀", Color = Color3.fromRGB(255, 110, 215) },
 	{ Panel = "Bestiary", Label = "Index", Icon = "📖", Color = Color3.fromRGB(90, 215, 120) },
 	{ Panel = "Settings", Label = "Settings", Icon = "⚙️", Color = Color3.fromRGB(150, 150, 190) },
-	{ Panel = "Daily", Label = "Daily", Icon = "🎁", Color = Color3.fromRGB(255, 196, 64) },
+	-- Corner = sits on its own in the top-right instead of in the left menu
+	{ Panel = "Daily", Label = "Daily", Icon = "🎁", Color = Color3.fromRGB(255, 196, 64), Corner = true },
 }
 Panels.MenuButtons = {} :: { TextButton }
 
@@ -132,6 +134,20 @@ local function buildMenu(root: Frame)
 		SortOrder = Enum.SortOrder.LayoutOrder,
 		Parent = menu,
 	})
+	-- Top-right corner button(s), e.g. Daily
+	local corner = Ui.new("Frame", {
+		Name = "CornerButtons",
+		AnchorPoint = Vector2.new(1, 0),
+		BackgroundTransparency = 1,
+		Parent = root,
+	})
+	local cornerTiles: { TextButton } = {}
+	local gridCount = 0
+	for _, entry in MENU do
+		if not entry.Corner then
+			gridCount += 1
+		end
+	end
 	local hints: { TextLabel } = {}
 	for i, entry in MENU do
 		local tile = Ui.button({
@@ -141,10 +157,14 @@ local function buildMenu(root: Frame)
 			Variant = "Secondary",
 			BackgroundColor3 = T.Glass,
 			BackgroundTransparency = 0.18,
-			Parent = menu,
+			Parent = if entry.Corner then corner else menu,
 		}, function()
 			Ui.toggle(entry.Panel)
 		end)
+		if entry.Corner then
+			tile.Size = UDim2.fromScale(1, 1)
+			table.insert(cornerTiles, tile)
+		end
 		local pad = tile:FindFirstChildOfClass("UIPadding")
 		if pad then
 			pad:Destroy()
@@ -224,11 +244,33 @@ local function buildMenu(root: Frame)
 				MaxTextSize = 13,
 				Parent = bubble,
 			})
+			-- gentle pulse while something is waiting, so it catches the eye
+			local pulseScale = Ui.new("UIScale", { Parent = tile:FindFirstChild("Chip") })
+			local pulse = TweenService:Create(
+				pulseScale,
+				TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+				{ Scale = 1.12 }
+			)
+			local pulsing = false
+			local function setPulse(on: boolean)
+				if on == pulsing then
+					return
+				end
+				pulsing = on
+				if on then
+					pulse:Play()
+				else
+					pulse:Cancel()
+					pulseScale.Scale = 1
+				end
+			end
 			State.Changed:Connect(function(key)
 				local d = State.Data
 				if key == "Data" and d and d.Daily then
-					bubble.Visible = d.Daily.ReadyCount > 0
+					local ready = d.Daily.ReadyCount > 0
+					bubble.Visible = ready
 					count.Text = tostring(d.Daily.ReadyCount)
+					setPulse(ready)
 				end
 			end)
 		end
@@ -246,12 +288,12 @@ local function buildMenu(root: Frame)
 	})
 	local function arrange()
 		local c = Layout.Compact
-		-- Phones: 4 per row; everything else: 2 per row. Touch devices keep it in the top-left (clear of the
+		-- Phones: 3x2 block; everything else: 2x3. Touch devices keep it in the top-left (clear of the
 		-- thumbstick); PC/console keep it left-centre (clear of the chat window).
 		local tileSize = if c then 54 else 70
-		local cols = if c then 4 else 2
+		local cols = if c then 3 else 2
 		grid.CellSize = UDim2.fromOffset(tileSize, tileSize)
-		local rows = math.ceil(#MENU / cols)
+		local rows = math.ceil(gridCount / cols)
 		local size = UDim2.fromOffset(cols * tileSize + (cols - 1) * 8, rows * tileSize + (rows - 1) * 8)
 		menu.Size = size
 		holder.Size = size
@@ -262,6 +304,9 @@ local function buildMenu(root: Frame)
 			(hint.Parent :: GuiObject).Visible = not Layout.Touch and not Layout.Gamepad
 		end
 		padHint.Visible = Layout.Gamepad
+		-- Corner buttons: top-right. On PC/console they sit left of the player list.
+		corner.Size = UDim2.fromOffset(tileSize, tileSize)
+		corner.Position = UDim2.new(1, if Layout.Touch or c then -10 else -224, 0, 8)
 		-- Gamepad: d-pad moves through the menu in order
 		for i, button in Panels.MenuButtons do
 			button.NextSelectionDown = Panels.MenuButtons[i + cols]
