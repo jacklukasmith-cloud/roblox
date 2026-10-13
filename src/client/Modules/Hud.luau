@@ -9,6 +9,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Lighting = game:GetService("Lighting")
 local TweenService = game:GetService("TweenService")
+local GuiService = game:GetService("GuiService")
 
 local Shared = ReplicatedStorage.Shared
 local Format = require(Shared.Format)
@@ -325,6 +326,17 @@ function Hud.Build(root: Frame)
 
 	local tint = Ui.new("ColorCorrectionEffect", { Name = "SurgeTint", Parent = Lighting })
 
+	-- Height of Roblox's top bar and the free strip in its middle (empty on mobile)
+	local function topbarSpace(): (number, number, number)
+		local ok, rect = pcall(function()
+			return GuiService.TopbarInset
+		end)
+		if ok and typeof(rect) == "Rect" and rect.Height > 0 then
+			return rect.Height, rect.Min.X, rect.Max.X
+		end
+		return 0, 0, 0
+	end
+
 	-- Responsive arrangement ------------------------------------------------------------
 	local function arrange()
 		local c = Layout.Compact
@@ -337,8 +349,19 @@ function Hud.Build(root: Frame)
 		div1.Visible, div2.Visible = true, true
 		multLabel.Visible = not c
 		bottom.Position = UDim2.new(0.5, 0, 1, if c then -6 else -14)
+		local bannerW, bannerH = if c then 240 else 300, if c then 26 else 30
+		banner.Size = UDim2.fromOffset(bannerW, bannerH)
 		top.Position = UDim2.new(0.5, 0, 0, if c then 2 else 4)
-		banner.Size = UDim2.fromOffset(if c then 240 else 300, if c then 26 else 30)
+		-- Touch devices: tuck the banner up into the empty middle of Roblox's top bar
+		if Layout.Touch or c then
+			local barH, freeMin, freeMax = topbarSpace()
+			local scale = Layout.Scale
+			local screenW = Layout.Size.X * scale
+			local half = bannerW * scale / 2
+			if barH >= bannerH * scale and freeMin <= screenW / 2 - half and freeMax >= screenW / 2 + half then
+				top.Position = UDim2.new(0.5, 0, 0, -barH / scale + (barH / scale - bannerH) / 2)
+			end
+		end
 		weatherText.Visible = not c -- phones: keep the top of the screen clear
 		weatherText.Size = UDim2.fromOffset(420, 14)
 		topList.Size = UDim2.fromOffset(if c then 200 else 240, 20)
@@ -347,6 +370,9 @@ function Hud.Build(root: Frame)
 		setExpanded(not c) -- phones start collapsed; tap the header to open
 	end
 	Layout.Changed:Connect(arrange)
+	pcall(function()
+		GuiService:GetPropertyChangedSignal("TopbarInset"):Connect(arrange)
+	end)
 	arrange()
 
 	-- Updaters --------------------------------------------------------------------------
