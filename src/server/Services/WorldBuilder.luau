@@ -454,62 +454,155 @@ local function makeEggStand(parent: Instance, eggId: string, position: Vector3):
 	visual.PrimaryPart = eggPart
 	visual.Parent = stand
 
-	-- Billboard: name, price and every possible creature with its odds, shown in 3D
+	-- Billboard: name, price and every possible creature with its odds. Sized in studs so it
+	-- sits in the world like a sign (shrinks with distance) instead of covering the screen.
 	local columns = 3
 	local rows = math.ceil(#egg.Drops / columns)
-	local gui = billboard(eggPart, UDim2.fromOffset(270, 76 + rows * 86), Vector3.new(0, 6 + rows * 1.6, 0), 55)
+	local W, PAD, GAP, HEADER, FOOTER = 10, 0.35, 0.22, 2.2, 0.75
+	local cellSize = (W - PAD * 2 - GAP * (columns - 1)) / columns
+	local gridW = W - PAD * 2
+	local gridH = rows * cellSize + (rows - 1) * GAP
+	local H = PAD + HEADER + GAP + gridH + GAP + FOOTER + PAD
+	local function sx(studs: number): number
+		return studs / W
+	end
+	local function sy(studs: number): number
+		return studs / H
+	end
+	local priceColor = if egg.Currency == "Trophies" then rgb(84, 210, 255) else rgb(96, 232, 190)
+	local priceIcon = if egg.Currency == "Trophies" then "🏆" else "💎"
+
+	local gui = billboard(eggPart, UDim2.fromScale(W, H), Vector3.new(0, 3.3 + 0.9 + H / 2, 0), 70)
 	gui.Name = "OddsGui"
 	local panel = Instance.new("Frame")
 	panel.Size = UDim2.fromScale(1, 1)
-	panel.BackgroundColor3 = rgb(25, 18, 45)
-	panel.BackgroundTransparency = 0.25
+	panel.BackgroundColor3 = rgb(16, 18, 34)
+	panel.BackgroundTransparency = 0.2
+	panel.BorderSizePixel = 0
 	panel.Parent = gui
-	Instance.new("UICorner", panel).CornerRadius = UDim.new(0, 12)
+	Instance.new("UICorner", panel).CornerRadius = UDim.new(0.06, 0)
 	local panelStroke = Instance.new("UIStroke")
-	panelStroke.Color = egg.Color
-	panelStroke.Thickness = 2
+	panelStroke.Color = WHITE
+	panelStroke.Transparency = 0.82
+	panelStroke.Thickness = 1.5
 	panelStroke.Parent = panel
-	label(panel, { Text = egg.Name, Size = UDim2.new(1, 0, 0, 34), TextColor3 = egg.Color })
+	local sheen = Instance.new("UIGradient")
+	sheen.Color = ColorSequence.new(WHITE, rgb(200, 200, 215))
+	sheen.Rotation = 90
+	sheen.Parent = panel
+	-- egg-coloured accent strip across the top
+	local accentBar = Instance.new("Frame")
+	accentBar.AnchorPoint = Vector2.new(0.5, 0)
+	accentBar.Position = UDim2.fromScale(0.5, 0)
+	accentBar.Size = UDim2.fromScale(0.36, sy(0.12))
+	accentBar.BackgroundColor3 = egg.Color
+	accentBar.BorderSizePixel = 0
+	accentBar.Parent = panel
+	Instance.new("UICorner", accentBar).CornerRadius = UDim.new(1, 0)
+
+	-- Header: egg name + price pill
 	label(panel, {
-		Text = `{Format.Number(egg.Cost)} {egg.Currency}`,
-		Position = UDim2.fromOffset(0, 34),
-		Size = UDim2.new(1, 0, 0, 24),
-		TextColor3 = if egg.Currency == "Trophies" then rgb(0, 255, 225) else rgb(255, 230, 120),
+		Text = egg.Name,
+		Font = Enum.Font.GothamBlack,
+		Position = UDim2.fromScale(sx(PAD), sy(PAD)),
+		Size = UDim2.fromScale(sx(gridW), sy(1.1)),
+		TextColor3 = WHITE,
 	})
+	local pill = Instance.new("Frame")
+	pill.AnchorPoint = Vector2.new(0.5, 0)
+	pill.Position = UDim2.fromScale(0.5, sy(PAD + 1.25))
+	pill.Size = UDim2.fromScale(sx(4.4), sy(0.8))
+	pill.BackgroundColor3 = priceColor
+	pill.BackgroundTransparency = 0.8
+	pill.BorderSizePixel = 0
+	pill.Parent = panel
+	Instance.new("UICorner", pill).CornerRadius = UDim.new(1, 0)
+	local pillStroke = Instance.new("UIStroke")
+	pillStroke.Color = priceColor
+	pillStroke.Transparency = 0.35
+	pillStroke.Thickness = 1.5
+	pillStroke.Parent = pill
+	label(pill, {
+		Text = `{priceIcon}  {Format.Number(egg.Cost)}`,
+		Font = Enum.Font.GothamBold,
+		Position = UDim2.fromScale(0.08, 0.14),
+		Size = UDim2.fromScale(0.84, 0.72),
+		TextColor3 = priceColor,
+	})
+
+	-- Odds grid
 	local grid = Instance.new("Frame")
 	grid.BackgroundTransparency = 1
-	grid.Position = UDim2.fromOffset(6, 64)
-	grid.Size = UDim2.new(1, -12, 1, -68)
+	grid.Position = UDim2.fromScale(sx(PAD), sy(PAD + HEADER + GAP))
+	grid.Size = UDim2.fromScale(sx(gridW), sy(gridH))
 	grid.Parent = panel
-	local layout = Instance.new("UIGridLayout")
-	layout.CellSize = UDim2.fromOffset(82, 82)
-	layout.CellPadding = UDim2.fromOffset(4, 4)
-	layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-	layout.SortOrder = Enum.SortOrder.LayoutOrder
-	layout.Parent = grid
+	-- one centred row per line, so a short last row sits in the middle
+	local rowFrames = {}
+	for r = 1, rows do
+		local row = Instance.new("Frame")
+		row.BackgroundTransparency = 1
+		row.Position = UDim2.fromScale(0, (r - 1) * (cellSize + GAP) / gridH)
+		row.Size = UDim2.fromScale(1, cellSize / gridH)
+		row.Parent = grid
+		local rowLayout = Instance.new("UIListLayout")
+		rowLayout.FillDirection = Enum.FillDirection.Horizontal
+		rowLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+		rowLayout.Padding = UDim.new(GAP / gridW, 0)
+		rowLayout.SortOrder = Enum.SortOrder.LayoutOrder
+		rowLayout.Parent = row
+		rowFrames[r] = row
+	end
 	local odds = Eggs.GetOdds(egg, 1)
 	for i, drop in egg.Drops do
 		local def = Creatures.Get(drop.Creature) :: Creatures.CreatureDef
 		local rarityColor = Creatures.Rarities[def.Rarity].Color
 		local cell = Instance.new("Frame")
 		cell.LayoutOrder = i
-		cell.BackgroundColor3 = rarityColor:Lerp(BLACK, 0.6)
-		cell.BackgroundTransparency = 0.2
-		cell.Parent = grid
-		Instance.new("UICorner", cell).CornerRadius = UDim.new(0, 10)
+		cell.Size = UDim2.fromScale(cellSize / gridW, 1)
+		cell.BackgroundColor3 = rgb(34, 38, 66)
+		cell.BackgroundTransparency = 0.25
+		cell.BorderSizePixel = 0
+		cell.Parent = rowFrames[math.ceil(i / columns)]
+		Instance.new("UICorner", cell).CornerRadius = UDim.new(0.14, 0)
 		local cellStroke = Instance.new("UIStroke")
 		cellStroke.Color = rarityColor
+		cellStroke.Transparency = 0.4
 		cellStroke.Thickness = 1.5
 		cellStroke.Parent = cell
-		local viewport = CreatureModels.Viewport(def.Id, "Normal", { Size = UDim2.new(1, 0, 1, -18) })
+		-- soft rarity glow behind the creature
+		local glow = Instance.new("UIGradient")
+		glow.Color = ColorSequence.new(rarityColor:Lerp(BLACK, 0.35), rgb(34, 38, 66))
+		glow.Rotation = 90
+		glow.Parent = cell
+		local viewport = CreatureModels.Viewport(def.Id, "Normal", {
+			Position = UDim2.fromScale(0.06, 0.03),
+			Size = UDim2.fromScale(0.88, 0.62),
+		})
 		viewport.Parent = cell
 		label(cell, {
 			Text = Format.Percent(odds[i]),
-			Position = UDim2.new(0, 0, 1, -20),
-			Size = UDim2.new(1, 0, 0, 18),
+			Font = Enum.Font.GothamBlack,
+			Position = UDim2.fromScale(0.06, 0.64),
+			Size = UDim2.fromScale(0.88, 0.2),
+			TextColor3 = WHITE,
+		})
+		label(cell, {
+			Text = def.Rarity,
+			Font = Enum.Font.GothamBold,
+			Position = UDim2.fromScale(0.1, 0.83),
+			Size = UDim2.fromScale(0.8, 0.13),
 			TextColor3 = rarityColor,
 		})
 	end
+
+	-- Footer hint
+	label(panel, {
+		Text = "Walk up to hatch",
+		Font = Enum.Font.GothamMedium,
+		Position = UDim2.fromScale(sx(PAD), sy(H - PAD - FOOTER * 0.85)),
+		Size = UDim2.fromScale(sx(gridW), sy(FOOTER * 0.7)),
+		TextColor3 = rgb(168, 176, 210),
+	})
 
 	local one = Instance.new("ProximityPrompt")
 	one.Name = "Hatch1"
