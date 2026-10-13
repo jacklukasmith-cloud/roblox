@@ -9,6 +9,10 @@
       "CreatureMeshes": {
         "$path": "assets/creatures",
         "$ignoreUnknownInstances": true
+      },
+      "GameSounds": {
+        "$className": "Folder",
+        "$ignoreUnknownInstances": true
       }
     },
     "ServerScriptService": {

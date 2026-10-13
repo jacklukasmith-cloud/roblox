@@ -5,6 +5,8 @@ local State = {
 	World = nil :: any, -- weather / merchant / house war
 	Surge = nil :: any, -- Mana Surge state
 	PotatoMode = false,
+	MusicMuted = false,
+	SfxMuted = false,
 }
 
 local changed = Instance.new("BindableEvent")

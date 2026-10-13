@@ -10,6 +10,7 @@ local Weather = require(Shared.Weather)
 local Houses = require(Shared.Houses)
 local Ui = require(script.Parent.Ui)
 local State = require(script.Parent.State)
+local Sound = require(script.Parent.Sound)
 
 local Hud = {}
 
@@ -195,7 +196,14 @@ function Hud.Build(screen: ScreenGui)
 		houseHint.Text = if d and d.House then "Break crystals to earn points!" else "Join a House at the hub!"
 	end
 
+	local wasActive = false
 	State.Changed:Connect(function(key)
+		if key == "Surge" and State.Surge then
+			if State.Surge.Active and not wasActive then
+				Sound.Jingle("Surge")
+			end
+			wasActive = State.Surge.Active
+		end
 		if key == "Data" then
 			refreshStats()
 		elseif key == "Surge" then

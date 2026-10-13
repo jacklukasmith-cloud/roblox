@@ -13,6 +13,7 @@ local TweenService = game:GetService("TweenService")
 local Format = require(ReplicatedStorage.Shared.Format)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local State = require(script.Parent.State)
+local Sound = require(script.Parent.Sound)
 
 local Breaking = {}
 
@@ -218,6 +219,9 @@ local function collect(orb: any)
 	orb.Done = true
 	orb.Part:Destroy()
 	local batch = orb.Batch
+	batch.Collected = (batch.Collected or 0) + 1
+	-- Each orb in a burst pings a little higher, like Pet Sim's coin pickups
+	Sound.Play("Orb", 1 + math.min(batch.Collected, 16) * 0.06, 1, 0.03)
 	batch.Remaining -= 1
 	if batch.Remaining == 0 then
 		local r = root()
@@ -280,6 +284,7 @@ function Breaking.Start()
 			return
 		end
 		squish(model)
+		Sound.Play("Hit", 1.3 + math.random() * 0.5, 1, 0.07)
 		if not State.PotatoMode then
 			local jitter = Vector3.new(math.random(-15, 15) / 10, 3 + math.random() * 1.5, math.random(-15, 15) / 10)
 			floatText(main, Format.Number(dealt), Color3.new(1, 1, 1), 5, jitter)
@@ -290,6 +295,8 @@ function Breaking.Start()
 		if typeof(model) ~= "Instance" or not model:IsA("Model") then
 			return
 		end
+		local chest = model:GetAttribute("Breakable") == "Chest"
+		Sound.Play(if chest then "ChestBreak" else "Break", if chest then 0.65 else 0.95 + math.random() * 0.15)
 		spawnOrbs(model, earned, if State.PotatoMode then math.min(count, 3) else count)
 	end)
 

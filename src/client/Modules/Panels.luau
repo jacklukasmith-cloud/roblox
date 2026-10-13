@@ -14,6 +14,7 @@ local Format = require(Shared.Format)
 local Remotes = require(Shared.Remotes)
 local CreatureModels = require(Shared.CreatureModels)
 local Ui = require(script.Parent.Ui)
+local Sound = require(script.Parent.Sound)
 local State = require(script.Parent.State)
 
 local Panels = {}
@@ -698,7 +699,7 @@ end
 
 -- Settings panel -------------------------------------------------------------------------
 local function buildSettings(screen: ScreenGui)
-	local _, content = Ui.panel(screen, "Settings", "Settings", UDim2.fromScale(0.4, 0.4))
+	local _, content = Ui.panel(screen, "Settings", "Settings", UDim2.fromScale(0.4, 0.55))
 	Ui.new("UIListLayout", { Padding = UDim.new(0, 10), SortOrder = Enum.SortOrder.LayoutOrder, Parent = content })
 	local potato
 	potato = Ui.button({
@@ -716,6 +717,28 @@ local function buildSettings(screen: ScreenGui)
 				inst.Enabled = not State.PotatoMode
 			end
 		end
+	end)
+	local music
+	music = Ui.button({
+		LayoutOrder = 3,
+		Size = UDim2.new(1, 0, 0, 44),
+		Text = "Music: ON",
+		BackgroundColor3 = T.Card,
+		Parent = content,
+	}, function()
+		State.Set("MusicMuted", not State.MusicMuted)
+		music.Text = "Music: " .. (if State.MusicMuted then "OFF" else "ON")
+	end)
+	local sfx
+	sfx = Ui.button({
+		LayoutOrder = 4,
+		Size = UDim2.new(1, 0, 0, 44),
+		Text = "Sound Effects: ON",
+		BackgroundColor3 = T.Card,
+		Parent = content,
+	}, function()
+		State.Set("SfxMuted", not State.SfxMuted)
+		sfx.Text = "Sound Effects: " .. (if State.SfxMuted then "OFF" else "ON")
 	end)
 	local auto
 	auto = Ui.button({
@@ -804,9 +827,15 @@ local function buildHatchDisplay(screen: ScreenGui)
 				task.spawn(function()
 					local start = os.clock()
 					local duration = 0.9 + (i - 1) * 0.3
+					local nextTick = 0
 					while os.clock() - start < duration and token == myToken do
 						local p = (os.clock() - start) / duration
 						shake(p * p, os.clock())
+						if os.clock() >= nextTick then
+							-- rattles faster and higher as the egg is about to crack
+							Sound.Play("EggShake", 0.9 + p * 0.6, 0.6 + p * 0.6)
+							nextTick = os.clock() + 0.22 - p * 0.14
+						end
 						task.wait()
 					end
 					if token ~= myToken then
@@ -823,6 +852,8 @@ local function buildHatchDisplay(screen: ScreenGui)
 					TweenService:Create(flash, TweenInfo.new(0.45), { BackgroundTransparency = 1 }):Play()
 					Debris(flash, 0.5)
 					-- 3) ...and the creature appears
+					Sound.Play("Break", 1.3, 0.7)
+					Sound.Reveal(rarity.Order + (if result.Variant ~= "Normal" then 2 else 0))
 					stroke.Color = rarity.Color
 					local icon = creatureIcon(card, def, result.Variant, 104)
 					icon.AnchorPoint = Vector2.new(0.5, 0)

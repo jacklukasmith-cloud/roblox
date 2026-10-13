@@ -7,6 +7,7 @@ compete in server-wide **Mana Surges** and a weekly cross-server **House War**.
 - **[docs/GAME_DESIGN.md](docs/GAME_DESIGN.md)**: every system, the economy numbers and the monetization plan
 - **[docs/MARKET_RESEARCH.md](docs/MARKET_RESEARCH.md)**: what makes the top simulators different, and which ideas we borrowed
 - **[docs/ICONS.md](docs/ICONS.md)**: generated icons for every game pass and product
+- **[docs/SOUNDS.md](docs/SOUNDS.md)**: sound effects, music, and how to swap in your own
 - **[docs/CREATURE_MESHES.md](docs/CREATURE_MESHES.md)**: 3D models (GLB) of all 25 creatures and how to import them
 
 ## Look

@@ -15,6 +15,7 @@ local Panels = require(Modules.Panels)
 local Followers = require(Modules.Followers)
 local Ambient = require(Modules.Ambient)
 local Breaking = require(Modules.Breaking)
+local Sound = require(Modules.Sound)
 
 local player = Players.LocalPlayer
 
@@ -38,6 +39,7 @@ Panels.Build(screen)
 Followers.Start()
 Ambient.Start()
 Breaking.Start()
+Sound.Start()
 
 -- Networking ------------------------------------------------------------------------------
 Remotes.Event("DataChanged").OnClientEvent:Connect(function(snapshot)
@@ -88,10 +90,24 @@ local function refreshGates()
 end
 
 local lastZones = -1
+local lastRebirths = -1
 State.Changed:Connect(function(key)
-	if key == "Data" and State.Data and State.Data.ZonesUnlocked ~= lastZones then
-		lastZones = State.Data.ZonesUnlocked
+	local d = State.Data
+	if key ~= "Data" or not d then
+		return
+	end
+	if d.ZonesUnlocked ~= lastZones then
+		if lastZones ~= -1 and d.ZonesUnlocked > lastZones then
+			Sound.Jingle("Unlock")
+		end
+		lastZones = d.ZonesUnlocked
 		refreshGates()
+	end
+	if d.Rebirths ~= lastRebirths then
+		if lastRebirths ~= -1 and d.Rebirths > lastRebirths then
+			Sound.Jingle("Rebirth")
+		end
+		lastRebirths = d.Rebirths
 	end
 end)
 workspace.ChildAdded:Connect(function(child)

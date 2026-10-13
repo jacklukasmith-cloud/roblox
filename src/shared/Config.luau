@@ -199,6 +199,27 @@ Config.DevProducts = {
 	},
 }
 
+-- Sounds & music ------------------------------------------------------------------
+-- Every sound has a built-in Roblox fallback, so the game is never silent. To use your own:
+--   a) paste an audio asset id here, e.g. Hit = "rbxassetid://1234567", or
+--   b) put a Sound named after the key (e.g. "MusicMeadow") anywhere in Workspace or in
+--      ReplicatedStorage.GameSounds - the game picks it up automatically.
+-- Music keys without a track play the built-in "music box" for that realm.
+Config.Sounds = {
+	Hit = "",
+	Break = "",
+	ChestBreak = "",
+	Orb = "",
+	Click = "",
+	EggShake = "",
+	Reveal = "",
+	MusicHub = "",
+	MusicMeadow = "",
+	MusicEmber = "",
+	MusicFrost = "",
+	MusicSky = "",
+}
+
 -- Boost strengths (from potions, merchant items, products) ----------------------
 Config.Boosts = {
 	Luck = 2,

@@ -59,6 +59,25 @@ do
 	)
 end
 
+-- Custom sounds: a Sound in Workspace named after a Config.Sounds key (e.g. "MusicMeadow")
+-- is moved into ReplicatedStorage.GameSounds so every client uses it.
+do
+	local folder = ReplicatedStorage:FindFirstChild("GameSounds")
+	if not folder then
+		folder = Instance.new("Folder")
+		folder.Name = "GameSounds"
+		folder.Parent = ReplicatedStorage
+	end
+	for _, obj in workspace:GetDescendants() do
+		if obj:IsA("Sound") and Config.Sounds[obj.Name] ~= nil and not folder:FindFirstChild(obj.Name) then
+			obj.Parent = folder
+		end
+	end
+	if #folder:GetChildren() > 0 then
+		print(`[Mythic Tamers] Using {#folder:GetChildren()} custom sound(s)`)
+	end
+end
+
 -- World ----------------------------------------------------------------------------
 local world = WorldBuilder.Build()
 

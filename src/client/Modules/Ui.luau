@@ -2,6 +2,8 @@
 
 local TweenService = game:GetService("TweenService")
 
+local Sound = require(script.Parent.Sound)
+
 local Ui = {}
 
 local rgb = Color3.fromRGB
@@ -94,6 +96,7 @@ function Ui.button(props: { [string]: any }, onClick: () -> ()): TextButton
 	button.MouseButton1Click:Connect(function()
 		scale.Scale = 0.92
 		TweenService:Create(scale, TweenInfo.new(0.15, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		Sound.Play("Click", 1.1)
 		onClick()
 	end)
 	return button
