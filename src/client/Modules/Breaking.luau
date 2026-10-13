@@ -284,7 +284,7 @@ function Breaking.Start()
 			return
 		end
 		squish(model)
-		Sound.Play("Hit", 1.3 + math.random() * 0.5, 1, 0.07)
+		Sound.Play("Hit", Sound.Pitch("Hit", 1.3 + math.random() * 0.5), 1, 0.07)
 		if not State.PotatoMode then
 			local jitter = Vector3.new(math.random(-15, 15) / 10, 3 + math.random() * 1.5, math.random(-15, 15) / 10)
 			floatText(main, Format.Number(dealt), Color3.new(1, 1, 1), 5, jitter)
@@ -296,7 +296,8 @@ function Breaking.Start()
 			return
 		end
 		local chest = model:GetAttribute("Breakable") == "Chest"
-		Sound.Play(if chest then "ChestBreak" else "Break", if chest then 0.65 else 0.95 + math.random() * 0.15)
+		local key = if chest then "ChestBreak" else "Break"
+		Sound.Play(key, Sound.Pitch(key, if chest then 0.65 else 0.95 + math.random() * 0.15))
 		spawnOrbs(model, earned, if State.PotatoMode then math.min(count, 3) else count)
 	end)
 

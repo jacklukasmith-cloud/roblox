@@ -111,6 +111,15 @@ function Sound.Play(key: string, pitch: number?, volumeScale: number?, minGap: n
 	end)
 end
 
+-- Built-in sounds get re-pitched for variety; your own sounds keep their natural pitch
+-- (with just a touch of variation so repeats don't sound robotic).
+function Sound.Pitch(key: string, builtInPitch: number): number
+	if customSound(key) or configId(key) then
+		return 0.95 + math.random() * 0.1
+	end
+	return builtInPitch
+end
+
 -- Semitones -> playback speed
 local function note(semitones: number): number
 	return 2 ^ (semitones / 12)
@@ -142,7 +151,18 @@ local JINGLES: { [string]: { { number } } } = {
 	},
 }
 
+local function hasCustom(key: string): boolean
+	return customSound(key) ~= nil or configId(key) ~= nil
+end
+
+local FANFARE_PITCH = { Surge = 1, Unlock = 1.1, Rebirth = 0.9 }
+
 function Sound.Jingle(name: string)
+	-- A real "Fanfare" sound replaces the built-in ping melodies
+	if FANFARE_PITCH[name] and hasCustom("Fanfare") then
+		Sound.Play("Fanfare", FANFARE_PITCH[name])
+		return
+	end
 	local jingle = JINGLES[name]
 	if not jingle then
 		return
@@ -156,8 +176,17 @@ end
 
 -- Hatch reveal: a custom "Reveal" sound if provided, plus a jingle that grows with rarity
 function Sound.Reveal(rarityOrder: number)
+	local rare = rarityOrder >= 5
+	if rare and hasCustom("RareReveal") then
+		Sound.Play("RareReveal")
+		return
+	end
+	if hasCustom("Reveal") then
+		Sound.Play("Reveal", if rare then 1.1 else 1)
+		return
+	end
 	Sound.Play("Reveal", 1, 0.8)
-	Sound.Jingle(if rarityOrder >= 5 then "Legendary" elseif rarityOrder >= 3 then "Rare" else "Common")
+	Sound.Jingle(if rare then "Legendary" elseif rarityOrder >= 3 then "Rare" else "Common")
 end
 
 -- Music ------------------------------------------------------------------------------------
@@ -274,18 +303,29 @@ local function musicBoxStep(area: number, beat: number, degree: number): number
 	return degree
 end
 
+-- The realm's own track, else the hub track, else any track at all
+local function musicKeyFor(area: number): string
+	local preferred = { MUSIC_KEYS[area], "MusicHub", "MusicMeadow", "MusicEmber", "MusicFrost", "MusicSky" }
+	for _, key in preferred do
+		if customSound(key) or configId(key) then
+			return key
+		end
+	end
+	return MUSIC_KEYS[area]
+end
+
 function Sound.Start()
 	task.spawn(function()
 		local beat, degree = 0, 5
 		while true do
 			local area = currentArea()
-			local key = MUSIC_KEYS[area]
+			local key = musicKeyFor(area)
 			local hasTrack = not State.MusicMuted and playTrack(key)
 			if State.MusicMuted then
 				stopTrack()
 			end
 			local box = MUSIC_BOX[area] or MUSIC_BOX[0]
-			if not hasTrack and not State.MusicMuted then
+			if not hasTrack and not State.MusicMuted and Config.MusicBox then
 				degree = musicBoxStep(area, beat, degree)
 				beat += 1
 			end

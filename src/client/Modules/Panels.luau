@@ -833,7 +833,7 @@ local function buildHatchDisplay(screen: ScreenGui)
 						shake(p * p, os.clock())
 						if os.clock() >= nextTick then
 							-- rattles faster and higher as the egg is about to crack
-							Sound.Play("EggShake", 0.9 + p * 0.6, 0.6 + p * 0.6)
+							Sound.Play("EggShake", Sound.Pitch("EggShake", 0.9 + p * 0.6), 0.6 + p * 0.6)
 							nextTick = os.clock() + 0.22 - p * 0.14
 						end
 						task.wait()
@@ -852,7 +852,7 @@ local function buildHatchDisplay(screen: ScreenGui)
 					TweenService:Create(flash, TweenInfo.new(0.45), { BackgroundTransparency = 1 }):Play()
 					Debris(flash, 0.5)
 					-- 3) ...and the creature appears
-					Sound.Play("Break", 1.3, 0.7)
+					Sound.Play("Break", Sound.Pitch("Break", 1.3), 0.7)
 					Sound.Reveal(rarity.Order + (if result.Variant ~= "Normal" then 2 else 0))
 					stroke.Color = rarity.Color
 					local icon = creatureIcon(card, def, result.Variant, 104)

@@ -204,7 +204,8 @@ Config.DevProducts = {
 --   a) paste an audio asset id here, e.g. Hit = "rbxassetid://1234567", or
 --   b) put a Sound named after the key (e.g. "MusicMeadow") anywhere in Workspace or in
 --      ReplicatedStorage.GameSounds - the game picks it up automatically.
--- Music keys without a track play the built-in "music box" for that realm.
+-- A realm without its own track uses MusicHub (or any other track you added).
+Config.MusicBox = false -- true = play the generated music box where there's no track at all
 Config.Sounds = {
 	Hit = "",
 	Break = "",
@@ -213,6 +214,8 @@ Config.Sounds = {
 	Click = "",
 	EggShake = "",
 	Reveal = "",
+	RareReveal = "",
+	Fanfare = "",
 	MusicHub = "",
 	MusicMeadow = "",
 	MusicEmber = "",
