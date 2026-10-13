@@ -17,6 +17,7 @@ local Followers = require(Modules.Followers)
 local Ambient = require(Modules.Ambient)
 local Breaking = require(Modules.Breaking)
 local Sound = require(Modules.Sound)
+local EggBoards = require(Modules.EggBoards)
 
 local player = Players.LocalPlayer
 
@@ -55,6 +56,7 @@ start("Creatures", Followers.Start)
 start("Effects", Ambient.Start)
 start("Breaking", Breaking.Start)
 start("Sound", Sound.Start)
+start("Egg previews", EggBoards.Start)
 start("HUD", function()
 	Hud.Build(root)
 end)

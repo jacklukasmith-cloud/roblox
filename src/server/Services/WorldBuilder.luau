@@ -574,24 +574,36 @@ local function makeEggStand(parent: Instance, eggId: string, position: Vector3):
 		glow.Color = ColorSequence.new(rarityColor:Lerp(BLACK, 0.35), rgb(34, 38, 66))
 		glow.Rotation = 90
 		glow.Parent = cell
-		local viewport = CreatureModels.Viewport(def.Id, "Normal", {
-			Position = UDim2.fromScale(0.06, 0.03),
-			Size = UDim2.fromScale(0.88, 0.62),
-		})
-		viewport.Parent = cell
+		-- 3D preview slot: filled in by each client (cameras made on the server don't replicate,
+		-- so a server-built ViewportFrame would show up empty)
+		local preview = Instance.new("Frame")
+		preview.Name = "Preview"
+		preview.BackgroundTransparency = 1
+		preview.Position = UDim2.fromScale(0.06, 0.03)
+		preview.Size = UDim2.fromScale(0.88, 0.54)
+		preview:SetAttribute("CreatureId", def.Id)
+		preview.Parent = cell
 		label(cell, {
-			Text = Format.Percent(odds[i]),
-			Font = Enum.Font.GothamBlack,
-			Position = UDim2.fromScale(0.06, 0.64),
-			Size = UDim2.fromScale(0.88, 0.2),
+			Name = "CreatureName",
+			Text = def.Name,
+			Font = Enum.Font.GothamBold,
+			Position = UDim2.fromScale(0.06, 0.57),
+			Size = UDim2.fromScale(0.88, 0.13),
 			TextColor3 = WHITE,
 		})
 		label(cell, {
-			Text = def.Rarity,
-			Font = Enum.Font.GothamBold,
-			Position = UDim2.fromScale(0.1, 0.83),
-			Size = UDim2.fromScale(0.8, 0.13),
+			Text = Format.Percent(odds[i]),
+			Font = Enum.Font.GothamBlack,
+			Position = UDim2.fromScale(0.1, 0.7),
+			Size = UDim2.fromScale(0.8, 0.15),
 			TextColor3 = rarityColor,
+		})
+		label(cell, {
+			Text = def.Rarity,
+			Font = Enum.Font.GothamMedium,
+			Position = UDim2.fromScale(0.15, 0.85),
+			Size = UDim2.fromScale(0.7, 0.11),
+			TextColor3 = rarityColor:Lerp(WHITE, 0.25),
 		})
 	end
 
