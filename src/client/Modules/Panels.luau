@@ -210,35 +210,71 @@ local function buildMenu(root: Frame)
 			Name = entry.Panel .. "Button",
 			Text = "",
 			LayoutOrder = i,
-			BackgroundColor3 = entry.Color,
+			Variant = "Secondary",
+			BackgroundColor3 = T.Glass,
+			BackgroundTransparency = 0.18,
 			Parent = menu,
 		}, function()
 			Ui.toggle(entry.Panel)
 		end)
+		local pad = tile:FindFirstChildOfClass("UIPadding")
+		if pad then
+			pad:Destroy()
+		end
+		-- coloured icon chip + label + accent underline
+		local chip = Ui.new("Frame", {
+			Name = "Chip",
+			AnchorPoint = Vector2.new(0.5, 0),
+			Position = UDim2.fromScale(0.5, 0.1),
+			Size = UDim2.fromScale(0.56, 0.5),
+			BackgroundColor3 = entry.Color,
+			BackgroundTransparency = 0.72,
+			Parent = tile,
+		}, { Ui.corner(8), Ui.stroke(entry.Color, 1, 0.45) })
+		Ui.new("UIAspectRatioConstraint", { AspectRatio = 1, Parent = chip })
 		Ui.text({
 			Text = entry.Icon,
-			Size = UDim2.fromScale(1, 0.6),
-			MaxTextSize = 40,
-			Parent = tile,
+			Size = UDim2.fromScale(0.8, 0.8),
+			Position = UDim2.fromScale(0.1, 0.1),
+			MaxTextSize = 30,
+			Parent = chip,
 		})
 		Ui.text({
 			Text = entry.Label,
-			Size = UDim2.fromScale(1.15, 0.32),
-			Position = UDim2.fromScale(-0.075, 0.66),
-			MaxTextSize = 18,
+			Size = UDim2.fromScale(0.92, 0.2),
+			Position = UDim2.fromScale(0.04, 0.66),
+			Font = T.Font,
+			MaxTextSize = 14,
 			Parent = tile,
 		})
+		Ui.new("Frame", {
+			Name = "Accent",
+			AnchorPoint = Vector2.new(0.5, 1),
+			Position = UDim2.new(0.5, 0, 1, -3),
+			Size = UDim2.new(0.4, 0, 0, 3),
+			BackgroundColor3 = entry.Color,
+			BorderSizePixel = 0,
+			Parent = tile,
+		}, { Ui.round() })
 		-- Keyboard shortcut badge (PC only)
 		local badge = Ui.new("Frame", {
-			Size = UDim2.fromOffset(20, 20),
-			Position = UDim2.fromOffset(-14, -12),
-			BackgroundColor3 = T.Background,
+			Size = UDim2.fromOffset(18, 18),
+			Position = UDim2.fromOffset(4, 4),
+			BackgroundColor3 = T.GlassLight,
+			BackgroundTransparency = 0.2,
 			ZIndex = 3,
 			Parent = tile,
-		}, { Ui.round(), Ui.stroke(T.Outline, 1.5) })
+		}, { Ui.corner(5), Ui.stroke() })
 		table.insert(
 			hints,
-			Ui.text({ Text = tostring(i), Size = UDim2.fromScale(1, 1), ZIndex = 4, MaxTextSize = 14, Parent = badge })
+			Ui.text({
+				Text = tostring(i),
+				Size = UDim2.fromScale(1, 1),
+				ZIndex = 4,
+				TextColor3 = T.SubText,
+				MaxTextSize = 12,
+				Parent = badge,
+			})
 		)
 		table.insert(Panels.MenuButtons, tile)
 	end
@@ -256,7 +292,7 @@ local function buildMenu(root: Frame)
 		local c = Layout.Compact
 		-- Phones: 3x2 block; everything else: 2x3. Touch devices keep it in the top-left (clear of the
 		-- thumbstick); PC/console keep it left-centre (clear of the chat window).
-		local tileSize = if c then 52 else 66
+		local tileSize = if c then 54 else 70
 		local cols = if c then 3 else 2
 		grid.CellSize = UDim2.fromOffset(tileSize, tileSize)
 		local rows = math.ceil(#MENU / cols)

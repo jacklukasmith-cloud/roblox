@@ -43,12 +43,24 @@ if game:GetService("RunService"):IsStudio() then
 		Ui.toast(`[ERROR] {where}: {message}`, Color3.fromRGB(255, 90, 90))
 	end)
 end
-Hud.Build(root)
-Panels.Build(root)
-Followers.Start()
-Ambient.Start()
-Breaking.Start()
-Sound.Start()
+-- Start each part on its own, so one failing part can't take the rest of the game down with it
+local function start(name: string, fn: () -> ())
+	local ok, err = pcall(fn)
+	if not ok then
+		warn(`[Mythic Tamers] {name} failed to start: {err}`)
+		Ui.toast(`[ERROR] {name}: {err}`, Color3.fromRGB(255, 90, 90))
+	end
+end
+start("Creatures", Followers.Start)
+start("Effects", Ambient.Start)
+start("Breaking", Breaking.Start)
+start("Sound", Sound.Start)
+start("HUD", function()
+	Hud.Build(root)
+end)
+start("Menus", function()
+	Panels.Build(root)
+end)
 
 -- Networking ------------------------------------------------------------------------------
 Remotes.Event("DataChanged").OnClientEvent:Connect(function(snapshot)

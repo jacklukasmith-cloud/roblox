@@ -12,22 +12,38 @@ local Sound = require(script.Parent.Sound)
 local Ui = {}
 
 local rgb = Color3.fromRGB
+
+-- Builder Sans is Roblox's modern UI font; fall back to Gotham on older clients
+local function pickFont(name: string, fallback: Enum.Font): Enum.Font
+	local ok, font = pcall(function()
+		return (Enum.Font :: any)[name]
+	end)
+	return if ok and font then font else fallback
+end
+
 Ui.Theme = {
-	Background = rgb(24, 17, 42),
-	Panel = rgb(38, 27, 66),
-	PanelLight = rgb(56, 40, 96),
-	Card = rgb(62, 45, 104),
-	Accent = rgb(170, 110, 255),
+	-- surfaces (dark "frosted glass")
+	Glass = rgb(16, 18, 34),
+	GlassLight = rgb(34, 38, 66),
+	Background = rgb(16, 18, 34),
+	Panel = rgb(20, 22, 40),
+	PanelLight = rgb(30, 33, 58),
+	Card = rgb(34, 38, 66),
+	Edge = rgb(255, 255, 255), -- thin highlight edge, used with high transparency
+	-- brand + states
+	Accent = rgb(124, 92, 255),
 	Text = rgb(255, 255, 255),
-	SubText = rgb(205, 195, 235),
-	Good = rgb(95, 220, 125),
-	Bad = rgb(255, 95, 105),
-	Gold = rgb(255, 205, 70),
-	Essence = rgb(120, 255, 200),
-	Trophy = rgb(0, 235, 215),
-	Power = rgb(255, 150, 110),
-	Outline = rgb(14, 8, 28),
-	Font = Enum.Font.FredokaOne,
+	SubText = rgb(168, 176, 210),
+	Good = rgb(46, 196, 118),
+	Bad = rgb(232, 70, 92),
+	Gold = rgb(255, 196, 64),
+	Essence = rgb(96, 232, 190),
+	Trophy = rgb(84, 210, 255),
+	Power = rgb(255, 140, 100),
+	Outline = rgb(6, 6, 16),
+	Font = pickFont("BuilderSansBold", Enum.Font.GothamBold),
+	FontHeavy = pickFont("BuilderSansExtraBold", Enum.Font.GothamBlack),
+	FontRegular = pickFont("BuilderSansMedium", Enum.Font.GothamMedium),
 }
 local T = Ui.Theme
 
@@ -56,12 +72,33 @@ function Ui.round(): UICorner
 	return Ui.new("UICorner", { CornerRadius = UDim.new(1, 0) })
 end
 
-function Ui.stroke(color: Color3?, thickness: number?): UIStroke
+function Ui.stroke(color: Color3?, thickness: number?, transparency: number?): UIStroke
 	return Ui.new("UIStroke", {
-		Color = color or T.Outline,
-		Thickness = thickness or 2,
+		Color = color or T.Edge,
+		Thickness = thickness or 1.2,
+		Transparency = transparency or (if color then 0 else 0.86),
 		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 	})
+end
+
+-- A frosted-glass surface: dark, slightly see-through, with a thin light edge
+function Ui.glass(props: { [string]: any }, children: { Instance }?): Frame
+	local defaults: { [string]: any } = {
+		BackgroundColor3 = T.Glass,
+		BackgroundTransparency = 0.18,
+		BorderSizePixel = 0,
+	}
+	for k, v in props do
+		defaults[k] = v
+	end
+	local frame = Ui.new("Frame", defaults, children)
+	Ui.stroke().Parent = frame
+	Ui.new("UIGradient", {
+		Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(205, 205, 220)),
+		Rotation = 90,
+		Parent = frame,
+	})
+	return frame
 end
 
 function Ui.padding(px: number): UIPadding
@@ -78,72 +115,87 @@ function Ui.gloss(strength: number?): UIGradient
 	})
 end
 
+-- Text label. Extra option (not a Roblox property): MaxTextSize caps the auto-scaled size.
 function Ui.text(props: { [string]: any }): TextLabel
-	local defaults = {
+	local defaults: { [string]: any } = {
 		BackgroundTransparency = 1,
 		Font = T.Font,
 		TextColor3 = T.Text,
 		TextScaled = true,
 		Size = UDim2.new(1, 0, 0, 24),
 	}
+	local maxSize = 32
 	for k, v in props do
-		defaults[k] = v
+		if k == "MaxTextSize" then
+			maxSize = v
+		else
+			defaults[k] = v
+		end
 	end
 	local label = Ui.new("TextLabel", defaults)
-	Ui.new("UIStroke", { Thickness = 1.6, Color = T.Outline, Transparency = 0.15, Parent = label })
-	Ui.new("UITextSizeConstraint", { MaxTextSize = props.MaxTextSize or 34, MinTextSize = 7, Parent = label })
+	-- soft outline keeps text readable over the bright 3D world
+	Ui.new("UIStroke", { Thickness = 1, Color = T.Outline, Transparency = 0.55, Parent = label })
+	Ui.new("UITextSizeConstraint", { MaxTextSize = maxSize, MinTextSize = 7, Parent = label })
 	return label
 end
 
--- A chunky glossy button. onClick runs on mouse, touch and gamepad A.
+-- Buttons. props.Variant = "Primary" (default) | "Secondary" | "Success" | "Danger" | "Gold",
+-- or set BackgroundColor3 directly. onClick runs on mouse, touch and gamepad A.
+local VARIANTS = {
+	Primary = T.Accent,
+	Secondary = T.GlassLight,
+	Success = T.Good,
+	Danger = T.Bad,
+	Gold = T.Gold,
+}
+
 function Ui.button(props: { [string]: any }, onClick: () -> ()): TextButton
-	local defaults = {
-		BackgroundColor3 = T.Accent,
+	local defaults: { [string]: any } = {
+		BackgroundColor3 = VARIANTS[props.Variant or "Primary"] or T.Accent,
 		Font = T.Font,
 		TextColor3 = T.Text,
 		TextScaled = true,
 		AutoButtonColor = false,
 		Selectable = true,
-		Size = UDim2.fromOffset(130, 44),
+		BorderSizePixel = 0,
+		Size = UDim2.fromOffset(130, 42),
 	}
 	for k, v in props do
-		defaults[k] = v
+		if k ~= "Variant" then
+			defaults[k] = v
+		end
 	end
-	local button = Ui.new("TextButton", defaults, { Ui.corner(12), Ui.stroke(T.Outline, 2.5), Ui.gloss(0.3) })
-	Ui.new("UIStroke", {
-		Thickness = 1.5,
-		Color = T.Outline,
-		Transparency = 0.2,
-		ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual,
-		Parent = button,
-	})
-	Ui.new("UITextSizeConstraint", { MaxTextSize = 30, MinTextSize = 8, Parent = button })
+	if defaults.TextColor3 == T.Text and (props.Variant == "Gold") then
+		defaults.TextColor3 = Color3.fromRGB(40, 28, 6)
+	end
+	local button = Ui.new("TextButton", defaults, { Ui.corner(10), Ui.stroke(), Ui.gloss(0.14) })
+	Ui.new("UITextSizeConstraint", { MaxTextSize = 24, MinTextSize = 8, Parent = button })
 	Ui.new("UIPadding", {
-		PaddingTop = UDim.new(0, 6),
-		PaddingBottom = UDim.new(0, 6),
-		PaddingLeft = UDim.new(0, 10),
-		PaddingRight = UDim.new(0, 10),
+		PaddingTop = UDim.new(0, 7),
+		PaddingBottom = UDim.new(0, 7),
+		PaddingLeft = UDim.new(0, 12),
+		PaddingRight = UDim.new(0, 12),
 		Parent = button,
 	})
 	local scale = Ui.new("UIScale", { Parent = button })
 	local function tweenScale(to: number, time: number)
-		TweenService:Create(scale, TweenInfo.new(time, Enum.EasingStyle.Back), { Scale = to }):Play()
+		TweenService:Create(scale, TweenInfo.new(time, Enum.EasingStyle.Quad), { Scale = to }):Play()
 	end
 	button.MouseEnter:Connect(function()
-		tweenScale(1.05, 0.12)
+		tweenScale(1.04, 0.1)
 	end)
 	button.MouseLeave:Connect(function()
-		tweenScale(1, 0.12)
+		tweenScale(1, 0.1)
 	end)
 	button.SelectionGained:Connect(function()
-		tweenScale(1.08, 0.12)
+		tweenScale(1.06, 0.1)
 	end)
 	button.SelectionLost:Connect(function()
-		tweenScale(1, 0.12)
+		tweenScale(1, 0.1)
 	end)
 	button.Activated:Connect(function()
-		scale.Scale = 0.9
-		tweenScale(1, 0.18)
+		scale.Scale = 0.94
+		tweenScale(1, 0.14)
 		Sound.Play("Click", 1.1)
 		onClick()
 	end)
@@ -183,49 +235,66 @@ function Ui.panel(parent: Instance, name: string, title: string, size: UDim2?, i
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.5),
 		BackgroundColor3 = T.Panel,
+		BackgroundTransparency = 0.04,
+		BorderSizePixel = 0,
 		Parent = backdrop,
-	}, { Ui.corner(18), Ui.stroke(T.Outline, 3) })
+	}, { Ui.corner(16), Ui.stroke(nil, 1.4) })
 	Ui.new("UISizeConstraint", { MaxSize = Vector2.new(940, 620), MinSize = Vector2.new(320, 240), Parent = frame })
-	-- Header bar
+	-- Header: icon + title on the left, round close button on the right, hairline divider below
 	local header = Ui.new("Frame", {
 		Name = "Header",
-		Size = UDim2.new(1, 0, 0, 52),
-		BackgroundColor3 = T.Accent,
+		Size = UDim2.new(1, 0, 0, 54),
+		BackgroundTransparency = 1,
 		Parent = frame,
-	}, { Ui.corner(18), Ui.gloss(0.35) })
-	-- square off the header's bottom corners
-	Ui.new("Frame", {
-		Size = UDim2.new(1, 0, 0, 18),
-		Position = UDim2.new(0, 0, 1, -18),
-		BackgroundColor3 = T.Accent,
-		BorderSizePixel = 0,
-		Parent = header,
-	}, { Ui.gloss(0.35) })
+	})
+	if icon then
+		local chip = Ui.new("Frame", {
+			Size = UDim2.fromOffset(34, 34),
+			Position = UDim2.fromOffset(16, 10),
+			BackgroundColor3 = T.Accent,
+			Parent = header,
+		}, { Ui.corner(10), Ui.gloss(0.2) })
+		Ui.text({
+			Text = icon,
+			Size = UDim2.fromScale(0.72, 0.72),
+			Position = UDim2.fromScale(0.14, 0.14),
+			Parent = chip,
+		})
+	end
 	Ui.text({
-		Text = (if icon then icon .. "  " else "") .. title,
-		Size = UDim2.new(1, -90, 0, 40),
-		Position = UDim2.fromOffset(16, 6),
+		Text = title,
+		Font = T.FontHeavy,
+		Size = UDim2.new(1, -140, 0, 30),
+		Position = UDim2.fromOffset(if icon then 60 else 18, 12),
 		TextXAlignment = Enum.TextXAlignment.Left,
-		ZIndex = 2,
+		MaxTextSize = 26,
 		Parent = header,
 	})
 	Ui.button({
 		Name = "Close",
-		Text = "X",
-		Size = UDim2.fromOffset(44, 44),
+		Text = "✕",
+		Variant = "Secondary",
+		Size = UDim2.fromOffset(38, 38),
 		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -6, 0.5, 0),
-		BackgroundColor3 = T.Bad,
-		ZIndex = 3,
+		Position = UDim2.new(1, -10, 0.5, 0),
 		Parent = header,
 	}, function()
 		Ui.toggle(name, false)
 	end)
+	Ui.new("Frame", {
+		Name = "Divider",
+		Size = UDim2.new(1, -32, 0, 1),
+		Position = UDim2.new(0, 16, 1, 0),
+		BackgroundColor3 = T.Edge,
+		BackgroundTransparency = 0.88,
+		BorderSizePixel = 0,
+		Parent = header,
+	})
 	local content = Ui.new("Frame", {
 		Name = "Content",
 		BackgroundTransparency = 1,
-		Position = UDim2.fromOffset(14, 62),
-		Size = UDim2.new(1, -28, 1, -76),
+		Position = UDim2.fromOffset(16, 66),
+		Size = UDim2.new(1, -32, 1, -80),
 		Parent = frame,
 	})
 	local info: PanelInfo = { Backdrop = backdrop, Frame = frame, Size = size }
@@ -355,21 +424,29 @@ function Ui.toast(text: string, color: Color3?)
 		return
 	end
 	toastCount += 1
-	local pill = Ui.new("Frame", {
+	local pill = Ui.glass({
 		Size = UDim2.new(1, 0, 0, 34),
-		BackgroundColor3 = T.Background,
-		BackgroundTransparency = 0.15,
+		BackgroundTransparency = 0.12,
 		LayoutOrder = toastCount, -- newest at the bottom, nearest the currency bar
 		ZIndex = 30,
 		Parent = toastHolder,
-	}, { Ui.round(), Ui.stroke(color or T.Accent, 2) })
+	}, { Ui.round() })
+	Ui.new("Frame", {
+		Size = UDim2.fromOffset(10, 10),
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.new(0, 14, 0.5, 0),
+		BackgroundColor3 = color or T.Accent,
+		ZIndex = 31,
+		Parent = pill,
+	}, { Ui.round() })
 	local label = Ui.text({
 		Text = text,
-		TextColor3 = color or T.Text,
-		Size = UDim2.new(1, -24, 1, -8),
-		Position = UDim2.fromOffset(12, 4),
+		Font = T.FontRegular,
+		TextColor3 = T.Text,
+		Size = UDim2.new(1, -48, 1, -10),
+		Position = UDim2.fromOffset(34, 5),
 		ZIndex = 31,
-		MaxTextSize = 22,
+		MaxTextSize = 20,
 		Parent = pill,
 	})
 	local scale = Ui.new("UIScale", { Scale = 0.6, Parent = pill })

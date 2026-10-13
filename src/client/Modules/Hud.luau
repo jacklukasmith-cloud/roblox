@@ -1,6 +1,9 @@
 --[[
-	Always-on HUD: currency pills (top-left), Mana Surge banner + weather (top-centre),
-	House War card (right side, collapsible). Everything re-arranges for phones via Layout.
+	Always-on HUD (clean "frosted glass" style):
+	  - bottom-centre: one glass currency bar (Essence / Trophies / Power) + boosts above it
+	  - top-centre: Mana Surge banner, weather line, live surge leaderboard
+	  - right: House War card with progress bars (collapsible; collapsed on phones)
+	Everything re-arranges for phones via Layout.
 ]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -20,40 +23,64 @@ local Hud = {}
 
 local T = Ui.Theme
 
--- A rounded "pill" with a coloured icon bubble on the left and a value on the right.
-local function pill(parent: Instance, order: number, icon: string, color: Color3, width: number, height: number)
+-- One segment of the currency bar: small caps label over a big value, with an icon chip
+local function segment(parent: Instance, order: number, icon: string, label: string, color: Color3)
 	local frame = Ui.new("Frame", {
 		LayoutOrder = order,
-		Size = UDim2.fromOffset(width, height),
-		BackgroundColor3 = T.Background,
-		BackgroundTransparency = 0.2,
+		Size = UDim2.fromOffset(170, 48),
+		BackgroundTransparency = 1,
 		Parent = parent,
-	}, { Ui.round(), Ui.stroke(T.Outline, 2.5) })
-	local bubble = Ui.new("Frame", {
-		Size = UDim2.fromOffset(height + 4, height + 4),
-		Position = UDim2.fromOffset(-4, -2),
+	})
+	local chip = Ui.new("Frame", {
+		Size = UDim2.fromOffset(34, 34),
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.new(0, 0, 0.5, 0),
 		BackgroundColor3 = color,
+		BackgroundTransparency = 0.75,
 		Parent = frame,
-	}, { Ui.round(), Ui.stroke(T.Outline, 2.5), Ui.gloss(0.35) })
-	Ui.text({ Text = icon, Size = UDim2.fromScale(0.7, 0.7), Position = UDim2.fromScale(0.15, 0.15), Parent = bubble })
-	local value = Ui.text({
-		Text = "0",
-		TextColor3 = color,
-		Size = UDim2.new(1, -(height + 14), 0.78, 0),
-		Position = UDim2.new(0, height + 8, 0.11, 0),
+	}, { Ui.corner(10) })
+	Ui.text({ Text = icon, Size = UDim2.fromScale(0.7, 0.7), Position = UDim2.fromScale(0.15, 0.15), Parent = chip })
+	local caption = Ui.text({
+		Text = string.upper(label),
+		Font = T.FontRegular,
+		TextColor3 = T.SubText,
+		Size = UDim2.new(1, -44, 0, 14),
+		Position = UDim2.fromOffset(44, 4),
 		TextXAlignment = Enum.TextXAlignment.Left,
+		MaxTextSize = 13,
 		Parent = frame,
 	})
-	return frame, value, bubble
+	local value = Ui.text({
+		Text = "0",
+		Font = T.FontHeavy,
+		TextColor3 = color,
+		Size = UDim2.new(1, -44, 0, 26),
+		Position = UDim2.fromOffset(44, 18),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		MaxTextSize = 26,
+		Parent = frame,
+	})
+	return frame, value, caption
+end
+
+local function divider(parent: Instance, order: number)
+	return Ui.new("Frame", {
+		LayoutOrder = order,
+		Size = UDim2.fromOffset(1, 30),
+		BackgroundColor3 = T.Edge,
+		BackgroundTransparency = 0.85,
+		BorderSizePixel = 0,
+		Parent = parent,
+	})
 end
 
 function Hud.Build(root: Frame)
-	-- Bottom-centre bar: boosts, multipliers and currency (free space on every device) -----
+	-- Bottom-centre: boosts row, multipliers, currency bar ------------------------------
 	local bottom = Ui.new("Frame", {
 		Name = "BottomBar",
 		AnchorPoint = Vector2.new(0.5, 1),
-		Position = UDim2.new(0.5, 0, 1, -10),
-		Size = UDim2.fromOffset(620, 110),
+		Position = UDim2.new(0.5, 0, 1, -12),
+		Size = UDim2.fromOffset(640, 110),
 		BackgroundTransparency = 1,
 		Parent = root,
 	}, {
@@ -64,46 +91,9 @@ function Hud.Build(root: Frame)
 			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),
 	})
-	local currency = Ui.new("Frame", {
-		Name = "Currency",
-		LayoutOrder = 3,
-		Size = UDim2.fromOffset(620, 46),
-		BackgroundTransparency = 1,
-		Parent = bottom,
-	}, {
-		Ui.new("UIListLayout", {
-			FillDirection = Enum.FillDirection.Horizontal,
-			HorizontalAlignment = Enum.HorizontalAlignment.Center,
-			VerticalAlignment = Enum.VerticalAlignment.Center,
-			Padding = UDim.new(0, 14),
-			SortOrder = Enum.SortOrder.LayoutOrder,
-		}),
-	})
-
-	local essencePill, essenceValue = pill(currency, 1, "💎", T.Essence, 250, 46)
-	local plus = Ui.button({
-		Text = "+",
-		Size = UDim2.fromOffset(34, 34),
-		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -6, 0.5, 0),
-		BackgroundColor3 = T.Good,
-		Parent = essencePill,
-	}, function()
-		Ui.toggle("Shop", true) -- Pet Sim style: tap + to buy more
-	end)
-	local trophyPill, trophyValue = pill(currency, 2, "🏆", T.Trophy, 200, 40)
-	local powerPill, powerValue = pill(currency, 3, "💪", T.Power, 200, 40)
-	local multLabel = Ui.text({
-		LayoutOrder = 2,
-		Size = UDim2.fromOffset(400, 18),
-		TextColor3 = T.Gold,
-		Text = "",
-		MaxTextSize = 18,
-		Parent = bottom,
-	})
 	local boostRow = Ui.new("Frame", {
 		LayoutOrder = 1,
-		Size = UDim2.fromOffset(500, 26),
+		Size = UDim2.fromOffset(560, 24),
 		BackgroundTransparency = 1,
 		Parent = bottom,
 	}, {
@@ -114,8 +104,47 @@ function Hud.Build(root: Frame)
 			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),
 	})
+	local multLabel = Ui.text({
+		LayoutOrder = 2,
+		Size = UDim2.fromOffset(420, 16),
+		Font = T.FontRegular,
+		TextColor3 = T.SubText,
+		Text = "",
+		MaxTextSize = 15,
+		Parent = bottom,
+	})
+	local bar = Ui.glass({
+		Name = "Currency",
+		LayoutOrder = 3,
+		Size = UDim2.fromOffset(600, 60),
+		Parent = bottom,
+	}, {
+		Ui.corner(16),
+		Ui.new("UIPadding", { PaddingLeft = UDim.new(0, 14), PaddingRight = UDim.new(0, 10) }),
+		Ui.new("UIListLayout", {
+			FillDirection = Enum.FillDirection.Horizontal,
+			HorizontalAlignment = Enum.HorizontalAlignment.Center,
+			VerticalAlignment = Enum.VerticalAlignment.Center,
+			Padding = UDim.new(0, 14),
+			SortOrder = Enum.SortOrder.LayoutOrder,
+		}),
+	})
+	local essenceSeg, essenceValue = segment(bar, 1, "💎", "Essence", T.Essence)
+	local plus = Ui.button({
+		Text = "+",
+		Variant = "Success",
+		LayoutOrder = 2,
+		Size = UDim2.fromOffset(32, 32),
+		Parent = bar,
+	}, function()
+		Ui.toggle("Shop", true) -- quick route to buying more
+	end)
+	local div1 = divider(bar, 3)
+	local trophySeg, trophyValue = segment(bar, 4, "🏆", "Trophies", T.Trophy)
+	local div2 = divider(bar, 5)
+	local powerSeg, powerValue = segment(bar, 6, "💪", "Power", T.Power)
 
-	-- Surge banner + weather (top-centre) --------------------------------------------
+	-- Top-centre: Mana Surge banner, weather, live leaderboard -------------------------
 	local top = Ui.new("Frame", {
 		Name = "TopCenter",
 		AnchorPoint = Vector2.new(0.5, 0),
@@ -130,62 +159,64 @@ function Hud.Build(root: Frame)
 			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),
 	})
-	local banner = Ui.new("Frame", {
-		LayoutOrder = 1,
-		Size = UDim2.fromOffset(440, 50),
-		BackgroundColor3 = T.Background,
-		BackgroundTransparency = 0.15,
-		Parent = top,
-	}, { Ui.round(), Ui.stroke(T.Outline, 2.5) })
-	local bannerStroke = Ui.new("UIStroke", { Color = T.Accent, Thickness = 2, Parent = banner })
-	bannerStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	local bannerText =
-		Ui.text({ Size = UDim2.new(1, -28, 1, -12), Position = UDim2.fromOffset(14, 6), Text = "", Parent = banner })
-	local weatherPill = Ui.new("Frame", {
-		LayoutOrder = 2,
-		Size = UDim2.fromOffset(380, 28),
-		BackgroundColor3 = T.Background,
-		BackgroundTransparency = 0.35,
-		Parent = top,
+	local banner = Ui.glass({ LayoutOrder = 1, Size = UDim2.fromOffset(420, 44), Parent = top }, { Ui.round() })
+	local bannerDot = Ui.new("Frame", {
+		Size = UDim2.fromOffset(10, 10),
+		AnchorPoint = Vector2.new(0, 0.5),
+		Position = UDim2.new(0, 18, 0.5, 0),
+		BackgroundColor3 = T.Accent,
+		Parent = banner,
 	}, { Ui.round() })
+	local bannerText = Ui.text({
+		Size = UDim2.new(1, -56, 1, -14),
+		Position = UDim2.fromOffset(38, 7),
+		Text = "",
+		MaxTextSize = 22,
+		Parent = banner,
+	})
 	local weatherText = Ui.text({
-		Size = UDim2.new(1, -20, 1, -6),
-		Position = UDim2.fromOffset(10, 3),
+		LayoutOrder = 2,
+		Size = UDim2.fromOffset(420, 18),
+		Font = T.FontRegular,
 		Text = "",
 		TextColor3 = T.SubText,
-		MaxTextSize = 18,
-		Parent = weatherPill,
+		MaxTextSize = 15,
+		Parent = top,
 	})
-	local topList = Ui.new("Frame", {
+	local topList = Ui.glass({
 		LayoutOrder = 3,
-		Size = UDim2.fromOffset(300, 20),
+		Size = UDim2.fromOffset(280, 20),
 		AutomaticSize = Enum.AutomaticSize.Y,
-		BackgroundColor3 = T.Background,
-		BackgroundTransparency = 0.25,
 		Visible = false,
 		Parent = top,
-	}, { Ui.corner(14), Ui.padding(6), Ui.new("UIListLayout", { SortOrder = Enum.SortOrder.LayoutOrder }) })
+	}, {
+		Ui.corner(12),
+		Ui.padding(8),
+		Ui.new("UIListLayout", { Padding = UDim.new(0, 2), SortOrder = Enum.SortOrder.LayoutOrder }),
+	})
 	local topRows = {}
 	for i = 1, 5 do
-		topRows[i] =
-			Ui.text({ LayoutOrder = i, Size = UDim2.new(1, 0, 0, 24), Text = "", MaxTextSize = 20, Parent = topList })
+		topRows[i] = Ui.text({
+			LayoutOrder = i,
+			Size = UDim2.new(1, 0, 0, 22),
+			Text = "",
+			TextXAlignment = Enum.TextXAlignment.Left,
+			MaxTextSize = 18,
+			Parent = topList,
+		})
 	end
 
-	-- House War card (right side, collapsible) --------------------------------------
-	local house = Ui.new("Frame", {
+	-- Right: House War card ------------------------------------------------------------
+	local house = Ui.glass({
 		Name = "House",
 		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -12, 0.42, 0),
 		Size = UDim2.fromOffset(230, 40),
 		AutomaticSize = Enum.AutomaticSize.Y,
-		BackgroundColor3 = T.Background,
-		BackgroundTransparency = 0.2,
 		Parent = root,
 	}, {
 		Ui.corner(14),
-		Ui.stroke(T.Outline, 2.5),
-		Ui.padding(6),
-		Ui.new("UIListLayout", { Padding = UDim.new(0, 4), SortOrder = Enum.SortOrder.LayoutOrder }),
+		Ui.padding(10),
+		Ui.new("UIListLayout", { Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder }),
 	})
 	local expanded = true
 	local houseHeader = Ui.new("TextButton", {
@@ -194,46 +225,65 @@ function Hud.Build(root: Frame)
 		AutoButtonColor = false,
 		Selectable = true,
 		BackgroundTransparency = 1,
-		Size = UDim2.new(1, 0, 0, 26),
+		Size = UDim2.new(1, 0, 0, 22),
 		Parent = house,
 	})
 	local houseTitle = Ui.text({
 		Size = UDim2.fromScale(1, 1),
 		Text = "House War",
-		TextColor3 = T.Gold,
-		MaxTextSize = 20,
+		Font = T.FontHeavy,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		MaxTextSize = 18,
 		Parent = houseHeader,
 	})
-	local houseRows: { [string]: { Frame: Frame, Bar: Frame, Label: TextLabel } } = {}
+	local houseRows: { [string]: { Frame: Frame, Bar: Frame, Name: TextLabel, Points: TextLabel } } = {}
 	for i, id in Houses.Order do
 		local h = Houses.List[id]
 		local row = Ui.new("Frame", {
 			LayoutOrder = i,
-			Size = UDim2.new(1, 0, 0, 24),
-			BackgroundColor3 = T.Panel,
+			Size = UDim2.new(1, 0, 0, 30),
+			BackgroundTransparency = 1,
 			Parent = house,
-		}, { Ui.round() })
-		local bar = Ui.new(
-			"Frame",
-			{ Size = UDim2.fromScale(0, 1), BackgroundColor3 = h.Color, Parent = row },
-			{ Ui.round(), Ui.gloss(0.3) }
-		)
-		local label = Ui.text({
-			Size = UDim2.new(1, -12, 1, -4),
-			Position = UDim2.fromOffset(8, 2),
-			Text = "",
+		})
+		local name = Ui.text({
+			Size = UDim2.new(0.6, 0, 0, 16),
+			Font = T.FontRegular,
+			Text = string.gsub(h.Name, "House ", ""),
 			TextXAlignment = Enum.TextXAlignment.Left,
-			MaxTextSize = 17,
+			MaxTextSize = 15,
 			Parent = row,
 		})
-		houseRows[id] = { Frame = row, Bar = bar, Label = label }
+		local points = Ui.text({
+			Size = UDim2.new(0.4, 0, 0, 16),
+			Position = UDim2.fromScale(0.6, 0),
+			Text = "0",
+			TextColor3 = h.Color,
+			TextXAlignment = Enum.TextXAlignment.Right,
+			MaxTextSize = 15,
+			Parent = row,
+		})
+		local track = Ui.new("Frame", {
+			Size = UDim2.new(1, 0, 0, 6),
+			Position = UDim2.fromOffset(0, 21),
+			BackgroundColor3 = T.Edge,
+			BackgroundTransparency = 0.88,
+			BorderSizePixel = 0,
+			Parent = row,
+		}, { Ui.round() })
+		local fill = Ui.new(
+			"Frame",
+			{ Size = UDim2.fromScale(0, 1), BackgroundColor3 = h.Color, BorderSizePixel = 0, Parent = track },
+			{ Ui.round() }
+		)
+		houseRows[id] = { Frame = row, Bar = fill, Name = name, Points = points }
 	end
 	local houseHint = Ui.text({
 		LayoutOrder = 9,
-		Size = UDim2.new(1, 0, 0, 16),
+		Size = UDim2.new(1, 0, 0, 14),
+		Font = T.FontRegular,
 		TextColor3 = T.SubText,
 		Text = "",
-		MaxTextSize = 14,
+		MaxTextSize = 13,
 		Parent = house,
 	})
 	local function setExpanded(value: boolean)
@@ -248,25 +298,27 @@ function Hud.Build(root: Frame)
 		setExpanded(not expanded)
 	end)
 
-	-- Surge screen tint
 	local tint = Ui.new("ColorCorrectionEffect", { Name = "SurgeTint", Parent = Lighting })
 
 	-- Responsive arrangement ------------------------------------------------------------
 	local function arrange()
 		local c = Layout.Compact
-		essencePill.Size = UDim2.fromOffset(if c then 176 else 230, if c then 36 else 44)
-		trophyPill.Size = UDim2.fromOffset(if c then 112 else 150, if c then 32 else 40)
-		powerPill.Size = UDim2.fromOffset(if c then 124 else 160, if c then 32 else 40)
-		plus.Size = UDim2.fromOffset(if c then 28 else 34, if c then 28 else 34)
-		currency.Size = UDim2.fromOffset(if c then 440 else 600, if c then 40 else 46)
+		local segW = if c then 112 else 150
+		essenceSeg.Size = UDim2.fromOffset(if c then 120 else 160, 48)
+		trophySeg.Size = UDim2.fromOffset(segW - (if c then 16 else 10), 48)
+		powerSeg.Size = UDim2.fromOffset(segW, 48)
+		plus.Size = UDim2.fromOffset(if c then 28 else 32, if c then 28 else 32)
+		bar.Size = UDim2.fromOffset(if c then 470 else 600, if c then 54 else 60)
+		div1.Visible, div2.Visible = true, true
 		multLabel.Visible = not c
-		bottom.Position = UDim2.new(0.5, 0, 1, if c then -6 else -12)
-		top.Position = UDim2.new(0.5, 0, 0, if c then 4 else 8)
-		banner.Size = UDim2.fromOffset(if c then 340 else 440, if c then 40 else 50)
-		weatherPill.Size = UDim2.fromOffset(if c then 320 else 380, if c then 22 else 28)
-		topList.Size = UDim2.fromOffset(if c then 240 else 300, 20)
+		bottom.Position = UDim2.new(0.5, 0, 1, if c then -6 else -14)
+		top.Position = UDim2.new(0.5, 0, 0, if c then 4 else 10)
+		banner.Size = UDim2.fromOffset(if c then 330 else 420, if c then 38 else 44)
+		weatherText.Visible = true
+		weatherText.Size = UDim2.fromOffset(if c then 330 else 420, if c then 14 else 18)
+		topList.Size = UDim2.fromOffset(if c then 220 else 280, 20)
 		house.Size = UDim2.fromOffset(if c then 190 else 230, 40)
-		house.Position = UDim2.new(1, if c then -8 else -12, if c then 0.3 else 0.5, 0)
+		house.Position = UDim2.new(1, if c then -8 else -14, if c then 0.3 else 0.5, 0)
 		setExpanded(not c) -- phones start collapsed; tap the header to open
 	end
 	Layout.Changed:Connect(arrange)
@@ -283,7 +335,7 @@ function Hud.Build(root: Frame)
 		trophyValue.Text = Format.Number(d.Trophies)
 		powerValue.Text = Format.Number(d.Power)
 		multLabel.Text =
-			`Essence x{math.floor(d.EssenceMultiplier * 100) / 100}   Luck x{math.floor(d.Luck * 100) / 100}`
+			`Essence x{math.floor(d.EssenceMultiplier * 100) / 100}  ·  Luck x{math.floor(d.Luck * 100) / 100}`
 		local now = State.Now()
 		local seen = {}
 		for name, endsAt in d.Boosts do
@@ -291,20 +343,27 @@ function Hud.Build(root: Frame)
 				seen[name] = true
 				local chip = boostChips[name]
 				if not chip then
-					local frame = Ui.new("Frame", {
-						Size = UDim2.fromOffset(Layout.pick(92, 104), 26),
+					local frame = Ui.glass(
+						{ Size = UDim2.fromOffset(Layout.pick(96, 112), 24), Parent = boostRow },
+						{ Ui.round() }
+					)
+					Ui.new("Frame", {
+						Size = UDim2.fromOffset(8, 8),
+						AnchorPoint = Vector2.new(0, 0.5),
+						Position = UDim2.new(0, 10, 0.5, 0),
 						BackgroundColor3 = T.Good,
-						Parent = boostRow,
-					}, { Ui.round(), Ui.stroke(T.Outline, 2), Ui.gloss(0.3) })
+						Parent = frame,
+					}, { Ui.round() })
 					chip = Ui.text({
-						Size = UDim2.new(1, -10, 1, -4),
-						Position = UDim2.fromOffset(5, 2),
-						MaxTextSize = 16,
+						Size = UDim2.new(1, -28, 1, -6),
+						Position = UDim2.fromOffset(22, 3),
+						Font = T.FontRegular,
+						MaxTextSize = 14,
 						Parent = frame,
 					})
 					boostChips[name] = chip
 				end
-				chip.Text = `{name} {Format.Time(endsAt - now)}`
+				chip.Text = `{name}  {Format.Time(endsAt - now)}`
 			end
 		end
 		for name, chip in boostChips do
@@ -323,15 +382,15 @@ function Hud.Build(root: Frame)
 		end
 		local left = Format.Time(s.EndsAt - State.Now())
 		if s.Active then
-			local rank = if s.MyRank then `#{s.MyRank}` else "-"
-			bannerText.Text = `⚡ MANA SURGE {left}  ·  You {Format.Number(s.MyScore)} ({rank})`
-			bannerText.TextColor3 = Color3.fromRGB(235, 185, 255)
-			bannerStroke.Color = Color3.fromRGB(210, 120, 255)
+			local rank = if s.MyRank then `#{s.MyRank}` else "–"
+			bannerText.Text = `MANA SURGE  {left}   ·   You {Format.Number(s.MyScore)} ({rank})`
+			bannerText.TextColor3 = Color3.fromRGB(226, 200, 255)
+			bannerDot.BackgroundColor3 = Color3.fromRGB(200, 120, 255)
 			topList.Visible = #s.Top > 0
 			for i = 1, 5 do
 				local entry = s.Top[i]
-				topRows[i].Text = if entry then `{i}. {entry.Name}  {Format.Number(entry.Score)}` else ""
 				topRows[i].Visible = entry ~= nil
+				topRows[i].Text = if entry then `{i}.  {entry.Name}   {Format.Number(entry.Score)}` else ""
 				topRows[i].TextColor3 = if entry
 						and entry.House
 						and Houses.List[entry.House]
@@ -341,9 +400,9 @@ function Hud.Build(root: Frame)
 			tint.TintColor = Color3.fromRGB(235, 215, 255)
 			tint.Saturation = 0.25
 		else
-			bannerText.Text = `🔮 Mana Surge in {left}`
+			bannerText.Text = `Next Mana Surge in {left}`
 			bannerText.TextColor3 = T.Text
-			bannerStroke.Color = T.Accent
+			bannerDot.BackgroundColor3 = T.Accent
 			topList.Visible = false
 			tint.TintColor = Color3.new(1, 1, 1)
 			tint.Saturation = 0
@@ -359,10 +418,10 @@ function Hud.Build(root: Frame)
 		local weather = Weather.Types[w.Weather.Id] or Weather.Types.Clear
 		local nextWeather = Weather.Types[w.Weather.NextId] or Weather.Types.Clear
 		if weather.Id == "Clear" then
-			weatherText.Text = `Clear skies · {nextWeather.Name} in {Format.Time(w.Weather.NextAt - now)}`
+			weatherText.Text = `Clear skies  ·  {nextWeather.Name} in {Format.Time(w.Weather.NextAt - now)}`
 			weatherText.TextColor3 = T.SubText
 		else
-			weatherText.Text = `{weather.Name}: {weather.Description} ({Format.Time(w.Weather.EndsAt - now)})`
+			weatherText.Text = `{weather.Name}  ·  {weather.Description}  ·  {Format.Time(w.Weather.EndsAt - now)}`
 			weatherText.TextColor3 = weather.SkyTint
 		end
 		local d = State.Data
@@ -374,14 +433,16 @@ function Hud.Build(root: Frame)
 			local points = w.Houses[id] or 0
 			local row = houseRows[id]
 			local mine = d and d.House == id
-			row.Label.Text =
-				`{if mine then "★ " else ""}{string.gsub(Houses.List[id].Name, "House ", "")}  {Format.Number(points)}`
-			row.Bar.Size = UDim2.fromScale(math.clamp(points / best, 0.04, 1), 1)
+			row.Name.Text = (if mine then "★ " else "") .. string.gsub(Houses.List[id].Name, "House ", "")
+			row.Points.Text = Format.Number(points)
+			row.Bar.Size = UDim2.fromScale(math.clamp(points / best, 0.03, 1), 1)
 		end
-		local left = math.max(0, w.HouseWeekEndsAt - now)
-		local timeText = if left >= 86400 then `{left // 86400}d {(left % 86400) // 3600}h` else Format.Time(left)
-		houseTitle.Text = `🏰 House War  {timeText}  {if expanded then "▲" else "▼"}`
-		houseHint.Text = if d and d.House then "Break crystals to earn points!" else "Join a House in the hub!"
+		local leftTime = math.max(0, w.HouseWeekEndsAt - now)
+		local timeText = if leftTime >= 86400
+			then `{leftTime // 86400}d {(leftTime % 86400) // 3600}h`
+			else Format.Time(leftTime)
+		houseTitle.Text = `House War  ·  {timeText}  {if expanded then "–" else "+"}`
+		houseHint.Text = if d and d.House then "Break crystals to earn points" else "Join a House in the hub"
 	end
 
 	local wasActive = false
@@ -410,15 +471,15 @@ function Hud.Build(root: Frame)
 		end
 	end)
 
-	-- Bounce the Essence pill when Essence goes up
+	-- Gentle pop on the Essence value when it goes up
 	local lastEssence = 0
-	local pulse = Ui.new("UIScale", { Parent = essencePill })
+	local pulse = Ui.new("UIScale", { Parent = essenceSeg })
 	State.Changed:Connect(function(key)
 		local d = State.Data
 		if key == "Data" and d then
 			if d.Essence > lastEssence then
-				pulse.Scale = 1.07
-				TweenService:Create(pulse, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+				pulse.Scale = 1.06
+				TweenService:Create(pulse, TweenInfo.new(0.2, Enum.EasingStyle.Quad), { Scale = 1 }):Play()
 			end
 			lastEssence = d.Essence
 		end
