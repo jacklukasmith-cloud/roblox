@@ -14,13 +14,27 @@ Config.DataStoreName = "MythicTamers_PlayerData_v1"
 Config.AutosaveInterval = 120 -- seconds
 Config.MaxReceiptHistory = 50
 
--- Collecting ----------------------------------------------------------------------
+-- Collecting (Pet Simulator style) -------------------------------------------------
+-- Click a crystal to send your creatures at it; they deal your Power as damage every tick.
 Config.BaseClickPower = 1
-Config.HitCooldown = 0.12 -- min seconds between crystal hits (anti autoclicker spam)
-Config.MaxHitDistance = 45 -- studs from character to crystal
+Config.PetAttackInterval = 0.5 -- seconds between creature attack ticks
+Config.PetDamageMultiplier = 1.5 -- damage per tick = Power * this
+Config.MaxHitDistance = 45 -- studs from character to crystal when choosing a target
+Config.MaxAttackDistance = 70 -- creatures give up if you walk further than this away
 Config.CrystalRespawnTime = 4
-Config.AutoCollectInterval = 0.35
-Config.AutoCollectRange = 30
+Config.AutoCollectRange = 40 -- Auto Collect pass: auto-targets the nearest crystal within this range
+Config.StarterCreature = "GlowSprite" -- every new player gets one, so they can farm straight away
+
+-- Big breakables: one Mana Chest per realm
+Config.Chest = {
+	HPMultiplier = 25,
+	RewardMultiplier = 35,
+	RespawnTime = 45,
+}
+
+-- Essence orbs that burst out of broken crystals (visual only; Essence is awarded on break)
+Config.OrbsPerBreak = 6
+Config.OrbsPerChest = 20
 
 -- Creatures -----------------------------------------------------------------------
 Config.BaseEquipSlots = 4

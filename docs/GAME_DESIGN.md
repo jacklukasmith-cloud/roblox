@@ -1,11 +1,15 @@
 # Mythic Tamers: Game Design
 
 ## Core loop
-**Click crystals → earn Essence → hatch creatures → more Power → unlock the next realm → rebirth.**
+**Click crystals → creatures break them → Essence orbs fly to you → hatch more creatures → unlock the next realm → rebirth.**
 
-- **Power** = 1 + the power of every equipped creature. Each click deals Power damage to a crystal.
-- Crystals are **shared**: when one breaks, everyone who hit it is paid for their share of the damage.
-  Players in the same zone naturally race each other.
+Breaking works like Pet Simulator:
+- **Click a crystal** and your equipped creatures fly to it and surround it, pouncing on it while damage numbers pop off.
+  Clicking only picks the target; every 0.5 s your creatures deal **Power × 1.5** damage.
+- **Power** = 1 + the power of every equipped creature. New players start with a free **Glow Sprite**.
+- When it breaks, **Essence orbs burst out**, bounce, and magnet into you. Everyone who helped is paid for their share of the damage.
+- Every realm has a **Mana Chest**: 25× HP, 35× reward, 45 s respawn. Big enough that players team up on it.
+- **Auto Collect** (game pass) automatically targets the nearest crystal when your creatures are idle.
 - You start with 4 creature slots (+3 with a pass). Storage holds 150. Use **Equip Best** or **Release** extras.
 
 ## Realms

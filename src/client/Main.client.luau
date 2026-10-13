@@ -14,6 +14,7 @@ local Hud = require(Modules.Hud)
 local Panels = require(Modules.Panels)
 local Followers = require(Modules.Followers)
 local Ambient = require(Modules.Ambient)
+local Breaking = require(Modules.Breaking)
 
 local player = Players.LocalPlayer
 
@@ -36,6 +37,7 @@ Hud.Build(screen)
 Panels.Build(screen)
 Followers.Start()
 Ambient.Start()
+Breaking.Start()
 
 -- Networking ------------------------------------------------------------------------------
 Remotes.Event("DataChanged").OnClientEvent:Connect(function(snapshot)

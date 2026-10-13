@@ -1,13 +1,9 @@
 --[[
 	Client-side ambient animation for the world:
 	  - anything with a "Spin" (radians/sec) or "Bob" (studs) attribute spins / floats
-	  - crystals squish when you click them (purely visual feedback)
 ]]
 
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-
-local State = require(script.Parent.State)
 
 local Ambient = {}
 
@@ -39,57 +35,15 @@ local function register(inst: Instance)
 	})
 end
 
-local function squish(model: Model)
-	local ok, scale = pcall(function()
-		return model:GetScale()
-	end)
-	if not ok then
-		return
-	end
-	local value = Instance.new("NumberValue")
-	value.Value = scale
-	value.Changed:Connect(function(v)
-		pcall(model.ScaleTo, model, v)
-	end)
-	local up = TweenService:Create(value, TweenInfo.new(0.06), { Value = scale * 1.07 })
-	local down = TweenService:Create(value, TweenInfo.new(0.12, Enum.EasingStyle.Back), { Value = scale })
-	up.Completed:Connect(function()
-		down:Play()
-	end)
-	down.Completed:Connect(function()
-		value:Destroy()
-	end)
-	up:Play()
-end
-
-local function hookClick(inst: Instance)
-	if inst:IsA("ClickDetector") and inst.Parent and inst.Parent:IsA("Model") then
-		local model = inst.Parent :: Model
-		local busy = false
-		inst.MouseClick:Connect(function()
-			if busy or State.PotatoMode then
-				return
-			end
-			busy = true
-			squish(model)
-			task.delay(0.2, function()
-				busy = false
-			end)
-		end)
-	end
-end
-
 function Ambient.Start()
 	task.spawn(function()
 		local world = workspace:WaitForChild("World")
 		for _, d in world:GetDescendants() do
 			register(d)
-			hookClick(d)
 		end
 		world.DescendantAdded:Connect(function(d)
 			task.defer(function()
 				register(d)
-				hookClick(d)
 			end)
 		end)
 	end)

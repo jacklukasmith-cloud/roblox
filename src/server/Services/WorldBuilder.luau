@@ -183,6 +183,43 @@ local function ambientParticles(parent: Instance, center: Vector3, size: Vector3
 	e.Parent = emitterPart
 end
 
+-- Breakables ------------------------------------------------------------------------------------
+
+local function healthBar(main: BasePart, color: Color3, width: number, height: number)
+	local gui = billboard(main, UDim2.fromOffset(width, 24), Vector3.new(0, height, 0), 80)
+	gui.Name = "HealthGui"
+	local back = Instance.new("Frame")
+	back.Name = "Back"
+	back.Size = UDim2.fromScale(1, 1)
+	back.BackgroundColor3 = rgb(20, 15, 35)
+	back.Parent = gui
+	Instance.new("UICorner", back).CornerRadius = UDim.new(0.5, 0)
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = WHITE
+	stroke.Thickness = 1.5
+	stroke.Parent = back
+	local fill = Instance.new("Frame")
+	fill.Name = "Fill"
+	fill.Size = UDim2.fromScale(1, 1)
+	fill.BackgroundColor3 = color
+	fill.Parent = back
+	Instance.new("UICorner", fill).CornerRadius = UDim.new(0.5, 0)
+	label(back, { Name = "Amount", Text = "", ZIndex = 2 })
+end
+
+local function burstEmitter(main: BasePart, color: Color3)
+	local burst = Instance.new("ParticleEmitter")
+	burst.Name = "Burst"
+	burst.Enabled = false
+	burst.Color = ColorSequence.new(color, WHITE)
+	burst.LightEmission = 1
+	burst.Size = NumberSequence.new(0.7, 0)
+	burst.Speed = NumberRange.new(14, 24)
+	burst.SpreadAngle = Vector2.new(180, 180)
+	burst.Lifetime = NumberRange.new(0.4, 0.9)
+	burst.Parent = main
+end
+
 -- Crystal cluster ----------------------------------------------------------------------------
 
 -- One faceted shard: a diamond-section column topped by a cube balanced on its corner.
@@ -246,38 +283,89 @@ local function makeCrystal(parent: Instance, zone: Zones.ZoneDef, position: Vect
 	end
 	light(main, zone.CrystalColor, 12, 1.5)
 
-	local burst = Instance.new("ParticleEmitter")
-	burst.Name = "Burst"
-	burst.Enabled = false
-	burst.Color = ColorSequence.new(zone.CrystalColor, WHITE)
-	burst.LightEmission = 1
-	burst.Size = NumberSequence.new(0.7, 0)
-	burst.Speed = NumberRange.new(14, 24)
-	burst.SpreadAngle = Vector2.new(180, 180)
-	burst.Lifetime = NumberRange.new(0.4, 0.9)
-	burst.Parent = main
+	burstEmitter(main, zone.CrystalColor)
 
-	local gui = billboard(main, UDim2.fromOffset(120, 24), Vector3.new(0, 4.8, 0), 70)
-	gui.Name = "HealthGui"
-	local back = Instance.new("Frame")
-	back.Name = "Back"
-	back.Size = UDim2.fromScale(1, 1)
-	back.BackgroundColor3 = rgb(20, 15, 35)
-	back.Parent = gui
-	Instance.new("UICorner", back).CornerRadius = UDim.new(0.5, 0)
-	local stroke = Instance.new("UIStroke")
-	stroke.Color = WHITE
-	stroke.Thickness = 1.5
-	stroke.Parent = back
-	local fill = Instance.new("Frame")
-	fill.Name = "Fill"
-	fill.Size = UDim2.fromScale(1, 1)
-	fill.BackgroundColor3 = zone.CrystalColor
-	fill.Parent = back
-	Instance.new("UICorner", fill).CornerRadius = UDim.new(0.5, 0)
-	label(back, { Name = "Amount", Text = "", ZIndex = 2 })
+	healthBar(main, zone.CrystalColor, 120, 4.8)
 
 	model.PrimaryPart = main
+	model.Parent = parent
+	return model
+end
+
+-- A big Mana Chest: lots of HP, big payout, takes a team (or a strong squad) to crack.
+local function makeChest(parent: Instance, zone: Zones.ZoneDef, position: Vector3): Model
+	local model = Instance.new("Model")
+	model.Name = "ManaChest"
+	local base = CFrame.new(position) * CFrame.Angles(0, math.pi, 0)
+	local wood = zone.GroundColor:Lerp(rgb(120, 75, 40), 0.6)
+	local metal = GOLD
+	disc(model, position + Vector3.new(0, 0.15, 0), 14, 0.3, zone.CrystalColor, Enum.Material.Neon)
+	local body = part({
+		Name = "Body",
+		Size = Vector3.new(9, 5, 6),
+		CFrame = base * CFrame.new(0, 2.5, 0),
+		Color = wood,
+		Material = Enum.Material.WoodPlanks,
+		Parent = model,
+	})
+	-- Domed lid, slightly open, with crystals glowing inside
+	part({
+		Name = "Lid",
+		Shape = Enum.PartType.Cylinder,
+		Size = Vector3.new(9.2, 6.2, 6.2),
+		CFrame = base * CFrame.new(0, 5.2, 0.6) * CFrame.Angles(-0.35, 0, 0) * CFrame.Angles(0, 0, 0),
+		Color = wood,
+		Material = Enum.Material.WoodPlanks,
+		Parent = model,
+	})
+	for i = -1, 1 do
+		local crystal = part({
+			Size = Vector3.new(1.2, 2.6, 1.2),
+			CFrame = base * CFrame.new(i * 2.4, 5.4, -0.8) * CFrame.Angles(0.2, math.pi / 4, i * 0.3),
+			Color = zone.CrystalColor,
+			Material = Enum.Material.Neon,
+			Parent = model,
+		})
+		crystal.CanCollide = false
+	end
+	-- Gold bands, corners and lock
+	for _, x in { -3.2, 3.2 } do
+		part({
+			Size = Vector3.new(0.6, 5.2, 6.2),
+			CFrame = base * CFrame.new(x, 2.5, 0),
+			Color = metal,
+			Material = Enum.Material.Metal,
+			Parent = model,
+		})
+	end
+	part({
+		Size = Vector3.new(9.2, 0.6, 6.2),
+		CFrame = base * CFrame.new(0, 0.3, 0),
+		Color = metal,
+		Material = Enum.Material.Metal,
+		Parent = model,
+	})
+	part({
+		Size = Vector3.new(1.6, 2, 0.6),
+		CFrame = base * CFrame.new(0, 3.6, -3.2),
+		Color = metal,
+		Material = Enum.Material.Metal,
+		Parent = model,
+	})
+	part({
+		Shape = Enum.PartType.Ball,
+		Size = Vector3.one * 0.7,
+		CFrame = base * CFrame.new(0, 3.4, -3.55),
+		Color = zone.CrystalColor,
+		Material = Enum.Material.Neon,
+		Parent = model,
+	})
+	light(body, zone.CrystalColor, 20, 2)
+	burstEmitter(body, zone.CrystalColor)
+	healthBar(body, GOLD, 200, 7)
+	local title = billboard(body, UDim2.fromOffset(220, 30), Vector3.new(0, 9.2, 0), 90)
+	label(title, { Text = "MANA CHEST", TextColor3 = GOLD })
+	model.PrimaryPart = body
 	model.Parent = parent
 	return model
 end
@@ -1263,13 +1351,14 @@ end
 
 export type BuiltWorld = {
 	Crystals: { { Model: Model, Zone: number } },
+	Chests: { { Model: Model, Zone: number } },
 	EggStands: { Model },
 	Gates: { BasePart },
 	HousePedestals: { BasePart },
 }
 
 function WorldBuilder.Build(): BuiltWorld
-	local result: BuiltWorld = { Crystals = {}, EggStands = {}, Gates = {}, HousePedestals = {} }
+	local result: BuiltWorld = { Crystals = {}, Chests = {}, EggStands = {}, Gates = {}, HousePedestals = {} }
 
 	local existing = workspace:FindFirstChild("World")
 	if existing then
@@ -1406,6 +1495,8 @@ function WorldBuilder.Build(): BuiltWorld
 		end
 
 		table.insert(result.EggStands, makeEggStand(folder, zone.EggId, Vector3.new(-32, 0, z0 + 22)))
+		local chest = makeChest(crystalFolder, zone, Vector3.new(30, 0, z0 + 22))
+		table.insert(result.Chests, { Model = chest, Zone = zone.Index })
 
 		-- Archway at the entrance of every zone, with a locked force field for paid zones
 		makeArch(folder, zone, z0)

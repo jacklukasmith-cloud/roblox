@@ -105,18 +105,21 @@ function Economy.AddEssence(player: Player, amount: number)
 end
 
 -- Called when a crystal breaks. share = fraction of the crystal's HP this player dealt.
-function Economy.AwardCrystal(player: Player, zoneIndex: number, share: number)
+-- Returns the Essence awarded (for the orb burst on the client).
+function Economy.AwardCrystal(player: Player, zoneIndex: number, share: number, rewardMultiplier: number?): number
 	local data = PlayerData.Get(player)
 	local zone = Zones.Get(zoneIndex)
 	if not data or not zone then
-		return
+		return 0
 	end
-	local base = zone.CrystalReward * share
-	Economy.AddEssence(player, base * Economy.GetEssenceMultiplier(player, data))
+	local base = zone.CrystalReward * share * (rewardMultiplier or 1)
+	local amount = base * Economy.GetEssenceMultiplier(player, data)
+	Economy.AddEssence(player, amount)
 	data.Stats.CrystalsBroken += share
 	-- Competitive scoring ignores paid boosts on purpose.
 	Surge.AddScore(player, base * Economy.GetRebirthMultiplier(data))
-	HouseWar.AddPoints(player, share * zoneIndex)
+	HouseWar.AddPoints(player, share * zoneIndex * (rewardMultiplier or 1))
+	return amount
 end
 
 -- Essence for developer products: N crystals' worth from your best zone.

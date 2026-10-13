@@ -103,6 +103,7 @@ function Followers.Start()
 	RunService.RenderStepped:Connect(function(dt)
 		local t = os.clock()
 		local alpha = 1 - math.exp(-dt * 7)
+		local alphaFast = 1 - math.exp(-dt * 10)
 		local camera = workspace.CurrentCamera
 		local camPos = if camera then camera.CFrame.Position else Vector3.zero
 		local count = 0
@@ -110,19 +111,49 @@ function Followers.Start()
 			local character = player.Character
 			local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
 			if root and (root.Position - camPos).Magnitude < DRAW_DISTANCE then
-				for _, f in entry.List do
-					local bob = math.sin(t * 2.5 + f.Phase) * 0.3
-					local target = (root.CFrame * CFrame.new(f.Offset + Vector3.new(0, bob, 0))).Position
-					local pos = f.Position
-					if not pos or (pos - target).Magnitude > 60 then
-						pos = target -- first frame / teleported / respawned
-					end
-					pos = (pos :: Vector3):Lerp(target, alpha)
-					f.Position = pos
-					-- Face where the player is heading
-					local look = root.CFrame.LookVector
+				-- Attacking a crystal? (Pet Simulator style: creatures surround it and pounce)
+				local targetValue = player:FindFirstChild("PetTarget") :: ObjectValue?
+				local target = targetValue and targetValue.Value
+				local targetPos: Vector3? = nil
+				local targetRadius = 0
+				if target and target:IsA("Model") and target.Parent then
+					local pivot, size = target:GetBoundingBox()
+					targetPos = pivot.Position
+					targetRadius = math.max(size.X, size.Z) / 2
+				end
+				local n = #entry.List
+				for index, f in entry.List do
 					local rig = f.Rig
-					CreatureModels.Pose(rig, CFrame.lookAt(pos, pos + Vector3.new(look.X, 0, look.Z)), t + f.Phase)
+					local desired: Vector3
+					local facing: Vector3
+					if targetPos then
+						local angle = (index / n) * math.pi * 2 + t * 0.4
+						local pounce = math.max(0, math.sin(t * 7 + f.Phase * 2)) * 1.2
+						local radius = targetRadius + rig.Radius + 1.5 - pounce
+						local ground = (targetPos :: Vector3).Y
+						desired = Vector3.new(
+							(targetPos :: Vector3).X + math.cos(angle) * radius,
+							ground + rig.Radius * 0.4 + math.sin(t * 3 + f.Phase) * 0.3,
+							(targetPos :: Vector3).Z + math.sin(angle) * radius
+						)
+						facing = ((targetPos :: Vector3) - desired) * Vector3.new(1, 0, 1)
+					else
+						local bob = math.sin(t * 2.5 + f.Phase) * 0.3
+						desired = (root.CFrame * CFrame.new(f.Offset + Vector3.new(0, bob, 0))).Position
+						local look = root.CFrame.LookVector
+						facing = Vector3.new(look.X, 0, look.Z)
+					end
+					local pos = f.Position
+					if not pos or (pos - desired).Magnitude > 120 then
+						pos = desired -- first frame / teleported / respawned
+					end
+					local speed = if targetPos then alphaFast else alpha
+					pos = (pos :: Vector3):Lerp(desired, speed)
+					f.Position = pos
+					if facing.Magnitude < 0.01 then
+						facing = Vector3.new(0, 0, -1)
+					end
+					CreatureModels.Pose(rig, CFrame.lookAt(pos, pos + facing.Unit), t + f.Phase)
 					for i, part in rig.Parts do
 						count += 1
 						allParts[count] = part

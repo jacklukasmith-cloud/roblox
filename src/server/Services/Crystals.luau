@@ -1,7 +1,13 @@
 --[[
-	Mana crystals: click (or auto-collect) to damage them; when one breaks, everyone who
-	hit it is paid for the share of damage they dealt. Crystals are shared, so players in
-	the same zone race each other for breaks.
+	Mana crystals, Pet Simulator style.
+
+	Clicking a crystal sends your equipped creatures at it. Every PetAttackInterval they deal
+	your Power as damage. When a crystal breaks, everyone who damaged it is paid for their
+	share, and the client shows Essence orbs bursting out and flying into the player.
+	Crystals are shared, so groups of players can team up on big Mana Chests.
+
+	Each player's current target is an ObjectValue "PetTarget" so every client can show
+	that player's creatures flying to it.
 ]]
 
 local Players = game:GetService("Players")
@@ -17,6 +23,8 @@ local Monetization = require(script.Parent.Monetization)
 
 local Crystals = {}
 
+export type Options = { HPMultiplier: number?, RewardMultiplier: number?, RespawnTime: number?, Kind: string? }
+
 type CrystalState = {
 	Model: Model,
 	Main: BasePart,
@@ -24,6 +32,9 @@ type CrystalState = {
 	Zone: number,
 	MaxHP: number,
 	HP: number,
+	RewardMultiplier: number,
+	RespawnTime: number,
+	Kind: string,
 	Broken: boolean,
 	Damage: { [Player]: number },
 	Bar: Frame,
@@ -31,9 +42,36 @@ type CrystalState = {
 }
 
 local states: { [Model]: CrystalState } = {}
-local lastHit: { [Player]: number } = {}
+local targets: { [Player]: Model } = {}
 local lastWarn: { [Player]: number } = {}
 local notify = Remotes.Event("Notify")
+local crystalHit = Remotes.Event("CrystalHit")
+local crystalBroken = Remotes.Event("CrystalBroken")
+
+local function characterPosition(player: Player): Vector3?
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	return root and root.Position
+end
+
+local function targetValue(player: Player): ObjectValue
+	local value = player:FindFirstChild("PetTarget") :: ObjectValue?
+	if not value then
+		local v = Instance.new("ObjectValue")
+		v.Name = "PetTarget"
+		v.Parent = player
+		value = v
+	end
+	return value :: ObjectValue
+end
+
+local function setTarget(player: Player, model: Model?)
+	targets[player] = model
+	local value = targetValue(player)
+	if value.Value ~= model then
+		value.Value = model
+	end
+end
 
 local function updateBar(state: CrystalState)
 	local pct = math.clamp(state.HP / state.MaxHP, 0, 1)
@@ -45,9 +83,18 @@ local function breakCrystal(state: CrystalState)
 	state.Broken = true
 	local damage = state.Damage
 	state.Damage = {}
+	local orbs = if state.Kind == "Chest" then Config.OrbsPerChest else Config.OrbsPerBreak
 	for player, dealt in damage do
 		if player.Parent then
-			Economy.AwardCrystal(player, state.Zone, math.min(dealt / state.MaxHP, 1))
+			local share = math.min(dealt / state.MaxHP, 1)
+			local earned = Economy.AwardCrystal(player, state.Zone, share, state.RewardMultiplier)
+			crystalBroken:FireClient(player, state.Model, earned, math.max(1, math.round(orbs * math.max(share, 0.3))))
+		end
+	end
+	-- Creatures attacking this crystal go back to their owners
+	for player, model in targets do
+		if model == state.Model then
+			setTarget(player, nil)
 		end
 	end
 	for _, entry in state.Parts do
@@ -64,9 +111,9 @@ local function breakCrystal(state: CrystalState)
 	end
 	local burst = state.Main:FindFirstChild("Burst") :: ParticleEmitter?
 	if burst then
-		burst:Emit(30)
+		burst:Emit(if state.Kind == "Chest" then 80 else 30)
 	end
-	task.delay(Config.CrystalRespawnTime, function()
+	task.delay(state.RespawnTime, function()
 		state.HP = state.MaxHP
 		state.Broken = false
 		for _, entry in state.Parts do
@@ -83,24 +130,29 @@ local function breakCrystal(state: CrystalState)
 	end)
 end
 
-local function characterPosition(player: Player): Vector3?
-	local character = player.Character
-	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
-	return root and root.Position
-end
-
-function Crystals.Hit(player: Player, crystal: Model, fromAuto: boolean?)
-	local state = states[crystal]
-	if not state or state.Broken then
+local function damage(player: Player, state: CrystalState, amount: number)
+	if state.Broken or amount <= 0 then
 		return
 	end
+	local dealt = math.min(amount, state.HP)
+	state.HP -= dealt
+	state.Damage[player] = (state.Damage[player] or 0) + dealt
+	crystalHit:FireClient(player, state.Model, dealt)
+	if state.HP <= 0 then
+		breakCrystal(state)
+	else
+		updateBar(state)
+	end
+end
+
+local function canAttack(player: Player, state: CrystalState, maxDistance: number, warn: boolean): boolean
 	local data = PlayerData.Get(player)
-	if not data then
-		return
+	if not data or state.Broken then
+		return false
 	end
 	if state.Zone > data.ZonesUnlocked then
 		local now = os.clock()
-		if not fromAuto and now - (lastWarn[player] or 0) > 2 then
+		if warn and now - (lastWarn[player] or 0) > 2 then
 			lastWarn[player] = now
 			local zone = Zones.Get(state.Zone)
 			notify:FireClient(
@@ -109,32 +161,32 @@ function Crystals.Hit(player: Player, crystal: Model, fromAuto: boolean?)
 				Color3.fromRGB(255, 120, 120)
 			)
 		end
-		return
-	end
-	local now = os.clock()
-	if not fromAuto and now - (lastHit[player] or 0) < Config.HitCooldown then
-		return
+		return false
 	end
 	local pos = characterPosition(player)
-	if not pos or (pos - state.Main.Position).Magnitude > Config.MaxHitDistance then
+	return pos ~= nil and (pos - state.Main.Position).Magnitude <= maxDistance
+end
+
+-- Player clicked a crystal: send their creatures at it (and land one hit straight away).
+function Crystals.Target(player: Player, model: Model)
+	local state = states[model]
+	if not state or not canAttack(player, state, Config.MaxHitDistance, true) then
 		return
 	end
-	if not fromAuto then
-		lastHit[player] = now
+	if targets[player] == model then
+		return
 	end
-	local damage = math.min(Economy.GetPower(data), state.HP)
-	state.HP -= damage
-	state.Damage[player] = (state.Damage[player] or 0) + damage
-	if state.HP <= 0 then
-		breakCrystal(state)
-	else
-		updateBar(state)
+	setTarget(player, model)
+	local data = PlayerData.Get(player)
+	if data then
+		damage(player, state, Economy.GetPower(data) * Config.PetDamageMultiplier)
 	end
 end
 
-function Crystals.Register(model: Model, zoneIndex: number)
+function Crystals.Register(model: Model, zoneIndex: number, options: Options?)
 	local zone = Zones.Get(zoneIndex)
 	assert(zone, "bad zone")
+	local o: Options = options or {}
 	local main = model.PrimaryPart :: BasePart
 	local gui = main:FindFirstChild("HealthGui") :: BillboardGui
 	local parts = {}
@@ -143,58 +195,92 @@ function Crystals.Register(model: Model, zoneIndex: number)
 			table.insert(parts, { Part = d, Transparency = d.Transparency, CanCollide = d.CanCollide })
 		end
 	end
+	local maxHP = zone.CrystalHP * (o.HPMultiplier or 1)
 	local state: CrystalState = {
 		Model = model,
 		Main = main,
 		Parts = parts,
 		Zone = zoneIndex,
-		MaxHP = zone.CrystalHP,
-		HP = zone.CrystalHP,
+		MaxHP = maxHP,
+		HP = maxHP,
+		RewardMultiplier = o.RewardMultiplier or 1,
+		RespawnTime = o.RespawnTime or Config.CrystalRespawnTime,
+		Kind = o.Kind or "Crystal",
 		Broken = false,
 		Damage = {},
-		Bar = gui.Back.Fill,
-		Label = gui.Back.Amount,
+		Bar = (gui :: any).Back.Fill,
+		Label = (gui :: any).Back.Amount,
 	}
 	states[model] = state
+	model:SetAttribute("Breakable", state.Kind)
 	updateBar(state)
-	-- A ClickDetector inside a Model makes every part of the cluster clickable
+	-- A ClickDetector inside a Model makes every part of it clickable
 	local detector = Instance.new("ClickDetector")
 	detector.MaxActivationDistance = Config.MaxHitDistance
 	detector.MouseClick:Connect(function(player)
-		Crystals.Hit(player, model)
+		Crystals.Target(player, model)
 	end)
 	detector.Parent = model
 end
 
--- Auto Collect game pass: damages the nearest crystal in range on a timer.
-task.spawn(function()
-	while true do
-		task.wait(Config.AutoCollectInterval)
-		for _, player in Players:GetPlayers() do
-			local data = PlayerData.Get(player)
-			if data and data.AutoCollectEnabled and Monetization.Owns(player, "AutoCollect") then
-				local pos = characterPosition(player)
-				if pos then
-					local best, bestDist = nil, Config.AutoCollectRange
-					for model, state in states do
-						if not state.Broken and state.Zone <= data.ZonesUnlocked then
-							local dist = (state.Main.Position - pos).Magnitude
-							if dist < bestDist then
-								best, bestDist = model, dist
-							end
-						end
-					end
-					if best then
-						Crystals.Hit(player, best, true)
-					end
-				end
+local function nearestCrystal(player: Player, range: number): Model?
+	local data = PlayerData.Get(player)
+	local pos = characterPosition(player)
+	if not data or not pos then
+		return nil
+	end
+	local best, bestDist = nil, range
+	for model, state in states do
+		if not state.Broken and state.Zone <= data.ZonesUnlocked then
+			local dist = (state.Main.Position - pos).Magnitude
+			if dist < bestDist then
+				best, bestDist = model, dist
 			end
 		end
 	end
+	return best
+end
+
+-- One creature attack tick for every player (runs every PetAttackInterval)
+function Crystals.Tick()
+	for _, player in Players:GetPlayers() do
+		local data = PlayerData.Get(player)
+		if data then
+			local model = targets[player]
+			local state = model and states[model]
+			if state and not canAttack(player, state, Config.MaxAttackDistance, false) then
+				setTarget(player, nil)
+				state = nil
+			end
+			-- Auto Collect pass: pick the nearest crystal automatically
+			if not state and data.AutoCollectEnabled and Monetization.Owns(player, "AutoCollect") then
+				local nearest = nearestCrystal(player, Config.AutoCollectRange)
+				if nearest then
+					setTarget(player, nearest)
+					state = states[nearest]
+				end
+			end
+			if state then
+				damage(player, state, Economy.GetPower(data) * Config.PetDamageMultiplier)
+			end
+		end
+	end
+end
+
+task.spawn(function()
+	while true do
+		task.wait(Config.PetAttackInterval)
+		Crystals.Tick()
+	end
 end)
 
+Players.PlayerAdded:Connect(targetValue)
+for _, player in Players:GetPlayers() do
+	targetValue(player)
+end
+
 Players.PlayerRemoving:Connect(function(player)
-	lastHit[player] = nil
+	targets[player] = nil
 	lastWarn[player] = nil
 	for _, state in states do
 		state.Damage[player] = nil

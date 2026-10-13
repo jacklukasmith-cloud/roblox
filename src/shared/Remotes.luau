@@ -13,6 +13,8 @@ local EVENTS = {
 	"HatchResult", -- server -> client: eggId, { {Id, Variant} }
 	"SurgeUpdate", -- server -> client: surge state
 	"WorldState", -- server -> client: weather / house war / merchant info
+	"CrystalHit", -- server -> client: crystal model, damage (for damage numbers)
+	"CrystalBroken", -- server -> client: crystal model, essence earned, orb count
 }
 
 local FUNCTIONS = {

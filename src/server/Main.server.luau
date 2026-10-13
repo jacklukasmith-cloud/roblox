@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage.Shared
+local Config = require(Shared.Config)
 local Format = require(Shared.Format)
 local Remotes = require(Shared.Remotes)
 
@@ -63,6 +64,14 @@ local world = WorldBuilder.Build()
 
 for _, crystal in world.Crystals do
 	Crystals.Register(crystal.Model, crystal.Zone)
+end
+for _, chest in world.Chests do
+	Crystals.Register(chest.Model, chest.Zone, {
+		HPMultiplier = Config.Chest.HPMultiplier,
+		RewardMultiplier = Config.Chest.RewardMultiplier,
+		RespawnTime = Config.Chest.RespawnTime,
+		Kind = "Chest",
+	})
 end
 
 local function report(player: Player, ok: boolean, message: string?)
@@ -139,7 +148,14 @@ local function pushSnapshot(player: Player)
 	Economy.UpdateFollowerAttribute(player)
 end
 
-PlayerData.Loaded:Connect(function(player)
+PlayerData.Loaded:Connect(function(player, loaded)
+	-- Brand-new players get a starter creature so they can farm straight away
+	local data = PlayerData.Get(player)
+	if data and loaded.NextUid == 1 and next(data.Creatures) == nil then
+		local uid = PlayerData.NewCreature(data, Config.StarterCreature, "Normal")
+		data.Creatures[uid].Equipped = true
+		data.Bestiary[Config.StarterCreature] = true
+	end
 	setupLeaderstats(player)
 	Monetization.Refresh(player)
 	Economy.GrantOffline(player)
