@@ -13,6 +13,10 @@
       "GameSounds": {
         "$className": "Folder",
         "$ignoreUnknownInstances": true
+      },
+      "WorldMeshes": {
+        "$className": "Folder",
+        "$ignoreUnknownInstances": true
       }
     },
     "ServerScriptService": {

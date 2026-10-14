@@ -130,6 +130,99 @@ local function billboard(adornee: BasePart, size: UDim2, offset: Vector3, maxDis
 	return b
 end
 
+-- Imported 3D props (ReplicatedStorage.WorldMeshes) -----------------------------------------
+-- A Model or MeshPart named after a prop (see WorldBuilder.MeshNames) replaces the built-in
+-- version of that prop. Missing ones just keep the procedural look.
+WorldBuilder.MeshNames = {
+	"MeadowEgg",
+	"EmberEgg",
+	"FrostEgg",
+	"SkyEgg",
+	"ChampionEgg",
+	"MeadowCrystal",
+	"EmberCrystal",
+	"FrostCrystal",
+	"SkyCrystal",
+	"ManaChest",
+	"MerchantStall",
+	"MagicTree",
+}
+local CRYSTAL_MESH = { "MeadowCrystal", "EmberCrystal", "FrostCrystal", "SkyCrystal" }
+
+local function meshTemplate(name: string): Instance?
+	local folder = ReplicatedStorage:FindFirstChild("WorldMeshes")
+	local template = folder and folder:FindFirstChild(name)
+	if template and (template:IsA("Model") or template:IsA("BasePart")) then
+		return template
+	end
+	return nil
+end
+
+-- Places a scaled copy of a prop so its bounding box is `size` studs on its longest side
+-- (or `height` tall when byHeight) and its bottom centre sits on `base`.
+local function placeMesh(
+	parent: Instance,
+	name: string,
+	base: CFrame,
+	size: number,
+	byHeight: boolean?,
+	collide: boolean?
+): Model?
+	local template = meshTemplate(name)
+	if not template then
+		return nil
+	end
+	local model: Model
+	if template:IsA("Model") then
+		model = template:Clone()
+	else
+		model = Instance.new("Model")
+		template:Clone().Parent = model
+	end
+	model.Name = name .. "Mesh"
+	-- optional attributes on the imported model: Yaw (degrees) to turn it, Scale to resize it
+	local yaw = tonumber(template:GetAttribute("Yaw")) or 0
+	size *= tonumber(template:GetAttribute("Scale")) or 1
+	base *= CFrame.Angles(0, math.rad(yaw), 0)
+	for _, d in model:GetDescendants() do
+		if d:IsA("BasePart") then
+			d.Anchored = true
+			d.CanCollide = collide == true
+			d.CanTouch = false
+			d.Massless = true
+		end
+	end
+	local _, extents = model:GetBoundingBox()
+	local measure = if byHeight then extents.Y else math.max(extents.X, extents.Y, extents.Z)
+	if measure > 0.01 then
+		model:ScaleTo(model:GetScale() * size / measure)
+	end
+	-- put the bottom centre of the bounding box on `base`
+	local boxCf, box = model:GetBoundingBox()
+	local pivot = model:GetPivot()
+	local bottom = boxCf.Position - Vector3.new(0, box.Y / 2, 0)
+	local offset = pivot.Position - bottom
+	model:PivotTo(CFrame.new(base.Position + offset) * base.Rotation * pivot.Rotation)
+	model.Parent = parent
+	return model
+end
+
+-- Hides the built-in parts of a prop once a mesh replaces it (they stay as invisible hitboxes)
+local function hideParts(root: Instance, except: { Instance }?)
+	local list = if root:IsA("BasePart") then { root :: Instance } else {}
+	for _, d in root:GetDescendants() do
+		table.insert(list, d)
+	end
+	for _, d in list do
+		if d:IsA("BasePart") and not (except and table.find(except, d)) then
+			d.Transparency = 1
+			if d.Name ~= "Main" and d.Name ~= "Body" and d.Name ~= "Merchant" then
+				d.CanCollide = false
+			end
+		end
+	end
+end
+
 local function light(parent: Instance, color: Color3, range: number, brightness: number?)
 	local l = Instance.new("PointLight")
 	l.Color = color
@@ -287,6 +380,11 @@ local function makeCrystal(parent: Instance, zone: Zones.ZoneDef, position: Vect
 
 	healthBar(main, zone.CrystalColor, 120, 4.8)
 
+	local mesh = placeMesh(model, CRYSTAL_MESH[zone.Index] or "", base, 6.5, true)
+	if mesh then
+		hideParts(model, mesh:GetDescendants())
+	end
+
 	model.PrimaryPart = main
 	model.Parent = parent
 	return model
@@ -365,6 +463,10 @@ local function makeChest(parent: Instance, zone: Zones.ZoneDef, position: Vector
 	healthBar(body, GOLD, 200, 7)
 	local title = billboard(body, UDim2.fromOffset(220, 30), Vector3.new(0, 9.2, 0), 90)
 	label(title, { Text = "MANA CHEST", TextColor3 = GOLD })
+	local mesh = placeMesh(model, "ManaChest", base, 9.5)
+	if mesh then
+		hideParts(model, mesh:GetDescendants())
+	end
 	model.PrimaryPart = body
 	model.Parent = parent
 	return model
@@ -453,6 +555,15 @@ local function makeEggStand(parent: Instance, eggId: string, position: Vector3):
 	sparkle.Parent = eggPart
 	visual.PrimaryPart = eggPart
 	visual.Parent = stand
+	-- Imported egg model replaces the built-in shell (the invisible egg part keeps the prompts)
+	if placeMesh(visual, eggId, CFrame.new(center - Vector3.new(0, 3.4, 0)), 6.8, true) then
+		for _, child in visual:GetChildren() do
+			if child:IsA("BasePart") and child ~= eggPart then
+				child:Destroy()
+			end
+		end
+		eggPart.Transparency = 1
+	end
 
 	-- Billboard: name, price and every possible creature with its odds. Sized in studs so it
 	-- sits in the world like a sign (shrinks with distance) instead of covering the screen.
@@ -930,6 +1041,10 @@ local function makeMerchant(parent: Instance, position: Vector3)
 	local gui = billboard(counter, UDim2.fromOffset(240, 50), Vector3.new(0, 9, 0), 90)
 	label(gui, { Text = "Wandering Merchant", TextColor3 = rgb(255, 200, 120) })
 	local prompt = Instance.new("ProximityPrompt")
+	local stallMesh = placeMesh(parent, "MerchantStall", CFrame.new(position), 9, true, true)
+	if stallMesh then
+		hideParts(counter)
+	end
 	prompt.Name = "MerchantPrompt"
 	prompt.ActionText = "Browse"
 	prompt.ObjectText = "Wandering Merchant"
@@ -1018,6 +1133,9 @@ decorators[1] = function(folder, zone, z0) -- Enchanted Meadow: fairy trees, mus
 		local p = sideSpot(z0, ZONE_LENGTH)
 		local h = rng:NextNumber(7, 11)
 		local lean = rng:NextNumber(-0.25, 0.25)
+		if placeMesh(folder, "MagicTree", CFrame.new(p) * CFrame.Angles(0, lean * 12, 0), h + 5, true, true) then
+			continue
+		end
 		part({
 			Shape = Enum.PartType.Cylinder,
 			Size = Vector3.new(h, 1.6, 1.6),

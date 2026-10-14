@@ -60,6 +60,32 @@ do
 	)
 end
 
+-- Imported world props (eggs, crystals, chest, merchant stall, trees): models in Workspace named
+-- after WorldBuilder.MeshNames (e.g. "MeadowEgg", "FrostCrystal") move to ReplicatedStorage.WorldMeshes.
+do
+	local folder = ReplicatedStorage:FindFirstChild("WorldMeshes")
+	if not folder then
+		folder = Instance.new("Folder")
+		folder.Name = "WorldMeshes"
+		folder.Parent = ReplicatedStorage
+	end
+	for _, obj in workspace:GetChildren() do
+		if obj:IsA("Model") or obj:IsA("MeshPart") then
+			local clean = string.lower((string.gsub(obj.Name, "[^%w]", "")))
+			for _, name in WorldBuilder.MeshNames do
+				if string.sub(clean, 1, #name) == string.lower(name) and not folder:FindFirstChild(name) then
+					obj.Name = name
+					obj.Parent = folder
+					break
+				end
+			end
+		end
+	end
+	if #folder:GetChildren() > 0 then
+		print(`[Mythic Tamers] World 3D models ready: {#folder:GetChildren()}/{#WorldBuilder.MeshNames}`)
+	end
+end
+
 -- Custom sounds: a Sound in Workspace named after a Config.Sounds key (e.g. "MusicMeadow")
 -- is moved into ReplicatedStorage.GameSounds so every client uses it.
 do
