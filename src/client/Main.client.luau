@@ -19,6 +19,7 @@ local Breaking = require(Modules.Breaking)
 local Sound = require(Modules.Sound)
 local EggBoards = require(Modules.EggBoards)
 local HatchAnim = require(Modules.HatchAnim)
+local BossBar = require(Modules.BossBar)
 
 local player = Players.LocalPlayer
 
@@ -67,6 +68,9 @@ start("Egg previews", function()
 end)
 start("HUD", function()
 	Hud.Build(root)
+end)
+start("Boss bar", function()
+	BossBar.Build(root)
 end)
 start("Hatching", function()
 	HatchAnim.Init(root)

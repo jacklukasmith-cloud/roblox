@@ -1,0 +1,294 @@
+--[[
+	Boss raids: every Config.Boss.Interval a giant Rainbow creature appears in one of the realms
+	(taking turns). Everyone's creatures attack it like a crystal (crits and combos included).
+	Its HP is sized from the whole server's power so it takes about a minute together.
+
+	When it falls, everyone who hit it is paid Essence by their share of the damage, the top 3
+	get extra Trophies and #1 also gets a Mystic Egg hatch. If nobody beats it in time it escapes.
+	A live boss bar (BossUpdate) shows HP, time left and the top damage dealers.
+]]
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Shared = ReplicatedStorage.Shared
+local Config = require(Shared.Config)
+local Creatures = require(Shared.Creatures)
+local CreatureModels = require(Shared.CreatureModels)
+local Zones = require(Shared.Zones)
+local Format = require(Shared.Format)
+local Remotes = require(Shared.Remotes)
+
+local PlayerData = require(script.Parent.PlayerData)
+local Economy = require(script.Parent.Economy)
+local Crystals = require(script.Parent.Crystals)
+local Hatching = require(script.Parent.Hatching)
+local WorldBuilder = require(script.Parent.WorldBuilder)
+
+local BossRaid = {}
+
+local bossUpdate = Remotes.Event("BossUpdate")
+local notify = Remotes.Event("Notify")
+local BOSS_COLOR = Color3.fromRGB(255, 90, 140)
+
+type Active = {
+	Model: Model,
+	Main: BasePart,
+	Zone: number,
+	CreatureId: string,
+	Name: string,
+	EndsAt: number,
+}
+
+local active: Active? = nil
+local rotation = 0
+local rng = Random.new()
+
+local function bossCandidates(): { string }
+	local list = {}
+	for _, def in Creatures.Ordered do
+		if Creatures.Rarities[def.Rarity].Order >= 5 then
+			table.insert(list, def.Id)
+		end
+	end
+	return list
+end
+
+-- Total damage per second of everyone in the server (sizes the boss's HP)
+local function serverDps(): number
+	local total = 0
+	for _, player in Players:GetPlayers() do
+		local data = PlayerData.Get(player)
+		if data then
+			total += Economy.GetPower(data) * Config.PetDamageMultiplier / Config.PetAttackInterval
+		end
+	end
+	return math.max(total, 1)
+end
+
+local function topDamage(damage: { [Player]: number }, count: number): { { Player: Player, Damage: number } }
+	local list = {}
+	for player, dealt in damage do
+		if player.Parent then
+			table.insert(list, { Player = player, Damage = dealt })
+		end
+	end
+	table.sort(list, function(a, b)
+		return a.Damage > b.Damage
+	end)
+	while #list > count do
+		table.remove(list)
+	end
+	return list
+end
+
+local function broadcast()
+	local boss = active
+	if not boss then
+		bossUpdate:FireAllClients({ Active = false })
+		return
+	end
+	local hp, maxHp, damage = Crystals.GetStatus(boss.Model)
+	local top = {}
+	for _, entry in topDamage(damage, 5) do
+		table.insert(top, { Name = entry.Player.DisplayName, UserId = entry.Player.UserId, Damage = entry.Damage })
+	end
+	local zone = Zones.Get(boss.Zone)
+	bossUpdate:FireAllClients({
+		Active = true,
+		Name = boss.Name,
+		Zone = boss.Zone,
+		ZoneName = zone and zone.Name or "",
+		HP = hp,
+		MaxHP = maxHp,
+		EndsAt = boss.EndsAt,
+		Top = top,
+	})
+end
+
+local function despawn()
+	local boss = active
+	if not boss then
+		return
+	end
+	active = nil
+	Crystals.Unregister(boss.Model)
+	task.delay(1.5, function()
+		boss.Model:Destroy()
+	end)
+	broadcast()
+end
+
+local function onDefeated(damage: { [Player]: number })
+	local boss = active
+	if not boss then
+		return
+	end
+	local ranking = topDamage(damage, math.huge)
+	for rank, entry in ranking do
+		local player = entry.Player
+		local data = PlayerData.Get(player)
+		if data then
+			local trophies = Config.Boss.TopTrophies[rank] or Config.Boss.ParticipationTrophies
+			data.Trophies += trophies
+			PlayerData.MarkChanged(player)
+			local extra = ""
+			if rank == 1 and Hatching.MysticHatch(player) then
+				extra = " + a Mystic Egg"
+			end
+			notify:FireClient(
+				player,
+				`Boss defeated! You were #{rank} for damage: +{trophies} Trophies{extra}`,
+				Color3.fromRGB(255, 220, 90)
+			)
+		end
+	end
+	local mvp = ranking[1]
+	for _, player in Players:GetPlayers() do
+		if not damage[player] then
+			notify:FireClient(
+				player,
+				`{boss.Name} was defeated{if mvp then " - MVP: " .. mvp.Player.DisplayName else ""}!`,
+				BOSS_COLOR
+			)
+		end
+	end
+	despawn()
+end
+
+local function buildBoss(zoneIndex: number, creatureId: string): (Model, BasePart)
+	local zone = Zones.Get(zoneIndex) :: Zones.ZoneDef
+	local z0 = WorldBuilder.Helpers.ZoneStart(zoneIndex)
+	local position = Vector3.new(0, 7, z0 + 68)
+	local model = Instance.new("Model")
+	model.Name = "Boss"
+	local main = Instance.new("Part")
+	main.Name = "Main"
+	main.Size = Vector3.new(12, 12, 12)
+	main.CFrame = CFrame.new(position)
+	main.Anchored = true
+	main.CanCollide = false
+	main.Transparency = 1
+	main.Parent = model
+	model.PrimaryPart = main
+
+	local rig = CreatureModels.Build(creatureId, "Rainbow", Config.Boss.Scale)
+	CreatureModels.Place(rig, CFrame.new(position) * CFrame.Angles(0, math.pi, 0))
+	rig.Model:SetAttribute("Bob", 1)
+	rig.Model.Parent = model
+
+	local helpers = WorldBuilder.Helpers
+	helpers.HealthBar(main, BOSS_COLOR, 320, 14)
+	helpers.Burst(main, BOSS_COLOR)
+	helpers.Light(main, BOSS_COLOR, 40, 3)
+	local title = helpers.Billboard(main, UDim2.fromOffset(360, 40), Vector3.new(0, 17, 0), 200)
+	helpers.Label(title, {
+		Text = `⚔️ BOSS: {Creatures.DisplayName(creatureId, "Rainbow")}`,
+		TextColor3 = Color3.fromRGB(255, 220, 90),
+	})
+	local folder = workspace:FindFirstChild("World") and workspace.World:FindFirstChild("Bosses")
+	if not folder then
+		folder = Instance.new("Folder")
+		folder.Name = "Bosses"
+		folder.Parent = workspace:FindFirstChild("World") or workspace
+	end
+	model.Parent = folder
+	return model, main
+end
+
+-- Spawns a boss now (zoneIndex optional: otherwise realms take turns)
+function BossRaid.Spawn(zoneIndex: number?): boolean
+	if active then
+		return false
+	end
+	rotation += 1
+	local zoneIdx = zoneIndex or ((rotation - 1) % #Zones.List) + 1
+	local zone = Zones.Get(zoneIdx)
+	if not zone then
+		return false
+	end
+	local candidates = bossCandidates()
+	local creatureId = candidates[rng:NextInteger(1, #candidates)]
+	local model, main = buildBoss(zoneIdx, creatureId)
+	local hp = serverDps() * Config.Boss.TargetSeconds
+	Crystals.Register(model, zoneIdx, {
+		HPMultiplier = math.max(hp / zone.CrystalHP, 40),
+		RewardMultiplier = Config.Boss.RewardMultiplier,
+		Kind = "Boss",
+		NoRespawn = true,
+		OnBreak = onDefeated,
+	})
+	active = {
+		Model = model,
+		Main = main,
+		Zone = zoneIdx,
+		CreatureId = creatureId,
+		Name = Creatures.DisplayName(creatureId, "Rainbow"),
+		EndsAt = os.time() + Config.Boss.Duration,
+	}
+	for _, player in Players:GetPlayers() do
+		notify:FireClient(
+			player,
+			`⚔️ A {active.Name} boss appeared in {zone.Name}! Team up to defeat it!`,
+			BOSS_COLOR
+		)
+	end
+	broadcast()
+	return true
+end
+
+-- Teleports a player next to the boss (if they've unlocked its realm)
+function BossRaid.GoTo(player: Player): (boolean, string?)
+	local boss = active
+	local data = PlayerData.Get(player)
+	if not boss or not data then
+		return false, "There's no boss right now"
+	end
+	if boss.Zone > data.ZonesUnlocked then
+		local zone = Zones.Get(boss.Zone)
+		return false, `Unlock {zone and zone.Name or "that realm"} to join this boss`
+	end
+	local character = player.Character
+	if not character then
+		return false
+	end
+	local spot = boss.Main.Position + Vector3.new(0, -3, -24)
+	character:PivotTo(CFrame.lookAt(spot, Vector3.new(boss.Main.Position.X, spot.Y, boss.Main.Position.Z)))
+	return true
+end
+
+function BossRaid.Start()
+	task.spawn(function()
+		local nextSpawn = os.clock() + Config.Boss.FirstDelay
+		while true do
+			task.wait(1)
+			local boss = active
+			if boss then
+				if os.time() >= boss.EndsAt then
+					for _, player in Players:GetPlayers() do
+						notify:FireClient(player, `The {boss.Name} escaped... be faster next time!`, BOSS_COLOR)
+					end
+					despawn()
+					nextSpawn = os.clock() + Config.Boss.Interval
+				else
+					broadcast()
+				end
+			elseif os.clock() >= nextSpawn and #Players:GetPlayers() > 0 then
+				BossRaid.Spawn()
+				nextSpawn = os.clock() + Config.Boss.Interval
+			end
+		end
+	end)
+	-- late joiners see the current boss straight away
+	Players.PlayerAdded:Connect(function()
+		task.wait(3)
+		broadcast()
+	end)
+end
+
+function BossRaid.Describe(): string
+	local boss = active
+	return if boss then `{boss.Name} ({Format.Time(boss.EndsAt - os.time())} left)` else "none"
+end
+
+return BossRaid

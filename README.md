@@ -98,6 +98,7 @@ Testing commands (only affect you; everyone is an admin in Studio):
 | `!give EmberFox Shiny` | Add a creature (optional `Shiny` / `Rainbow`) |
 | `!giveall` | One of every creature |
 | `!hatchtest Phoenix Rainbow` | Play the hatch animation for up to 3 creatures (nothing is added) |
+| `!boss` | Spawn a boss raid now (add a realm number, e.g. `!boss 2`) |
 
 ## Daily rewards & quests
 

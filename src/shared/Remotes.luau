@@ -14,7 +14,8 @@ local EVENTS = {
 	"SurgeUpdate", -- server -> client: surge state
 	"WorldState", -- server -> client: weather / house war / merchant info
 	"CrystalHit", -- server -> client: crystal model, damage (for damage numbers)
-	"CrystalBroken", -- server -> client: crystal model, essence earned, orb count
+	"CrystalBroken", -- server -> client: crystal model, essence earned, orb count, combo, window
+	"BossUpdate", -- server -> all: boss raid state for the boss bar
 }
 
 local FUNCTIONS = {
@@ -30,6 +31,7 @@ local FUNCTIONS = {
 	"ClaimDaily",
 	"ClaimQuest",
 	"Fuse",
+	"GoToBoss",
 }
 
 local Remotes = {}

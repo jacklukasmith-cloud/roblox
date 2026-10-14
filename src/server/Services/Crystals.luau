@@ -24,7 +24,15 @@ local DailyRewards = require(script.Parent.DailyRewards)
 
 local Crystals = {}
 
-export type Options = { HPMultiplier: number?, RewardMultiplier: number?, RespawnTime: number?, Kind: string? }
+export type Options = {
+	HPMultiplier: number?,
+	RewardMultiplier: number?,
+	RespawnTime: number?,
+	Kind: string?,
+	-- one-off targets (bosses): no respawn; OnBreak gets everyone's damage when it breaks
+	NoRespawn: boolean?,
+	OnBreak: ((damage: { [Player]: number }) -> ())?,
+}
 
 type CrystalState = {
 	Model: Model,
@@ -36,6 +44,8 @@ type CrystalState = {
 	RewardMultiplier: number,
 	RespawnTime: number,
 	Kind: string,
+	NoRespawn: boolean,
+	OnBreak: ((damage: { [Player]: number }) -> ())?,
 	Broken: boolean,
 	Damage: { [Player]: number },
 	Bar: Frame,
@@ -90,7 +100,7 @@ local function breakCrystal(state: CrystalState)
 	state.Broken = true
 	local damage = state.Damage
 	state.Damage = {}
-	local orbs = if state.Kind == "Chest" then Config.OrbsPerChest else Config.OrbsPerBreak
+	local orbs = if state.Kind == "Crystal" then Config.OrbsPerBreak else Config.OrbsPerChest
 	local now = os.clock()
 	for player, dealt in damage do
 		if player.Parent then
@@ -137,7 +147,14 @@ local function breakCrystal(state: CrystalState)
 	end
 	local burst = state.Main:FindFirstChild("Burst") :: ParticleEmitter?
 	if burst then
-		burst:Emit(if state.Kind == "Chest" then 80 else 30)
+		burst:Emit(if state.Kind == "Crystal" then 30 else 80)
+	end
+	if state.OnBreak then
+		task.spawn(state.OnBreak, damage)
+	end
+	if state.NoRespawn then
+		states[state.Model] = nil
+		return
 	end
 	task.delay(state.RespawnTime, function()
 		state.HP = state.MaxHP
@@ -225,6 +242,8 @@ function Crystals.Register(model: Model, zoneIndex: number, options: Options?)
 		RewardMultiplier = o.RewardMultiplier or 1,
 		RespawnTime = o.RespawnTime or Config.CrystalRespawnTime,
 		Kind = o.Kind or "Crystal",
+		NoRespawn = o.NoRespawn == true,
+		OnBreak = o.OnBreak,
 		Broken = false,
 		Damage = {},
 		Bar = (gui :: any).Back.Fill,
@@ -242,6 +261,25 @@ function Crystals.Register(model: Model, zoneIndex: number, options: Options?)
 	detector.Parent = model
 end
 
+-- Removes a breakable (e.g. a boss that escaped); creatures attacking it return to their owners
+function Crystals.Unregister(model: Model)
+	states[model] = nil
+	for player, target in targets do
+		if target == model then
+			setTarget(player, nil)
+		end
+	end
+end
+
+-- Current HP and each player's damage so far (for live boss boards)
+function Crystals.GetStatus(model: Model): (number, number, { [Player]: number })
+	local state = states[model]
+	if not state then
+		return 0, 0, {}
+	end
+	return state.HP, state.MaxHP, state.Damage
+end
+
 local function nearestCrystal(player: Player, range: number): Model?
 	local data = PlayerData.Get(player)
 	local pos = characterPosition(player)
@@ -250,7 +288,7 @@ local function nearestCrystal(player: Player, range: number): Model?
 	end
 	local best, bestDist = nil, range
 	for model, state in states do
-		if not state.Broken and state.Zone <= data.ZonesUnlocked then
+		if not state.Broken and state.Kind ~= "Boss" and state.Zone <= data.ZonesUnlocked then
 			local dist = (state.Main.Position - pos).Magnitude
 			if dist < bestDist then
 				best, bestDist = model, dist

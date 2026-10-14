@@ -11,6 +11,7 @@
 	  !essence 1000000           give yourself Essence
 	  !give EmberFox             hatch a specific creature (add "Shiny" or "Rainbow" after the name)
 	  !giveall                   get one of every creature and equip your best
+	  !boss                      spawn a boss raid now (on this server)
 	  !hatchtest Phoenix Rainbow play the hatch animation for any creatures (up to 3, nothing is
 	                             added to your inventory), e.g. !hatchtest GlowSprite MoonRabbit Shiny
 
@@ -87,6 +88,13 @@ local function runPersonal(player: Player, command: string, args: { string }): b
 		end
 		Economy.EquipBest(player)
 		notify:FireClient(player, `[TEST] Gave {#list} creature(s)`, Color3.fromRGB(140, 255, 200))
+	elseif command == "boss" then
+		local BossRaid = require(script.Parent.BossRaid) :: any
+		local ok = BossRaid.Spawn(tonumber(args[1]))
+		if not ok then
+			notify:FireClient(player, "[TEST] A boss is already active", Color3.fromRGB(255, 120, 120))
+		end
+		return true
 	elseif command == "hatchtest" then
 		-- Only plays the animation: "!hatchtest GlowSprite MoonRabbit Shiny Phoenix Rainbow"
 		local results = {}

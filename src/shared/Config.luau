@@ -40,6 +40,18 @@ Config.Combo = {
 	Max = 20,
 }
 
+-- Boss raids: a giant creature appears in a realm; everyone attacks it together
+Config.Boss = {
+	FirstDelay = 300, -- seconds after the server starts
+	Interval = 1200, -- seconds between bosses
+	Duration = 180, -- seconds before an undefeated boss escapes
+	TargetSeconds = 60, -- HP is sized so the whole server needs about this long
+	RewardMultiplier = 150, -- Essence worth this many crystals, shared by damage
+	TopTrophies = { 10, 6, 4 }, -- extra Trophies for the top 3 damage dealers
+	ParticipationTrophies = 1,
+	Scale = 3.2, -- creature model size
+}
+
 -- Big breakables: one Mana Chest per realm
 Config.Chest = {
 	HPMultiplier = 25,

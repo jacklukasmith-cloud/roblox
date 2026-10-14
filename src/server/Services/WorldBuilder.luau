@@ -1893,4 +1893,14 @@ function WorldBuilder.Build(): BuiltWorld
 	return result
 end
 
+-- Shared building helpers for other services (e.g. BossRaid)
+WorldBuilder.Helpers = {
+	HealthBar = healthBar,
+	Burst = burstEmitter,
+	Billboard = billboard,
+	Label = label,
+	Light = light,
+	ZoneStart = zoneStartZ,
+}
+
 return WorldBuilder
