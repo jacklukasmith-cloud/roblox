@@ -17,6 +17,7 @@ subjects were kept centred for that).
 | Essence Chest | `EssenceChest` | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261011_153723_b3680bff-9e7c-421e-914a-3cf6b8204fe2.png) |
 | Luck Potion | `LuckPotion` | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261011_153756_2bde36b0-56d6-4b26-b2cf-d762006be6df.png) |
 | Merchant Restock | `MerchantRestock` | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261011_153756_f89310f8-be1c-4379-aff4-8f5adf40d921.png) |
+| Nebula Kitsune (exclusive pet) | `NebulaKitsune` | [option A](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_234018_cbf52f84-d3c8-4e49-9d8f-d8343f3a821d.png) · [option B](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_234018_f925b128-1acc-4c5b-95b9-e3878c74ee65.png) |
 | Game icon | - | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261011_153723_8cb71d17-7b76-4c96-854c-b20dc725f899.png) |
 
 ## Game thumbnails (16:9)
