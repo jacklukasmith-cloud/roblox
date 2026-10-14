@@ -96,7 +96,7 @@ Config.StudioOwnsAllPasses = false
 Config.GamePasses = {
 	{
 		Key = "VIP",
-		Id = 0,
+		Id = 2036234466,
 		Name = "VIP",
 		Description = "+50% Essence, golden chat tag & VIP title",
 		PriceHint = 199, -- shown in the shop UI; set the real price on the Creator Hub
@@ -104,7 +104,7 @@ Config.GamePasses = {
 	},
 	{
 		Key = "DoubleEssence",
-		Id = 0,
+		Id = 2036564468,
 		Name = "2x Essence",
 		Description = "Double all Essence you earn, forever",
 		PriceHint = 299, -- shown in the shop UI; set the real price on the Creator Hub
@@ -112,15 +112,15 @@ Config.GamePasses = {
 	},
 	{
 		Key = "AutoCollect",
-		Id = 0,
+		Id = 2039582264,
 		Name = "Auto Collect",
 		Description = "Your creatures mine nearby crystals for you",
-		PriceHint = 149, -- shown in the shop UI; set the real price on the Creator Hub
+		PriceHint = 199, -- shown in the shop UI; set the real price on the Creator Hub
 		Icon = "", -- optional "rbxassetid://..." after uploading the icon
 	},
 	{
 		Key = "LuckyHatch",
-		Id = 0,
+		Id = 2039528282,
 		Name = "Lucky Hatch",
 		Description = "x1.5 chance for Rare+ creatures",
 		PriceHint = 249, -- shown in the shop UI; set the real price on the Creator Hub
@@ -128,7 +128,7 @@ Config.GamePasses = {
 	},
 	{
 		Key = "TripleHatch",
-		Id = 0,
+		Id = 2036828438,
 		Name = "Triple Hatch",
 		Description = "Hatch 3 eggs at once",
 		PriceHint = 199, -- shown in the shop UI; set the real price on the Creator Hub
@@ -136,7 +136,7 @@ Config.GamePasses = {
 	},
 	{
 		Key = "ExtraEquip",
-		Id = 0,
+		Id = 2037734445,
 		Name = "+3 Creature Slots",
 		Description = "Equip 3 more creatures",
 		PriceHint = 349, -- shown in the shop UI; set the real price on the Creator Hub
@@ -144,7 +144,7 @@ Config.GamePasses = {
 	},
 	{
 		Key = "LongerOffline",
-		Id = 0,
+		Id = 2036516467,
 		Name = "Night Shift",
 		Description = "Creatures gather offline for 24h instead of 8h",
 		PriceHint = 99, -- shown in the shop UI; set the real price on the Creator Hub
@@ -163,7 +163,7 @@ Config.GamePassBonuses = {
 Config.DevProducts = {
 	{
 		Key = "EssencePouch",
-		Id = 0,
+		Id = 3718616590,
 		Name = "Essence Pouch",
 		Description = "Instant Essence (scales with your best zone)",
 		PriceHint = 49, -- shown in the shop UI; set the real price on the Creator Hub
@@ -172,16 +172,16 @@ Config.DevProducts = {
 	},
 	{
 		Key = "EssenceChest",
-		Id = 0,
+		Id = 3718616759,
 		Name = "Essence Chest",
 		Description = "A LOT of instant Essence",
 		PriceHint = 249, -- shown in the shop UI; set the real price on the Creator Hub
 		Icon = "", -- optional "rbxassetid://..." after uploading the icon
-		Grant = { Kind = "Essence", CrystalRewards = 300 },
+		Grant = { Kind = "Essence", CrystalRewards = 500 },
 	},
 	{
 		Key = "LuckPotion",
-		Id = 0,
+		Id = 3718616652,
 		Name = "Luck Potion",
 		Description = "x2 Rare+ odds for 15 minutes (stacks time)",
 		PriceHint = 79, -- shown in the shop UI; set the real price on the Creator Hub
@@ -190,7 +190,7 @@ Config.DevProducts = {
 	},
 	{
 		Key = "MerchantRestock",
-		Id = 0,
+		Id = 3718616539,
 		Name = "Merchant Restock",
 		Description = "Refill your Wandering Merchant stock right now",
 		PriceHint = 39, -- shown in the shop UI; set the real price on the Creator Hub
