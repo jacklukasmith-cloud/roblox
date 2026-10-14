@@ -51,8 +51,10 @@ Config.CrystalSizes = {
 
 -- Boss raids: a giant creature appears in a realm; everyone attacks it together
 Config.Boss = {
-	FirstDelay = 300, -- seconds after the server starts
-	Interval = 1200, -- seconds between bosses
+	FirstDelay = 120, -- seconds after the server starts (StudioFirstDelay in Studio playtests)
+	StudioFirstDelay = 20,
+	Interval = 900, -- seconds between bosses
+	WarnBefore = 30, -- everyone gets a heads-up this many seconds before a boss appears
 	Duration = 180, -- seconds before an undefeated boss escapes
 	TargetSeconds = 60, -- HP is sized so the whole server needs about this long
 	RewardMultiplier = 150, -- Essence worth this many crystals, shared by damage

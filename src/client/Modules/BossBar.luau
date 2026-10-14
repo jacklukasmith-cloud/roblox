@@ -101,13 +101,36 @@ function BossBar.Build(root: Frame)
 		end
 	end)
 
+	-- Small countdown pill while no boss is up
+	local pill = Ui.glass({
+		Name = "BossTimer",
+		AnchorPoint = Vector2.new(0.5, 0),
+		Size = UDim2.fromOffset(170, 28),
+		Visible = false,
+		Parent = root,
+	}, { Ui.round() })
+	local pillText = Ui.text({
+		Size = UDim2.fromScale(1, 1),
+		Text = "",
+		Font = T.Font,
+		TextColor3 = Color3.fromRGB(255, 190, 210),
+		MaxTextSize = 15,
+		Parent = pill,
+	})
+
 	local current: any = nil
 	local function render()
 		local s = current
 		if not s or not s.Active then
 			bar.Visible = false
+			local left = if s and s.NextAt then s.NextAt - State.Now() else -1
+			pill.Visible = left > 0
+			if left > 0 then
+				pillText.Text = `⚔️ Boss in {Format.Time(left)}`
+			end
 			return
 		end
+		pill.Visible = false
 		if not bar.Visible then
 			bar.Visible = true
 			local scale = bar:FindFirstChildOfClass("UIScale") or Ui.new("UIScale", { Parent = bar })
@@ -138,8 +161,10 @@ function BossBar.Build(root: Frame)
 	local function arrange()
 		local c = Layout.Compact
 		bar.Size = UDim2.fromOffset(if c then 360 else 420, if c then 78 else 86)
-		-- just under the top-centre banner (or the top bar on phones, where the banner sits in it)
-		bar.Position = UDim2.new(0.5, 0, 0, if c then 6 else 60)
+		-- just under the top-centre Mana Surge banner (which sits in the top bar on phones)
+		local y = if c then 30 else 60
+		bar.Position = UDim2.new(0.5, 0, 0, y)
+		pill.Position = UDim2.new(0.5, 0, 0, y)
 	end
 	Layout.Changed:Connect(arrange)
 	arrange()
@@ -151,7 +176,7 @@ function BossBar.Build(root: Frame)
 	task.spawn(function()
 		while true do
 			task.wait(1)
-			if current and current.Active then
+			if current then
 				render()
 			end
 		end

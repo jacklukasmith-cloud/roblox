@@ -9,6 +9,7 @@
 ]]
 
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage.Shared
@@ -41,6 +42,7 @@ type Active = {
 }
 
 local active: Active? = nil
+local nextSpawnAt = 0 -- os.time() of the next scheduled boss
 local rotation = 0
 local rng = Random.new()
 
@@ -85,7 +87,7 @@ end
 local function broadcast()
 	local boss = active
 	if not boss then
-		bossUpdate:FireAllClients({ Active = false })
+		bossUpdate:FireAllClients({ Active = false, NextAt = nextSpawnAt })
 		return
 	end
 	local hp, maxHp, damage = Crystals.GetStatus(boss.Model)
@@ -124,6 +126,7 @@ local function onDefeated(damage: { [Player]: number })
 	if not boss then
 		return
 	end
+	nextSpawnAt = os.time() + Config.Boss.Interval
 	local ranking = topDamage(damage, math.huge)
 	for rank, entry in ranking do
 		local player = entry.Player
@@ -258,28 +261,60 @@ function BossRaid.GoTo(player: Player): (boolean, string?)
 end
 
 function BossRaid.Start()
+	local firstDelay = if RunService:IsStudio() then Config.Boss.StudioFirstDelay else Config.Boss.FirstDelay
+	nextSpawnAt = os.time() + firstDelay
+	local warned = false
 	task.spawn(function()
-		local nextSpawn = os.clock() + Config.Boss.FirstDelay
 		while true do
 			task.wait(1)
-			local boss = active
-			if boss then
-				if os.time() >= boss.EndsAt then
-					for _, player in Players:GetPlayers() do
-						notify:FireClient(player, `The {boss.Name} escaped... be faster next time!`, BOSS_COLOR)
+			-- a failure here must never stop future bosses
+			local ok, err = pcall(function()
+				local boss = active
+				local now = os.time()
+				if boss then
+					if now >= boss.EndsAt then
+						for _, player in Players:GetPlayers() do
+							notify:FireClient(player, `The {boss.Name} escaped... be faster next time!`, BOSS_COLOR)
+						end
+						nextSpawnAt = now + Config.Boss.Interval
+						warned = false
+						despawn()
+					else
+						broadcast()
 					end
-					despawn()
-					nextSpawn = os.clock() + Config.Boss.Interval
-				else
-					broadcast()
+				elseif #Players:GetPlayers() > 0 then
+					if not warned and now >= nextSpawnAt - Config.Boss.WarnBefore then
+						warned = true
+						for _, player in Players:GetPlayers() do
+							notify:FireClient(
+								player,
+								`⚔️ A boss raid starts in {math.max(0, nextSpawnAt - now)} seconds!`,
+								BOSS_COLOR
+							)
+						end
+					end
+					if now >= nextSpawnAt then
+						nextSpawnAt = now + Config.Boss.Interval
+						warned = false
+						BossRaid.Spawn()
+					end
 				end
-			elseif os.clock() >= nextSpawn and #Players:GetPlayers() > 0 then
-				BossRaid.Spawn()
-				nextSpawn = os.clock() + Config.Boss.Interval
+			end)
+			if not ok then
+				warn("[BossRaid] " .. tostring(err))
 			end
 		end
 	end)
-	-- late joiners see the current boss straight away
+	-- the countdown to the next boss, kept fresh for everyone
+	task.spawn(function()
+		while true do
+			task.wait(10)
+			if not active then
+				broadcast()
+			end
+		end
+	end)
+	-- late joiners see the current boss (or the countdown) straight away
 	Players.PlayerAdded:Connect(function()
 		task.wait(3)
 		broadcast()
@@ -288,7 +323,9 @@ end
 
 function BossRaid.Describe(): string
 	local boss = active
-	return if boss then `{boss.Name} ({Format.Time(boss.EndsAt - os.time())} left)` else "none"
+	return if boss
+		then `{boss.Name} ({Format.Time(boss.EndsAt - os.time())} left)`
+		else `none (next in {Format.Time(math.max(0, nextSpawnAt - os.time()))})`
 end
 
 return BossRaid
