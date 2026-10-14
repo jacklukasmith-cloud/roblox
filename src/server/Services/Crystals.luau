@@ -43,6 +43,8 @@ type CrystalState = {
 }
 
 local states: { [Model]: CrystalState } = {}
+local combos: { [Player]: { Count: number, ExpiresAt: number } } = {}
+local critRng = Random.new()
 local targets: { [Player]: Model } = {}
 local targetSince: { [Player]: number } = {}
 local lastWarn: { [Player]: number } = {}
@@ -89,11 +91,29 @@ local function breakCrystal(state: CrystalState)
 	local damage = state.Damage
 	state.Damage = {}
 	local orbs = if state.Kind == "Chest" then Config.OrbsPerChest else Config.OrbsPerBreak
+	local now = os.clock()
 	for player, dealt in damage do
 		if player.Parent then
 			local share = math.min(dealt / state.MaxHP, 1)
-			local earned = Economy.AwardCrystal(player, state.Zone, share, state.RewardMultiplier)
-			crystalBroken:FireClient(player, state.Model, earned, math.max(1, math.round(orbs * math.max(share, 0.3))))
+			-- back-to-back breaks build a combo that boosts this break's Essence
+			local combo = combos[player]
+			if combo and now <= combo.ExpiresAt then
+				combo.Count = math.min(combo.Count + 1, Config.Combo.Max)
+			else
+				combo = { Count = 1, ExpiresAt = 0 }
+				combos[player] = combo
+			end
+			combo.ExpiresAt = now + Config.Combo.Window
+			local comboMult = 1 + (combo.Count - 1) * Config.Combo.Step
+			local earned = Economy.AwardCrystal(player, state.Zone, share, state.RewardMultiplier * comboMult)
+			crystalBroken:FireClient(
+				player,
+				state.Model,
+				earned,
+				math.max(1, math.round(orbs * math.max(share, 0.3))),
+				combo.Count,
+				Config.Combo.Window
+			)
 			DailyRewards.Track(player, if state.Kind == "Chest" then "BreakChests" else "BreakCrystals", 1)
 		end
 	end
@@ -136,14 +156,14 @@ local function breakCrystal(state: CrystalState)
 	end)
 end
 
-local function damage(player: Player, state: CrystalState, amount: number)
+local function damage(player: Player, state: CrystalState, amount: number, crit: boolean?)
 	if state.Broken or amount <= 0 then
 		return
 	end
 	local dealt = math.min(amount, state.HP)
 	state.HP -= dealt
 	state.Damage[player] = (state.Damage[player] or 0) + dealt
-	crystalHit:FireClient(player, state.Model, dealt)
+	crystalHit:FireClient(player, state.Model, dealt, crit == true)
 	if state.HP <= 0 then
 		breakCrystal(state)
 	else
@@ -261,7 +281,12 @@ function Crystals.Tick()
 			end
 			-- Creatures need a moment to fly over before they start hitting
 			if state and os.clock() - (targetSince[player] or 0) >= Config.PetTravelTime then
-				damage(player, state, Economy.GetPower(data) * Config.PetDamageMultiplier)
+				local amount = Economy.GetPower(data) * Config.PetDamageMultiplier
+				local crit = critRng:NextNumber() < Config.Crit.Chance
+				if crit then
+					amount *= Config.Crit.Multiplier
+				end
+				damage(player, state, amount, crit)
 			end
 		end
 	end
@@ -283,6 +308,7 @@ Players.PlayerRemoving:Connect(function(player)
 	targets[player] = nil
 	targetSince[player] = nil
 	lastWarn[player] = nil
+	combos[player] = nil
 	for _, state in states do
 		state.Damage[player] = nil
 	end

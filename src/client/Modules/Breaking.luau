@@ -17,6 +17,8 @@ local Sound = require(script.Parent.Sound)
 
 local Breaking = {}
 
+local Config = require(ReplicatedStorage.Shared.Config)
+
 local player = Players.LocalPlayer
 local effects = Instance.new("Folder")
 effects.Name = "BreakingEffects"
@@ -272,10 +274,124 @@ local function stepOrbs(dt: number)
 	end
 end
 
+-- Small camera kick for crits (skipped in Potato Mode)
+local function cameraKick(strength: number)
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if not humanoid or State.PotatoMode then
+		return
+	end
+	task.spawn(function()
+		for i = 1, 6 do
+			local k = strength * (1 - i / 7)
+			humanoid.CameraOffset = Vector3.new((math.random() - 0.5) * k, (math.random() - 0.5) * k, 0)
+			task.wait(1 / 60)
+		end
+		humanoid.CameraOffset = Vector3.zero
+	end)
+end
+
+-- Combo meter (right side of the screen) -----------------------------------------------
+local comboGui: ScreenGui? = nil
+local comboLabel: TextLabel? = nil
+local comboSub: TextLabel? = nil
+local comboFill: Frame? = nil
+local comboScale: UIScale? = nil
+local comboEndsAt = 0
+local comboWindow = 1
+
+local function buildComboMeter()
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "ComboMeter"
+	gui.ResetOnSpawn = false
+	gui.ScreenInsets = Enum.ScreenInsets.CoreUISafeInsets
+	gui.Enabled = false
+	gui.Parent = player:WaitForChild("PlayerGui")
+	local frame = Instance.new("Frame")
+	frame.AnchorPoint = Vector2.new(0.5, 0)
+	frame.Position = UDim2.fromScale(0.5, 0.2)
+	frame.Size = UDim2.fromOffset(170, 74)
+	frame.BackgroundTransparency = 1
+	frame.Parent = gui
+	local scale = Instance.new("UIScale")
+	scale.Parent = frame
+	local label = Instance.new("TextLabel")
+	label.BackgroundTransparency = 1
+	label.Size = UDim2.new(1, 0, 0, 40)
+	label.Font = Enum.Font.FredokaOne
+	label.TextScaled = true
+	label.TextColor3 = GOLD
+	label.Text = ""
+	label.Parent = frame
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = 2.5
+	stroke.Parent = label
+	local sub = label:Clone()
+	sub.Position = UDim2.fromOffset(0, 40)
+	sub.Size = UDim2.new(1, 0, 0, 18)
+	sub.TextColor3 = Color3.new(1, 1, 1)
+	sub.Parent = frame
+	local back = Instance.new("Frame")
+	back.AnchorPoint = Vector2.new(0.5, 0)
+	back.Position = UDim2.new(0.5, 0, 0, 62)
+	back.Size = UDim2.new(0.8, 0, 0, 6)
+	back.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
+	back.BackgroundTransparency = 0.3
+	back.BorderSizePixel = 0
+	back.Parent = frame
+	Instance.new("UICorner", back).CornerRadius = UDim.new(1, 0)
+	local fill = Instance.new("Frame")
+	fill.Size = UDim2.fromScale(1, 1)
+	fill.BackgroundColor3 = GOLD
+	fill.BorderSizePixel = 0
+	fill.Parent = back
+	Instance.new("UICorner", fill).CornerRadius = UDim.new(1, 0)
+	comboGui, comboLabel, comboSub, comboFill, comboScale = gui, label, sub, fill, scale
+end
+
+local function showCombo(count: number, window: number)
+	if not comboGui then
+		buildComboMeter()
+	end
+	comboEndsAt = os.clock() + window
+	comboWindow = window
+	if count < 2 then
+		return -- a single break isn't a combo yet
+	end
+	local bonus = math.round((count - 1) * Config.Combo.Step * 100)
+	local heat = math.clamp((count - 2) / (Config.Combo.Max - 2), 0, 1)
+	local color = GOLD:Lerp(Color3.fromRGB(255, 80, 60), heat)
+	local gui, label, sub, fill, scale =
+		comboGui :: ScreenGui, comboLabel :: TextLabel, comboSub :: TextLabel, comboFill :: Frame, comboScale :: UIScale
+	gui.Enabled = true
+	label.Text = if count >= Config.Combo.Max then `MAX COMBO x{count}!` else `COMBO x{count}`
+	label.TextColor3 = color
+	sub.Text = `+{bonus}% Essence`
+	fill.BackgroundColor3 = color
+	scale.Scale = 1.35
+	TweenService:Create(scale, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	-- a rising chime every 5 combo steps
+	if count % 5 == 0 then
+		Sound.Play("Click", 1 + count / 20, 1)
+	end
+end
+
+local function stepCombo()
+	if not comboGui or not comboGui.Enabled then
+		return
+	end
+	local left = comboEndsAt - os.clock()
+	if left <= 0 then
+		comboGui.Enabled = false
+		return
+	end
+	(comboFill :: Frame).Size = UDim2.fromScale(math.clamp(left / comboWindow, 0, 1), 1)
+end
+
 function Breaking.Start()
 	task.spawn(watchTarget)
 
-	Remotes.Event("CrystalHit").OnClientEvent:Connect(function(model, dealt)
+	Remotes.Event("CrystalHit").OnClientEvent:Connect(function(model, dealt, crit)
 		if typeof(model) ~= "Instance" or not model:IsA("Model") then
 			return
 		end
@@ -284,14 +400,26 @@ function Breaking.Start()
 			return
 		end
 		squish(model)
-		Sound.Play("Hit", Sound.Pitch("Hit", 1.3 + math.random() * 0.5), 1, 0.07)
-		if not State.PotatoMode then
-			local jitter = Vector3.new(math.random(-15, 15) / 10, 3 + math.random() * 1.5, math.random(-15, 15) / 10)
-			floatText(main, Format.Number(dealt), Color3.new(1, 1, 1), 5, jitter)
+		if crit then
+			-- big gold number, deeper hit sound and a small camera kick
+			Sound.Play("Hit", Sound.Pitch("Hit", 0.9), 1.3)
+			local jitter = Vector3.new(math.random(-10, 10) / 10, 4.5, math.random(-10, 10) / 10)
+			floatText(main, `CRIT! {Format.Number(dealt)}`, GOLD, 9, jitter)
+			cameraKick(0.35)
+		else
+			Sound.Play("Hit", Sound.Pitch("Hit", 1.3 + math.random() * 0.5), 1, 0.07)
+			if not State.PotatoMode then
+				local jitter =
+					Vector3.new(math.random(-15, 15) / 10, 3 + math.random() * 1.5, math.random(-15, 15) / 10)
+				floatText(main, Format.Number(dealt), Color3.new(1, 1, 1), 5, jitter)
+			end
 		end
 	end)
 
-	Remotes.Event("CrystalBroken").OnClientEvent:Connect(function(model, earned, count)
+	Remotes.Event("CrystalBroken").OnClientEvent:Connect(function(model, earned, count, combo, window)
+		if type(combo) == "number" and type(window) == "number" then
+			showCombo(combo, window)
+		end
 		if typeof(model) ~= "Instance" or not model:IsA("Model") then
 			return
 		end
@@ -303,6 +431,7 @@ function Breaking.Start()
 
 	RunService.RenderStepped:Connect(function(dt)
 		stepOrbs(dt)
+		stepCombo()
 		if ring and ringTarget then
 			local center = ringTarget:GetPivot().Position
 			local _, size = ringTarget:GetBoundingBox()

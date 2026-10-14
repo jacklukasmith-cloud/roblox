@@ -26,6 +26,20 @@ Config.CrystalRespawnTime = 4
 Config.AutoCollectRange = 40 -- Auto Collect pass: auto-targets the nearest crystal within this range
 Config.StarterCreature = "GlowSprite" -- every new player gets one, so they can farm straight away
 
+-- Critical hits: each creature attack tick can crit for bonus damage
+Config.Crit = {
+	Chance = 0.12,
+	Multiplier = 2.5,
+}
+
+-- Combos: breaking crystals back-to-back (within Window seconds of the last break) builds a combo.
+-- Each step adds Step to the Essence multiplier, up to Max steps (x2 at 20).
+Config.Combo = {
+	Window = 6,
+	Step = 0.05,
+	Max = 20,
+}
+
 -- Big breakables: one Mana Chest per realm
 Config.Chest = {
 	HPMultiplier = 25,
