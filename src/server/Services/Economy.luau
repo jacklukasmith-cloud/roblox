@@ -18,6 +18,7 @@ local WorldService = require(script.Parent.WorldService)
 local HouseWar = require(script.Parent.HouseWar)
 local Surge = require(script.Parent.Surge)
 local DailyRewards = require(script.Parent.DailyRewards)
+local Seasons = require(script.Parent.Seasons)
 
 local Economy = {}
 
@@ -119,6 +120,7 @@ function Economy.AwardCrystal(player: Player, zoneIndex: number, share: number, 
 	data.Stats.CrystalsBroken += share
 	-- Competitive scoring ignores paid boosts on purpose.
 	Surge.AddScore(player, base * Economy.GetRebirthMultiplier(data))
+	Seasons.AddPoints(player, base * Economy.GetRebirthMultiplier(data))
 	HouseWar.AddPoints(player, share * zoneIndex * (rewardMultiplier or 1))
 	return amount
 end
@@ -363,6 +365,7 @@ function Economy.BuildSnapshot(player: Player)
 		BestiaryMultiplier = Economy.GetBestiaryMultiplier(data),
 		OwnedPasses = Monetization.GetOwned(player),
 		Daily = DailyRewards.Snapshot(data),
+		Season = Seasons.Snapshot(player, data),
 	}
 end
 

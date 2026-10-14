@@ -32,6 +32,7 @@ local FUNCTIONS = {
 	"ClaimQuest",
 	"Fuse",
 	"GoToBoss",
+	"EquipTitle",
 }
 
 local Remotes = {}

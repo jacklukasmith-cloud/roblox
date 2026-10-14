@@ -110,6 +110,13 @@ Config.Leaderboards = {
 	Size = 10,
 }
 
+-- Weekly seasons (rewards are in Shared/Season.luau) --------------------------------
+Config.Season = {
+	FirstWeek = 2962, -- week index of Season 1 (week of 12 Oct 2026)
+	StorePrefix = "MythicTamers_Season_v1_",
+	BoardSize = 10,
+}
+
 -- Admins can run live events with chat commands (see AdminService) ---------------
 -- The place owner is always an admin. Add extra UserIds here.
 Config.AdminUserIds = {}

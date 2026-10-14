@@ -17,6 +17,7 @@ local Remotes = require(Shared.Remotes)
 local CreatureModels = require(Shared.CreatureModels)
 local Ui = require(script.Parent.Ui)
 local DailyPanel = require(script.Parent.DailyPanel)
+local SeasonPanel = require(script.Parent.SeasonPanel)
 local Layout = require(script.Parent.Layout)
 local State = require(script.Parent.State)
 
@@ -113,6 +114,7 @@ local MENU = {
 	{ Panel = "Bestiary", Label = "Index", Icon = "📖", Color = Color3.fromRGB(90, 215, 120) },
 	{ Panel = "Settings", Label = "Settings", Icon = "⚙️", Color = Color3.fromRGB(150, 150, 190) },
 	-- Corner = sits on its own in the top-right instead of in the left menu
+	{ Panel = "Season", Label = "Season", Icon = "🏅", Color = Color3.fromRGB(255, 120, 90), Corner = true },
 	{ Panel = "Daily", Label = "Daily", Icon = "🎁", Color = Color3.fromRGB(255, 196, 64), Corner = true },
 }
 Panels.MenuButtons = {} :: { TextButton }
@@ -140,6 +142,13 @@ local function buildMenu(root: Frame)
 		AnchorPoint = Vector2.new(1, 0),
 		BackgroundTransparency = 1,
 		Parent = root,
+	}, {
+		Ui.new("UIListLayout", {
+			FillDirection = Enum.FillDirection.Horizontal,
+			HorizontalAlignment = Enum.HorizontalAlignment.Right,
+			Padding = UDim.new(0, 8),
+			SortOrder = Enum.SortOrder.LayoutOrder,
+		}),
 	})
 	local cornerTiles: { TextButton } = {}
 	local gridCount = 0
@@ -162,7 +171,6 @@ local function buildMenu(root: Frame)
 			Ui.toggle(entry.Panel)
 		end)
 		if entry.Corner then
-			tile.Size = UDim2.fromScale(1, 1)
 			table.insert(cornerTiles, tile)
 		end
 		local pad = tile:FindFirstChildOfClass("UIPadding")
@@ -305,7 +313,10 @@ local function buildMenu(root: Frame)
 		end
 		padHint.Visible = Layout.Gamepad
 		-- Corner buttons: top-right. On PC/console they sit left of the player list.
-		corner.Size = UDim2.fromOffset(tileSize, tileSize)
+		for _, tile in cornerTiles do
+			tile.Size = UDim2.fromOffset(tileSize, tileSize)
+		end
+		corner.Size = UDim2.fromOffset(#cornerTiles * tileSize + (#cornerTiles - 1) * 8, tileSize)
 		corner.Position = UDim2.new(1, if Layout.Touch or c then -10 else -224, 0, 8)
 		-- Gamepad: d-pad moves through the menu in order
 		for i, button in Panels.MenuButtons do
@@ -327,6 +338,7 @@ local function bindInput()
 		Enum.KeyCode.Five,
 		Enum.KeyCode.Six,
 		Enum.KeyCode.Seven,
+		Enum.KeyCode.Eight,
 	}
 	UserInputService.InputBegan:Connect(function(input, processed)
 		if processed or UserInputService:GetFocusedTextBox() then
@@ -1114,6 +1126,7 @@ function Panels.Build(screen: Frame)
 	buildBestiary(screen)
 	buildSettings(screen)
 	DailyPanel.Build(screen)
+	SeasonPanel.Build(screen)
 
 	-- The merchant stall in the hub opens the panel
 	task.spawn(function()

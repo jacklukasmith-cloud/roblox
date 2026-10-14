@@ -14,6 +14,7 @@ local Houses = require(Shared.Houses)
 local PlayerData = require(script.Parent.PlayerData)
 local HouseWar = require(script.Parent.HouseWar)
 local Surge = require(script.Parent.Surge)
+local Seasons = require(script.Parent.Seasons)
 
 local Leaderboards = {}
 
@@ -110,12 +111,12 @@ local function refreshGlobal()
 			return d.Trophies
 		end)
 	)
-	render(
-		"EssenceBoard",
-		fromStore(essenceStore, function(d)
-			return d.TotalEssence
-		end)
-	)
+	-- the middle board shows this week's season race
+	local seasonRows = {}
+	for _, row in Seasons.BoardRows() do
+		table.insert(seasonRows, { Name = row.Name, Value = Format.Number(row.Points) })
+	end
+	render("EssenceBoard", seasonRows)
 end
 
 local function refreshHouses()

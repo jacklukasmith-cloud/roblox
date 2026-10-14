@@ -1746,7 +1746,7 @@ function WorldBuilder.Build(): BuiltWorld
 	spawn.Parent = hub
 
 	makeBoard(hub, "TrophyBoard", "Top Trophies", Vector3.new(-25, 11, -55), rgb(0, 255, 225))
-	makeBoard(hub, "EssenceBoard", "Top Essence", Vector3.new(0, 11, -55), rgb(140, 255, 200))
+	makeBoard(hub, "EssenceBoard", "Weekly Season", Vector3.new(0, 11, -55), rgb(140, 255, 200))
 	makeBoard(hub, "HouseBoard", "House War", Vector3.new(25, 11, -55), rgb(255, 200, 90))
 	makeObelisk(hub, Vector3.new(0, 0, 5))
 

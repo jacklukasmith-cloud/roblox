@@ -39,6 +39,9 @@ export type Data = {
 	ProcessedReceipts: { string },
 	Stats: { CreaturesHatched: number, SurgeWins: number, CrystalsBroken: number },
 	Daily: { Streak: number, LastClaimDay: number },
+	Season: { Week: number, Points: number, RewardedWeek: number },
+	Titles: { string },
+	Title: string,
 	Quests: { Day: number, Progress: { [string]: number }, Claimed: { [string]: boolean }, BonusClaimed: boolean },
 }
 
@@ -64,6 +67,9 @@ local function defaultData(): Data
 		ProcessedReceipts = {},
 		Stats = { CreaturesHatched = 0, SurgeWins = 0, CrystalsBroken = 0 },
 		Daily = { Streak = 0, LastClaimDay = -1 },
+		Season = { Week = -1, Points = 0, RewardedWeek = -1 },
+		Titles = {},
+		Title = "",
 		Quests = { Day = -1, Progress = {}, Claimed = {}, BonusClaimed = false },
 	}
 end

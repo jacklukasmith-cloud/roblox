@@ -24,6 +24,7 @@ local Admin = require(Services.Admin)
 local WorldBuilder = require(Services.WorldBuilder)
 local DailyRewards = require(Services.DailyRewards)
 local BossRaid = require(Services.BossRaid)
+local Seasons = require(Services.Seasons)
 
 local notify = Remotes.Event("Notify")
 local dataChanged = Remotes.Event("DataChanged")
@@ -306,6 +307,13 @@ bind("ChooseHouse", function(player, houseId)
 	return HouseWar.Choose(player, houseId)
 end)
 
+bind("EquipTitle", function(player, title)
+	if type(title) ~= "string" then
+		return false
+	end
+	return Seasons.EquipTitle(player, title)
+end)
+
 bind("GoToBoss", function(player)
 	return BossRaid.GoTo(player)
 end)
@@ -343,6 +351,7 @@ end)
 Leaderboards.Start()
 DailyRewards.Start()
 BossRaid.Start()
+Seasons.Start()
 Admin.Start()
 
 print("[Mythic Tamers] Server ready")

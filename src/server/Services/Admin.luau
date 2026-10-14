@@ -12,6 +12,7 @@
 	  !give EmberFox             hatch a specific creature (add "Shiny" or "Rainbow" after the name)
 	  !giveall                   get one of every creature and equip your best
 	  !boss                      spawn a boss raid now (on this server)
+	  !seasonend                 end the season now on this server and hand out rewards
 	  !hatchtest Phoenix Rainbow play the hatch animation for any creatures (up to 3, nothing is
 	                             added to your inventory), e.g. !hatchtest GlowSprite MoonRabbit Shiny
 
@@ -88,6 +89,11 @@ local function runPersonal(player: Player, command: string, args: { string }): b
 		end
 		Economy.EquipBest(player)
 		notify:FireClient(player, `[TEST] Gave {#list} creature(s)`, Color3.fromRGB(140, 255, 200))
+	elseif command == "seasonend" then
+		local Seasons = require(script.Parent.Seasons) :: any
+		local count = Seasons.EndNowForTesting()
+		notify:FireClient(player, `[TEST] Season rewards given to {count} player(s)`, Color3.fromRGB(140, 255, 200))
+		return true
 	elseif command == "boss" then
 		local BossRaid = require(script.Parent.BossRaid) :: any
 		local ok = BossRaid.Spawn(tonumber(args[1]))
