@@ -29,6 +29,7 @@ local FUNCTIONS = {
 	"BuyMerchantItem",
 	"ClaimDaily",
 	"ClaimQuest",
+	"Fuse",
 }
 
 local Remotes = {}

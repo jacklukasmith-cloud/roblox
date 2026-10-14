@@ -190,6 +190,41 @@ function Economy.EquipBest(player: Player)
 	PlayerData.MarkChanged(player)
 end
 
+-- Fuses Creatures.FuseCost copies of a creature (same variant) into one of the next variant.
+-- Unequipped copies are used first; the result is equipped if any copy used was.
+function Economy.Fuse(player: Player, creatureId: string, variant: string): (boolean, string?, any)
+	local data = PlayerData.Get(player)
+	local nextVariant = Creatures.FuseNext[variant]
+	if not data or not Creatures.Get(creatureId) or not nextVariant then
+		return false, "Can't fuse that"
+	end
+	local matches = {}
+	for uid, entry in data.Creatures do
+		if entry.Id == creatureId and entry.Variant == variant then
+			table.insert(matches, uid)
+		end
+	end
+	if #matches < Creatures.FuseCost then
+		return false, `You need {Creatures.FuseCost} to fuse (you have {#matches})`
+	end
+	table.sort(matches, function(a, b)
+		local ea, eb = data.Creatures[a].Equipped, data.Creatures[b].Equipped
+		if ea ~= eb then
+			return not ea
+		end
+		return tonumber(a) < tonumber(b)
+	end)
+	local wasEquipped = false
+	for i = 1, Creatures.FuseCost do
+		wasEquipped = wasEquipped or data.Creatures[matches[i]].Equipped
+		data.Creatures[matches[i]] = nil
+	end
+	local uid = PlayerData.NewCreature(data, creatureId, nextVariant)
+	data.Creatures[uid].Equipped = wasEquipped
+	PlayerData.MarkChanged(player)
+	return true, nil, { Id = creatureId, Variant = nextVariant, New = false }
+end
+
 function Economy.Release(player: Player, uids: { string }): (boolean, string?)
 	local data = PlayerData.Get(player)
 	if not data then

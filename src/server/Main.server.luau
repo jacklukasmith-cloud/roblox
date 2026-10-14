@@ -9,6 +9,7 @@ local Shared = ReplicatedStorage.Shared
 local Config = require(Shared.Config)
 local Format = require(Shared.Format)
 local Remotes = require(Shared.Remotes)
+local Eggs = require(Shared.Eggs)
 
 local Services = script.Parent.Services
 local PlayerData = require(Services.PlayerData)
@@ -302,6 +303,18 @@ bind("ChooseHouse", function(player, houseId)
 		return false
 	end
 	return HouseWar.Choose(player, houseId)
+end)
+
+bind("Fuse", function(player, creatureId, variant)
+	if type(creatureId) ~= "string" or type(variant) ~= "string" then
+		return false
+	end
+	local ok, message, result = Economy.Fuse(player, creatureId, variant)
+	if ok then
+		-- reuse the hatch reveal for a big "Fusion!" moment
+		Remotes.Event("HatchResult"):FireClient(player, Eggs.EggFor(creatureId), { result }, { Title = "Fusion!" })
+	end
+	return ok, message
 end)
 
 bind("ClaimDaily", function(player)

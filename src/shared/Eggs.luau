@@ -152,4 +152,19 @@ function Eggs.Roll(egg: EggDef, luck: number, rng: Random, minRarityOrder: numbe
 	return egg.Drops[#egg.Drops].Creature
 end
 
+-- The egg a creature hatches from (first match), for showing the right egg colour
+function Eggs.EggFor(creatureId: string): string
+	for _, id in Eggs.Order do
+		local egg = Eggs.Get(id)
+		if egg then
+			for _, drop in egg.Drops do
+				if drop.Creature == creatureId then
+					return id
+				end
+			end
+		end
+	end
+	return Eggs.Order[1]
+end
+
 return Eggs

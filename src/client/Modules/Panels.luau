@@ -370,6 +370,7 @@ end
 local function buildCreatures(screen: Frame)
 	local _, content = Ui.panel(screen, "Creatures", "Your Creatures", nil, "🐾")
 	local releaseMode = false
+	local fuseMode = false
 	local selected: { [string]: boolean } = {}
 	local lastKey = ""
 
@@ -395,10 +396,25 @@ local function buildCreatures(screen: Frame)
 	local confirmButton
 	local refresh: (boolean) -> ()
 
+	local fuseButton
+	fuseButton = Ui.button(
+		{ LayoutOrder = 5, Text = "Fuse", Variant = "Gold", Size = UDim2.fromOffset(110, 40), Parent = bar },
+		function()
+			fuseMode = not fuseMode
+			releaseMode = false
+			selected = {}
+			releaseButton.BackgroundColor3 = T.Card
+			confirmButton.Visible = false
+			fuseButton.Text = if fuseMode then "Done" else "Fuse"
+			refresh(true)
+		end
+	)
 	releaseButton = Ui.button(
 		{ LayoutOrder = 3, Text = "Release Mode", BackgroundColor3 = T.Card, Parent = bar },
 		function()
 			releaseMode = not releaseMode
+			fuseMode = false
+			fuseButton.Text = "Fuse"
 			selected = {}
 			releaseButton.BackgroundColor3 = if releaseMode then T.Bad else T.Card
 			confirmButton.Visible = releaseMode
@@ -440,11 +456,110 @@ local function buildCreatures(screen: Frame)
 			end
 		end
 		info.Text = `Equipped {equipped}/{d.EquipSlots}  -  Storage {d.CreatureCount}/{d.MaxInventory}`
+
+		-- Fuse mode: one card per creature + variant with how many you own
+		if fuseMode then
+			local groups: { [string]: { Id: string, Variant: string, Count: number } } = {}
+			for _, item in list do
+				local k = item.Entry.Id .. "|" .. item.Entry.Variant
+				local g = groups[k] or { Id = item.Entry.Id, Variant = item.Entry.Variant, Count = 0 }
+				g.Count += 1
+				groups[k] = g
+			end
+			local sorted = {}
+			local keyParts = { "F" }
+			for k, g in groups do
+				table.insert(sorted, g)
+				table.insert(keyParts, k .. g.Count)
+			end
+			table.sort(keyParts)
+			local key = table.concat(keyParts, ",")
+			if key == lastKey and not force then
+				return
+			end
+			lastKey = key
+			table.sort(sorted, function(a, b)
+				local fa = a.Count >= Creatures.FuseCost and Creatures.FuseNext[a.Variant] ~= nil
+				local fb = b.Count >= Creatures.FuseCost and Creatures.FuseNext[b.Variant] ~= nil
+				if fa ~= fb then
+					return fa
+				end
+				if a.Count ~= b.Count then
+					return a.Count > b.Count
+				end
+				return a.Id < b.Id
+			end)
+			clearChildren(grid, "TextButton")
+			for i, g in sorted do
+				local def = Creatures.Get(g.Id)
+				if def then
+					local nextVariant = Creatures.FuseNext[g.Variant]
+					local ready = nextVariant ~= nil and g.Count >= Creatures.FuseCost
+					local rarityColor = Creatures.Rarities[def.Rarity].Color
+					local card = Ui.new("TextButton", {
+						LayoutOrder = i,
+						Text = "",
+						AutoButtonColor = ready,
+						BackgroundColor3 = if ready then T.Gold:Lerp(T.Card, 0.75) else T.Card,
+						Parent = grid,
+					}, { Ui.corner(10), Ui.stroke(if ready then T.Gold else rarityColor, if ready then 3 else 1.5) })
+					local icon = creatureIcon(card, def, g.Variant, 58)
+					icon.AnchorPoint = Vector2.new(0.5, 0)
+					icon.Position = UDim2.new(0.5, 0, 0, 8)
+					Ui.text({
+						Text = `{Creatures.DisplayName(def.Id, g.Variant)} x{g.Count}`,
+						Position = UDim2.fromOffset(4, 66),
+						Size = UDim2.new(1, -8, 0, 22),
+						TextColor3 = rarityColor,
+						Parent = card,
+					})
+					Ui.text({
+						Text = if nextVariant == nil
+							then "Max (Rainbow)"
+							else `{math.min(g.Count, Creatures.FuseCost)}/{Creatures.FuseCost} → {nextVariant}`,
+						Position = UDim2.fromOffset(4, 90),
+						Size = UDim2.new(1, -8, 0, 18),
+						TextColor3 = if ready then T.Gold else T.SubText,
+						Parent = card,
+					})
+					Ui.text({
+						Text = if ready then "TAP TO FUSE" else "",
+						Font = T.FontHeavy,
+						Position = UDim2.fromOffset(4, 112),
+						Size = UDim2.new(1, -8, 0, 16),
+						TextColor3 = T.Good,
+						Parent = card,
+					})
+					card.MouseButton1Click:Connect(function()
+						if ready then
+							invoke("Fuse", g.Id, g.Variant)
+						elseif nextVariant then
+							Ui.toast(`Collect {Creatures.FuseCost} to fuse into a {nextVariant}`, T.SubText)
+						end
+					end)
+				end
+			end
+			return
+		end
 		local count = 0
 		for _ in selected do
 			count += 1
 		end
 		confirmButton.Text = `Release ({count})`
+		local tally: { [string]: number } = {}
+		local fusable = 0
+		for _, item in list do
+			if Creatures.FuseNext[item.Entry.Variant] then
+				local k = item.Entry.Id .. "|" .. item.Entry.Variant
+				tally[k] = (tally[k] or 0) + 1
+				if tally[k] == Creatures.FuseCost then
+					fusable += 1
+				end
+			end
+		end
+		if not fuseMode then
+			fuseButton.Text = if fusable > 0 then `Fuse ({fusable})` else "Fuse"
+		end
 
 		-- Only rebuild cards when the creature list actually changed
 		table.sort(list, function(a, b)

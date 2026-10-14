@@ -279,6 +279,10 @@ function Creatures.DisplayName(id: string, variant: string?): string
 	return v.Prefix .. def.Name
 end
 
+-- Fusion: this many of the same creature + variant fuse into one of the next variant
+Creatures.FuseCost = 5
+Creatures.FuseNext = { Normal = "Shiny", Shiny = "Rainbow" }
+
 -- Rolls a variant. shinyMultiplier boosts both Shiny and Rainbow odds.
 function Creatures.RollVariant(rng: Random, shinyMultiplier: number): string
 	local roll = rng:NextNumber()

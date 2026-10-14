@@ -412,7 +412,7 @@ function HatchAnim.Init(root: Frame)
 		end)
 	end
 
-	local function play(eggId: string, results: { any })
+	local function play(eggId: string, results: { any }, opts: { Title: string? }?)
 		token += 1
 		local myToken = token
 		skipRequested = false
@@ -425,7 +425,7 @@ function HatchAnim.Init(root: Frame)
 			end
 		end
 		banner.Visible = false
-		title.Text = if egg then egg.Name else "Egg"
+		title.Text = if opts and opts.Title then opts.Title elseif egg then egg.Name else "Egg"
 		title.TextColor3 = WHITE
 		hint.Text = "Tap to skip"
 		hint.Visible = true
@@ -754,8 +754,8 @@ function HatchAnim.Init(root: Frame)
 		close(myToken)
 	end
 
-	Remotes.Event("HatchResult").OnClientEvent:Connect(function(eggId, results)
-		task.spawn(play, eggId, results)
+	Remotes.Event("HatchResult").OnClientEvent:Connect(function(eggId, results, opts)
+		task.spawn(play, eggId, results, if type(opts) == "table" then opts else nil)
 	end)
 end
 
