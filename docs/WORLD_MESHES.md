@@ -1,6 +1,6 @@
 # World 3D models (Higgsfield)
 
-Eggs, crystals, the Mana Chest and the Meadow trees can use 3D models instead of the built-in
+Eggs, crystals, the Mana Chest, the merchant stall and the Meadow trees can use 3D models instead of the built-in
 block versions. Any prop without a model keeps its built-in look, so you can add them one by one.
 
 | Model name | Replaces | Preview image |
@@ -17,8 +17,10 @@ block versions. Any prop without a model keeps its built-in look, so you can add
 | `ManaChest` | Mana Chests (every realm) | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195752_35745698-a1cc-414f-8a28-93f2b1e5e3ab.png) |
 | `MagicTree` | Enchanted Meadow trees | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195724_f6fd17c2-1b47-42ec-8ae8-2039d243e983.png) |
 
-`MerchantStall` is also supported (the 3D conversion failed for it, so the stall keeps its
-built-in look; drop in any model named `MerchantStall` to replace it).
+| `MerchantStall` | Wandering Merchant's stall in the hub (a wagon) | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_200721_0ce76297-92cb-435a-a340-e13fc230bfc0.png) |
+
+Spare: `MerchantTent.glb` is a tent version of the stall ([image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_200722_00b44a06-b6fe-4802-83ac-fc904f99c72f.png)).
+It isn't used unless you rename it to `MerchantStall` (and remove the wagon).
 
 ## Add them to the game
 
@@ -27,7 +29,7 @@ built-in look; drop in any model named `MerchantStall` to replace it).
 2. In Studio: **File → Import 3D**, select all the `.glb` files, and import them into Workspace.
    Keep the file names (e.g. `MeadowEgg`) as the model names.
 3. Press **Play**. The server moves them into `ReplicatedStorage.WorldMeshes` and builds the world
-   with them. The Output shows `World 3D models ready: 11/12`.
+   with them. The Output shows `World 3D models ready: 12/12`.
 4. That's it: leave them in Workspace. Every time the game starts they are picked up
    automatically (or drag them into `ReplicatedStorage > WorldMeshes` yourself, same result).
 

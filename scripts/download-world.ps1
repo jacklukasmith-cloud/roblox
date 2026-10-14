@@ -1,4 +1,4 @@
-# Downloads the world prop 3D models (eggs, crystals, chest, tree) into the "world-models" folder.
+# Downloads the world prop 3D models (eggs, crystals, chest, tree, merchant) into the "world-models" folder.
 # Usage (PowerShell, in the roblox folder):  powershell -ExecutionPolicy Bypass -File scripts\download-world.ps1
 
 Set-Location (Split-Path $PSScriptRoot -Parent)
@@ -17,6 +17,8 @@ $models = [ordered]@{
     "SkyCrystal" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195816_03d8f104-d738-4ab2-bbfe-12f2bbaddf9d.glb"
     "ManaChest" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195817_afb64682-f37c-48e2-9869-3020e9b82f45.glb"
     "MagicTree" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195806_00114dae-20c2-4644-bd48-1e1fd4c2d472.glb"
+    "MerchantStall" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_200801_7cf01a57-dc5a-4263-8203-2d83221abbed.glb"
+    "MerchantTent" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_200802_63cfd9f7-3dd7-4a70-8806-b9ee08a1395a.glb"
 }
 $ok = 0
 foreach ($id in $models.Keys) {

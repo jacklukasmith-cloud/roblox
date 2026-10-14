@@ -9,7 +9,7 @@ compete in server-wide **Mana Surges** and a weekly cross-server **House War**.
 - **[docs/ICONS.md](docs/ICONS.md)**: generated icons for every game pass and product
 - **[docs/SOUNDS.md](docs/SOUNDS.md)**: sound effects, music, and how to swap in your own
 - **[docs/CREATURE_MESHES.md](docs/CREATURE_MESHES.md)**: 3D models (GLB) of all 25 creatures and how to import them
-- **[docs/WORLD_MESHES.md](docs/WORLD_MESHES.md)**: 3D models for eggs, crystals, Mana Chests and trees, and how to import them
+- **[docs/WORLD_MESHES.md](docs/WORLD_MESHES.md)**: 3D models for eggs, crystals, Mana Chests, the merchant stall and trees, and how to import them
 
 ## Look
 
