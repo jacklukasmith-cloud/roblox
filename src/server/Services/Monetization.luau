@@ -97,6 +97,21 @@ local function grant(player: Player, product)
 	elseif g.Kind == "Boost" then
 		Economy.AddBoost(player, g.Boost, g.Seconds)
 		notify:FireClient(player, `{product.Name} activated!`, Color3.fromRGB(120, 255, 120))
+	elseif g.Kind == "Creature" then
+		local Creatures = require(ReplicatedStorage.Shared.Creatures)
+		local Eggs = require(ReplicatedStorage.Shared.Eggs)
+		assert(Creatures.Get(g.Creature), "unknown creature " .. tostring(g.Creature))
+		local isNew = not data.Bestiary[g.Creature]
+		PlayerData.NewCreature(data, g.Creature, "Normal")
+		data.Bestiary[g.Creature] = true
+		-- the big hatch reveal, retitled
+		Remotes.Event("HatchResult"):FireClient(
+			player,
+			Eggs.EggFor(g.Creature),
+			{ { Id = g.Creature, Variant = "Normal", New = isNew } },
+			{ Title = "Exclusive!" }
+		)
+		notify:FireClient(player, `Thank you! {product.Name} joined your team!`, Color3.fromRGB(255, 95, 200))
 	elseif g.Kind == "MerchantRestock" then
 		data.Merchant.Bought = {}
 		notify:FireClient(player, "The Merchant restocked just for you!", Color3.fromRGB(255, 200, 120))

@@ -49,7 +49,7 @@ local rng = Random.new()
 local function bossCandidates(): { string }
 	local list = {}
 	for _, def in Creatures.Ordered do
-		if Creatures.Rarities[def.Rarity].Order >= 5 then
+		if Creatures.Rarities[def.Rarity].Order >= 5 and def.Rarity ~= "Exclusive" then
 			table.insert(list, def.Id)
 		end
 	end

@@ -109,6 +109,16 @@ local PLANS: { [string]: { [string]: any } } = {
 		Aura = true,
 	},
 
+	NebulaKitsune = {
+		Type = "Quadruped",
+		Ears = "Pointy",
+		Tail = "Bushy",
+		Snout = "Long",
+		Mane = true,
+		Fire = "Tail",
+		Aura = true,
+	},
+
 	StormOwl = { Type = "Bird", Ears = "Tufts", FaceDisc = true },
 	CloudSerpent = { Type = "Serpent", Horn = "Pair", Whiskers = true, Mane = true, Segments = 9 },
 	ThunderGriffin = { Type = "Quadruped", Ears = "Tufts", Wings = "Feather", Snout = "Beak", Tail = "Long" },

@@ -4,7 +4,7 @@
 	and Grow a Garden's mutations.
 ]]
 
-export type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythic" | "Champion"
+export type Rarity = "Common" | "Uncommon" | "Rare" | "Epic" | "Legendary" | "Mythic" | "Champion" | "Exclusive"
 
 export type CreatureDef = {
 	Id: string,
@@ -25,6 +25,7 @@ Creatures.Rarities = {
 	Legendary = { Order = 5, Color = Color3.fromRGB(255, 190, 40), Size = 2.5 },
 	Mythic = { Order = 6, Color = Color3.fromRGB(255, 70, 115), Size = 3 },
 	Champion = { Order = 7, Color = Color3.fromRGB(0, 255, 225), Size = 2.8 },
+	Exclusive = { Order = 8, Color = Color3.fromRGB(255, 95, 200), Size = 2.6 }, -- Robux only (Shop)
 }
 
 -- Luck only boosts drops at or above this rarity
@@ -242,6 +243,15 @@ local defs: { CreatureDef } = {
 		Power = 40000,
 		Color = rgb(255, 255, 255),
 		Accent = rgb(0, 255, 225),
+	},
+	-- Robux exclusive (Shop developer product, see Config.DevProducts) - never drops from eggs
+	{
+		Id = "NebulaKitsune",
+		Name = "Nebula Kitsune",
+		Rarity = "Exclusive",
+		Power = 60000,
+		Color = rgb(245, 238, 255),
+		Accent = rgb(110, 190, 255),
 	},
 }
 

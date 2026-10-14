@@ -934,6 +934,92 @@ local function shopCard(
 	return card
 end
 
+-- Big featured card for a Robux-exclusive creature (a developer product that grants a creature)
+local function exclusiveCard(parent: Instance, order: number, product)
+	local def = Creatures.Get(product.Grant.Creature)
+	if not def then
+		return
+	end
+	local color = Creatures.Rarities[def.Rarity].Color
+	local card = Ui.new("Frame", {
+		LayoutOrder = order,
+		Size = UDim2.new(1, -8, 0, 150),
+		BackgroundColor3 = Color3.new(1, 1, 1),
+		Parent = parent,
+	}, {
+		Ui.corner(14),
+		Ui.stroke(color, 2.5),
+		Ui.new("UIGradient", {
+			Color = ColorSequence.new(color:Lerp(Color3.new(0, 0, 0), 0.45), Color3.fromRGB(30, 20, 60)),
+			Rotation = 20,
+		}),
+	})
+	local icon = creatureIcon(card, def, nil, 128)
+	icon.Position = UDim2.fromOffset(11, 11)
+	Ui.text({
+		Text = "★ ROBUX EXCLUSIVE",
+		Position = UDim2.fromOffset(152, 12),
+		Size = UDim2.new(1, -300, 0, 20),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = color:Lerp(Color3.new(1, 1, 1), 0.35),
+		Font = T.FontHeavy,
+		MaxTextSize = 15,
+		Parent = card,
+	})
+	Ui.text({
+		Text = def.Name,
+		Position = UDim2.fromOffset(152, 34),
+		Size = UDim2.new(1, -300, 0, 36),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		Font = T.FontHeavy,
+		MaxTextSize = 32,
+		Parent = card,
+	})
+	Ui.text({
+		Text = `💪 Power {Format.Number(def.Power)}  ·  ⚔️ {Format.Number(
+			def.Power * Config.PetDamageMultiplier / Config.PetAttackInterval
+		)} damage/sec`,
+		Position = UDim2.fromOffset(152, 76),
+		Size = UDim2.new(1, -300, 0, 22),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = T.Power,
+		MaxTextSize = 18,
+		Parent = card,
+	})
+	Ui.text({
+		Text = product.Description,
+		Position = UDim2.fromOffset(152, 104),
+		Size = UDim2.new(1, -300, 0, 34),
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextColor3 = T.SubText,
+		TextWrapped = true,
+		MaxTextSize = 15,
+		Parent = card,
+	})
+	local button = Ui.button({
+		Text = `R$ {product.PriceHint}`,
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(1, -14, 0.5, 0),
+		Size = UDim2.fromOffset(130, 56),
+		Variant = "Gold",
+		Parent = card,
+	}, function()
+		if product.Id == 0 then
+			Ui.toast("This product isn't set up yet (add its ID in Config.luau)", T.Bad)
+		else
+			MarketplaceService:PromptProductPurchase(player, product.Id)
+		end
+	end)
+	if product.Id ~= 0 then
+		task.spawn(function()
+			local info = productInfo(product.Id, Enum.InfoType.Product)
+			if info and info.Price and card.Parent then
+				button.Text = `R$ {info.Price}`
+			end
+		end)
+	end
+end
+
 local function buildShop(screen: Frame)
 	local _, content = Ui.panel(screen, "Shop", "Shop", nil, "🛒")
 	local list = scrolling(content)
@@ -943,6 +1029,11 @@ local function buildShop(screen: Frame)
 		clearChildren(list, "Frame")
 		clearChildren(list, "TextLabel")
 		local owned = if State.Data then State.Data.OwnedPasses else {}
+		for i, product in Config.DevProducts do
+			if product.Grant.Kind == "Creature" then
+				exclusiveCard(list, -100 + i, product)
+			end
+		end
 		Ui.text({
 			LayoutOrder = 0,
 			Text = "Game Passes (forever)",
@@ -967,6 +1058,9 @@ local function buildShop(screen: Frame)
 			Parent = list,
 		})
 		for i, product in Config.DevProducts do
+			if product.Grant.Kind == "Creature" then
+				continue -- featured at the top
+			end
 			shopCard(list, 100 + i, product, false, function()
 				if product.Id == 0 then
 					Ui.toast("This product isn't set up yet (add its ID in Config.luau)", T.Bad)

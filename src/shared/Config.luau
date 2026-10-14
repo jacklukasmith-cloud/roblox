@@ -241,6 +241,17 @@ Config.DevProducts = {
 		Icon = "", -- optional "rbxassetid://..." after uploading the icon
 		Grant = { Kind = "MerchantRestock" },
 	},
+	{
+		-- Robux-exclusive creature: featured at the top of the Shop. Can be bought more than once
+		-- (5 copies fuse into a Shiny). Create a Developer Product and paste its ID here.
+		Key = "NebulaKitsune",
+		Id = 0,
+		Name = "Nebula Kitsune",
+		Description = "Robux exclusive creature - never drops from eggs",
+		PriceHint = 399, -- shown in the shop UI; set the real price on the Creator Hub
+		Icon = "",
+		Grant = { Kind = "Creature", Creature = "NebulaKitsune" },
+	},
 }
 
 -- Sounds & music ------------------------------------------------------------------
