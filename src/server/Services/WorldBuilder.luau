@@ -976,8 +976,10 @@ end
 
 local HOUSE_STATUES = { Emberclaw = "Phoenix", Frostfang = "FrostPup", Stormwing = "ThunderGriffin" }
 
-local function makeHouse(parent: Instance, houseId: string, position: Vector3): BasePart
+local function makeHouse(parent: Instance, houseId: string, position: Vector3, yaw: number): BasePart
 	local house = Houses.List[houseId]
+	-- front of the house (statue, banners) looks down the frame's -Z
+	local frame = CFrame.new(position) * CFrame.Angles(0, yaw, 0)
 	disc(parent, position + Vector3.new(0, 0.4, 0), 12, 0.8, STONE, Enum.Material.Slate)
 	disc(parent, position + Vector3.new(0, 0.35, 0), 12.6, 0.6, house.Color, Enum.Material.Neon) -- glowing rim
 	local platform = part({
@@ -991,11 +993,11 @@ local function makeHouse(parent: Instance, houseId: string, position: Vector3): 
 	})
 	-- Banners on poles either side
 	for _, side in { -1, 1 } do
-		local pole = position + Vector3.new(side * 5.5, 0, 1.5)
-		column(platform, pole, 12, 0.4, GOLD, Enum.Material.Metal)
+		local pole = frame * CFrame.new(side * 5.5, 0, 1.5)
+		column(platform, pole.Position, 12, 0.4, GOLD, Enum.Material.Metal)
 		part({
 			Size = Vector3.new(3, 5, 0.2),
-			Position = pole + Vector3.new(-side * 1.6, 9, 0),
+			CFrame = pole * CFrame.new(-side * 1.6, 9, 0),
 			Color = house.Color,
 			Material = Enum.Material.Fabric,
 			CanCollide = false,
@@ -1004,14 +1006,14 @@ local function makeHouse(parent: Instance, houseId: string, position: Vector3): 
 		part({
 			ClassName = "WedgePart",
 			Size = Vector3.new(3, 1.2, 0.2),
-			CFrame = CFrame.new(pole + Vector3.new(-side * 1.6, 5.9, 0)) * CFrame.Angles(math.pi, 0, 0),
+			CFrame = pole * CFrame.new(-side * 1.6, 5.9, 0) * CFrame.Angles(math.pi, 0, 0),
 			Color = house.Color,
 			Material = Enum.Material.Fabric,
 			CanCollide = false,
 			Parent = platform,
 		})
 	end
-	statue(parent, HOUSE_STATUES[houseId], position + Vector3.new(0, 6, 0), 2)
+	statue(parent, HOUSE_STATUES[houseId], position + Vector3.new(0, 6, 0), 2, yaw)
 	local sign = part({
 		Size = Vector3.one,
 		Position = position + Vector3.new(0, 13, 0),
@@ -1777,8 +1779,10 @@ function WorldBuilder.Build(): BuiltWorld
 		placeMesh(hub, "HubBanner", CFrame.new(pos), 13, true)
 	end
 
+	-- Houses line the east side of the hub, facing the path, so the way to the realms stays clear
 	for i, id in Houses.Order do
-		table.insert(result.HousePedestals, makeHouse(hub, id, Vector3.new(-30 + (i - 1) * 30, 0, 32)))
+		local position = Vector3.new(32, 0, 2 + (i - 1) * 19)
+		table.insert(result.HousePedestals, makeHouse(hub, id, position, math.pi / 2))
 	end
 
 	-- Champion Egg under a golden arch, guarded by a Titan Unicorn statue

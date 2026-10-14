@@ -50,12 +50,6 @@ local function rebuild(player: Player)
 		local id, variant = parts[1], parts[2] or "Normal"
 		if Creatures.Get(id) then
 			local rig = CreatureModels.Build(id, variant)
-			-- details for tap-to-inspect (PetInspect)
-			rig.Model:SetAttribute("CreatureId", id)
-			rig.Model:SetAttribute("Variant", variant)
-			rig.Model:SetAttribute("OwnerId", player.UserId)
-			rig.Model:SetAttribute("OwnerName", player.DisplayName)
-			rig.Model:SetAttribute("Radius", rig.Radius)
 			rig.Model.Parent = folder
 			table.insert(rigs, rig)
 		end

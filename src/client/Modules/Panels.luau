@@ -11,6 +11,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage.Shared
 local Config = require(Shared.Config)
 local Creatures = require(Shared.Creatures)
+local Eggs = require(Shared.Eggs)
 local Merchant = require(Shared.Merchant)
 local Format = require(Shared.Format)
 local Remotes = require(Shared.Remotes)
@@ -380,7 +381,7 @@ end
 
 -- Creatures panel ------------------------------------------------------------------------
 local function buildCreatures(screen: Frame)
-	local _, content = Ui.panel(screen, "Creatures", "Your Creatures", nil, "🐾")
+	local panelFrame, content = Ui.panel(screen, "Creatures", "Your Creatures", nil, "🐾")
 	local releaseMode = false
 	local fuseMode = false
 	local selected: { [string]: boolean } = {}
@@ -453,6 +454,158 @@ local function buildCreatures(screen: Frame)
 
 	local grid = scrolling(content, { Position = UDim2.fromOffset(0, 48), Size = UDim2.new(1, 0, 1, -48) })
 	Ui.autoGrid(grid, 112, 138)
+
+	-- Stats card: tap a creature to see its details (and equip / unequip it from there)
+	local shownUid: string? = nil
+	local backdrop = Ui.new("TextButton", {
+		Name = "PetDetails",
+		Text = "",
+		AutoButtonColor = false,
+		BackgroundColor3 = Color3.new(0, 0, 0),
+		BackgroundTransparency = 0.45,
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 20,
+		Visible = false,
+		Parent = panelFrame, -- covers the whole panel so it has room on phones
+	}, { Ui.corner(16) })
+	local detail = Ui.glass({
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.new(1, -24, 1, -24),
+		Active = true,
+		Parent = backdrop,
+	}, { Ui.corner(14), Ui.new("UISizeConstraint", { MaxSize = Vector2.new(470, 330) }) })
+	local detailEdge = detail:FindFirstChildOfClass("UIStroke")
+	local detailScale = Ui.new("UIScale", { Parent = detail })
+	local iconHolder = Ui.new("Frame", {
+		Position = UDim2.fromOffset(16, 16),
+		Size = UDim2.new(0.38, -16, 1, -82),
+		BackgroundTransparency = 1,
+		Parent = detail,
+	}, { Ui.new("UIAspectRatioConstraint", { AspectRatio = 1 }) })
+	local detailName = Ui.text({
+		Position = UDim2.new(0.38, 8, 0, 16),
+		Size = UDim2.new(0.62, -24, 0, 30),
+		Text = "",
+		Font = T.FontHeavy,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		MaxTextSize = 26,
+		Parent = detail,
+	})
+	local detailRarity = Ui.text({
+		Position = UDim2.new(0.38, 8, 0, 48),
+		Size = UDim2.new(0.62, -24, 0, 20),
+		Text = "",
+		Font = T.Font,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		MaxTextSize = 17,
+		Parent = detail,
+	})
+	local statsList = Ui.new("Frame", {
+		Position = UDim2.new(0.38, 8, 0, 76),
+		Size = UDim2.new(0.62, -24, 1, -136),
+		BackgroundTransparency = 1,
+		Parent = detail,
+	}, { Ui.new("UIListLayout", { Padding = UDim.new(0, 3), SortOrder = Enum.SortOrder.LayoutOrder }) })
+	local statRows: { TextLabel } = {}
+	for i = 1, 5 do
+		statRows[i] = Ui.text({
+			LayoutOrder = i,
+			Size = UDim2.new(1, 0, 0.2, -3),
+			Text = "",
+			Font = T.Font,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			MaxTextSize = 16,
+			Parent = statsList,
+		})
+	end
+	local actionButton: TextButton
+	local function hideDetails()
+		shownUid = nil
+		backdrop.Visible = false
+	end
+	actionButton = Ui.button({
+		AnchorPoint = Vector2.new(0, 1),
+		Position = UDim2.new(0, 16, 1, -14),
+		Size = UDim2.new(0.5, -22, 0, 44),
+		Text = "Equip",
+		Variant = "Success",
+		Parent = detail,
+	}, function()
+		local uid = shownUid
+		local d = State.Data
+		local entry = uid and d and d.Creatures[uid]
+		if entry then
+			invoke(if entry.Equipped then "Unequip" else "Equip", uid)
+		end
+	end)
+	Ui.button({
+		AnchorPoint = Vector2.new(1, 1),
+		Position = UDim2.new(1, -16, 1, -14),
+		Size = UDim2.new(0.5, -22, 0, 44),
+		Text = "Close",
+		Variant = "Secondary",
+		Parent = detail,
+	}, hideDetails)
+	backdrop.MouseButton1Click:Connect(hideDetails)
+
+	local function renderDetails(animate: boolean)
+		local d = State.Data
+		local uid = shownUid
+		local entry = uid and d and d.Creatures[uid]
+		local def = entry and Creatures.Get(entry.Id)
+		if not entry or not def then
+			hideDetails()
+			return
+		end
+		local rarityColor = Creatures.Rarities[def.Rarity].Color
+		local variant = entry.Variant or "Normal"
+		if animate then
+			clearChildren(iconHolder, "Frame")
+			local icon = creatureIcon(iconHolder, def, variant, 10)
+			icon.Size = UDim2.fromScale(1, 1)
+			local corner = icon:FindFirstChildOfClass("UICorner")
+			if corner then
+				corner.CornerRadius = UDim.new(0, 18)
+			end
+			detailScale.Scale = 0.8
+			TweenService:Create(detailScale, TweenInfo.new(0.22, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		end
+		if detailEdge then
+			detailEdge.Color = rarityColor
+			detailEdge.Transparency = 0.2
+		end
+		detailName.Text = Creatures.DisplayName(def.Id, variant)
+		detailName.TextColor3 = rarityColor
+		detailRarity.Text = if variant == "Normal" then def.Rarity else `{def.Rarity}  ·  {variant}`
+		detailRarity.TextColor3 = rarityColor:Lerp(Color3.new(1, 1, 1), 0.3)
+		local power = Creatures.GetPower(def.Id, variant)
+		local multiplier = (Creatures.Variants[variant] or Creatures.Variants.Normal).Multiplier
+		local copies = 0
+		for _, other in d.Creatures do
+			if other.Id == entry.Id and (other.Variant or "Normal") == variant then
+				copies += 1
+			end
+		end
+		local nextVariant = Creatures.FuseNext[variant]
+		local egg = Eggs.Get(Eggs.EggFor(def.Id))
+		local rows = {
+			`💪 Power  {Format.Number(power)}{if multiplier > 1 then `  (x{multiplier} {variant})` else ""}`,
+			`⚔️ Damage  {Format.Number(power * Config.PetDamageMultiplier / Config.PetAttackInterval)} / sec`,
+			`🥚 Found in  {if egg then egg.Name else "?"}`,
+			`📦 Owned  {copies}` .. (if nextVariant
+				then `  ·  Fuse {math.min(copies, Creatures.FuseCost)}/{Creatures.FuseCost} → {nextVariant}`
+				else ""),
+			if entry.Equipped then "✅ Equipped" else "💤 In storage",
+		}
+		for i, row in statRows do
+			row.Text = rows[i] or ""
+			row.TextColor3 = if i == 1 then T.Power elseif i == 5 and entry.Equipped then T.Good else T.Text
+		end
+		actionButton.Text = if entry.Equipped then "Unequip" else "Equip"
+		actionButton.BackgroundColor3 = if entry.Equipped then T.Card else T.Good
+		backdrop.Visible = true
+	end
 
 	refresh = function(force: boolean)
 		local d = State.Data
@@ -641,10 +794,9 @@ local function buildCreatures(screen: Frame)
 						end
 						selected[item.Uid] = if selected[item.Uid] then nil else true
 						refresh(true)
-					elseif item.Entry.Equipped then
-						invoke("Unequip", item.Uid)
 					else
-						invoke("Equip", item.Uid)
+						shownUid = item.Uid
+						renderDetails(true)
 					end
 				end)
 			end
@@ -652,11 +804,15 @@ local function buildCreatures(screen: Frame)
 	end
 
 	Ui.onPanelOpen("Creatures", function()
+		hideDetails()
 		refresh(true)
 	end)
 	State.Changed:Connect(function(key)
 		if key == "Data" and Ui.isOpen("Creatures") then
 			refresh(false)
+			if shownUid then
+				renderDetails(false)
+			end
 		end
 	end)
 end
