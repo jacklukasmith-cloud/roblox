@@ -207,6 +207,20 @@ function Economy.Release(player: Player, uids: { string }): (boolean, string?)
 end
 
 -- Rebirth: reset Essence + zones for a permanent multiplier. Creatures are kept.
+-- Teleports the player's character to the hub spawn (used after rebirth, when every realm
+-- past the first is locked again)
+function Economy.SendToHub(player: Player)
+	local character = player.Character
+	local world = workspace:FindFirstChild("World")
+	local spawn = world and world:FindFirstChild("HubSpawn", true)
+	if not (character and spawn and spawn:IsA("BasePart")) then
+		return
+	end
+	-- face down the hub towards the realms (+Z), standing just above the pad
+	local position = spawn.Position + Vector3.new(0, 4, 0)
+	character:PivotTo(CFrame.lookAt(position, position + Vector3.new(0, 0, 1)))
+end
+
 function Economy.Rebirth(player: Player): (boolean, string?)
 	local data = PlayerData.Get(player)
 	if not data then
@@ -220,6 +234,7 @@ function Economy.Rebirth(player: Player): (boolean, string?)
 	data.ZonesUnlocked = 1
 	data.Rebirths += 1
 	PlayerData.MarkChanged(player)
+	Economy.SendToHub(player)
 	notify:FireClient(
 		player,
 		`Reborn! Essence multiplier is now x{Economy.GetRebirthMultiplier(data)}`,

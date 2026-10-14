@@ -1736,6 +1736,7 @@ function WorldBuilder.Build(): BuiltWorld
 	})
 
 	local spawn = Instance.new("SpawnLocation")
+	spawn.Name = "HubSpawn"
 	spawn.Anchored = true
 	spawn.Size = Vector3.new(10, 1, 10)
 	spawn.Position = Vector3.new(0, 0.5, -32)
