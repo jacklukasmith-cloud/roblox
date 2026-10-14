@@ -224,19 +224,17 @@ local function placeMesh(
 	return model
 end
 
--- Hides the built-in parts of a prop once a mesh replaces it (they stay as invisible hitboxes)
-local function hideParts(root: Instance, except: { Instance }?)
-	local list = if root:IsA("BasePart") then { root :: Instance } else {}
+-- Removes the built-in parts of a prop once a mesh replaces it. `keep` parts stay as invisible
+-- anchors because gameplay uses them (hitbox, prompts, health bar, lights, particles); every
+-- other built-in part is deleted. Parts inside `mesh` are left alone.
+local function stripParts(root: Instance, keep: { BasePart }, mesh: Instance?)
 	for _, d in root:GetDescendants() do
-		table.insert(list, d)
-	end
-	for _, d in list do
-		if d:IsA("BasePart") and not (except and table.find(except, d)) then
-			d.Transparency = 1
-			if d.Name ~= "Main" and d.Name ~= "Body" and d.Name ~= "Merchant" then
-				d.CanCollide = false
-			end
+		if d:IsA("BasePart") and not table.find(keep, d) and not (mesh and d:IsDescendantOf(mesh)) then
+			d:Destroy()
 		end
+	end
+	for _, p in keep do
+		p.Transparency = 1
 	end
 end
 
@@ -303,6 +301,20 @@ local function zoneStartZ(index: number): number
 end
 
 -- Random spot on the zone's sides, keeping the central lane (|x| < 15) clear
+-- True when every decoration model for this realm has been imported (Meadow also needs MagicTree)
+local function zoneDecorReady(zoneIndex: number): boolean
+	local list = ZONE_DECOR[zoneIndex]
+	if not list then
+		return false
+	end
+	for _, d in list do
+		if not meshTemplate(d.Name) then
+			return false
+		end
+	end
+	return zoneIndex ~= 1 or meshTemplate("MagicTree") ~= nil
+end
+
 local function placeZoneDecor(folder: Instance, zoneIndex: number, z0: number)
 	local list = ZONE_DECOR[zoneIndex]
 	if not list then
@@ -479,7 +491,7 @@ local function makeCrystal(parent: Instance, zone: Zones.ZoneDef, position: Vect
 
 	local mesh = placeMesh(model, CRYSTAL_MESH[zone.Index] or "", base, 6.5, true)
 	if mesh then
-		hideParts(model, mesh:GetDescendants())
+		stripParts(model, { main }, mesh)
 	end
 
 	model.PrimaryPart = main
@@ -562,7 +574,7 @@ local function makeChest(parent: Instance, zone: Zones.ZoneDef, position: Vector
 	label(title, { Text = "MANA CHEST", TextColor3 = GOLD })
 	local mesh = placeMesh(model, "ManaChest", base, 9.5)
 	if mesh then
-		hideParts(model, mesh:GetDescendants())
+		stripParts(model, { body }, mesh)
 	end
 	model.PrimaryPart = body
 	model.Parent = parent
@@ -1140,7 +1152,7 @@ local function makeMerchant(parent: Instance, position: Vector3)
 	local prompt = Instance.new("ProximityPrompt")
 	local stallMesh = placeMesh(parent, "MerchantStall", CFrame.new(position), 9, true, true)
 	if stallMesh then
-		hideParts(counter)
+		stripParts(counter, { counter })
 	end
 	prompt.Name = "MerchantPrompt"
 	prompt.ActionText = "Browse"
@@ -1818,6 +1830,14 @@ function WorldBuilder.Build(): BuiltWorld
 		local decorate = decorators[zone.Index]
 		if decorate then
 			decorate(decorFolder, zone, z0)
+		end
+		if zoneDecorReady(zone.Index) then
+			-- the realm's 3D decorations replace the old block ones (keep the ambient particles)
+			for _, child in decorFolder:GetChildren() do
+				if child.Name ~= "Ambience" and string.sub(child.Name, -4) ~= "Mesh" then
+					child:Destroy()
+				end
+			end
 		end
 		placeZoneDecor(decorFolder, zone.Index, z0)
 
