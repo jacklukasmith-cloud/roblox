@@ -19,4 +19,11 @@ subjects were kept centred for that).
 | Merchant Restock | `MerchantRestock` | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261011_153756_f89310f8-be1c-4379-aff4-8f5adf40d921.png) |
 | Game icon | - | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261011_153723_8cb71d17-7b76-4c96-854c-b20dc725f899.png) |
 
-Still to make: a 16:9 game **thumbnail** (1920×1080) and creature portraits for the Bestiary.
+## Game thumbnails (16:9)
+
+Upload on the Creator Hub: your experience → **Places → Thumbnails** (you can add several and Roblox rotates them).
+
+| Version | Image |
+|---|---|
+| A: title on top, hero with creatures | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_214435_6df9e2f9-6b47-44be-8fe7-9b83060fdc6c.png) |
+| B: title on the left, egg hatching a rainbow dragon | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_214436_ae7553dc-7a3d-4414-99e8-a00fc0cebfe6.png) |
