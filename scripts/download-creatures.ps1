@@ -1,4 +1,4 @@
-# Downloads all 25 creature 3D models into the "creature-models" folder, named for the game.
+# Downloads all 26 creature 3D models into the "creature-models" folder, named for the game.
 # Usage (PowerShell, in the roblox folder):  powershell -ExecutionPolicy Bypass -File scripts\download-creatures.ps1
 
 Set-Location (Split-Path $PSScriptRoot -Parent)
@@ -31,6 +31,7 @@ $models = [ordered]@{
     "ArenaBasilisk" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261011_163720_2e2193ea-3bd8-4e70-b241-6a6f9881253c.glb"
     "GladiatorManticore" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261011_163721_e2691e5b-f061-478d-9571-ad450cd64007.glb"
     "TitanUnicorn" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261011_163722_e9c5774e-d70c-4d4b-a472-96cbc520c09b.glb"
+    "NebulaKitsune" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_235137_102618db-162b-4e59-8fb1-73f7be6b06f8.glb"
 }
 $ok = 0
 foreach ($id in $models.Keys) {

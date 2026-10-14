@@ -1,6 +1,6 @@
 # Creature 3D models
 
-All 25 creatures have a textured 3D model (GLB) made with Higgsfield:
+All 26 creatures have a textured 3D model (GLB) made with Higgsfield:
 first a concept image (GPT Image), then image to 3D with **SAM 3D (Meta)**.
 
 The game already supports them. Any creature whose model is in **ReplicatedStorage → CreatureMeshes**
@@ -36,10 +36,11 @@ Creatures without one keep the built-in part model, so you can import them one a
 | Arena Basilisk | `ArenaBasilisk` | [GLB](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261011_163720_2e2193ea-3bd8-4e70-b241-6a6f9881253c.glb) | [concept](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261011_163621_41765471-abe2-4cae-ba06-8a70abaf805c.png) |
 | Gladiator Manticore | `GladiatorManticore` | [GLB](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261011_163721_e2691e5b-f061-478d-9571-ad450cd64007.glb) | [concept](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261011_163607_98645ab6-e485-4c5c-b5cb-4ea69698cdaf.png) |
 | Titan Unicorn | `TitanUnicorn` | [GLB](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261011_163722_e9c5774e-d70c-4d4b-a472-96cbc520c09b.glb) | [concept](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261011_163608_102e85e0-b95a-43ab-a004-e61ba52c6ec6.png) |
+| Nebula Kitsune (Robux exclusive) | `NebulaKitsune` | [GLB](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_235137_102618db-162b-4e59-8fb1-73f7be6b06f8.glb) | [concept](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_235114_e7e0b545-df50-45dd-9ce2-fc45e8375650.png) |
 
 > The links are on Higgsfield's CDN. You can also download every model from your Higgsfield library.
 
-## Import into Roblox (about 2 minutes for all 25)
+## Import into Roblox (about 2 minutes for all 26)
 
 With the live sync running (see README):
 
