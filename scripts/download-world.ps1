@@ -1,4 +1,4 @@
-# Downloads the world prop 3D models (eggs, crystals, chest, tree, merchant) into the "world-models" folder.
+# Downloads the world prop 3D models (eggs, crystals, chest, merchant, trees and decorations) into the "world-models" folder.
 # Usage (PowerShell, in the roblox folder):  powershell -ExecutionPolicy Bypass -File scripts\download-world.ps1
 
 Set-Location (Split-Path $PSScriptRoot -Parent)
@@ -18,6 +18,22 @@ $models = [ordered]@{
     "ManaChest" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195817_afb64682-f37c-48e2-9869-3020e9b82f45.glb"
     "MagicTree" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195806_00114dae-20c2-4644-bd48-1e1fd4c2d472.glb"
     "MerchantStall" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_200801_7cf01a57-dc5a-4263-8203-2d83221abbed.glb"
+    "HubLamp" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203654_e5c83505-e269-481e-86ee-9b141e7b135c.glb"
+    "FlowerPlanter" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203656_a9cd57aa-b829-415b-bc2f-efd752530e7a.glb"
+    "Bench" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203657_bc48931b-c4c5-4dbf-a2d6-3f8c08c36020.glb"
+    "HubBanner" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203659_c57b547d-5147-4998-aa97-399be85181d5.glb"
+    "GiantMushroom" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203700_661a3966-5d83-48d8-af55-4585350d5ba3.glb"
+    "FlowerBush" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203701_1e462185-708c-4764-9538-53b12abb9c85.glb"
+    "MossRock" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203834_fc48ecf3-a24b-4076-a3e4-1f423415b347.glb"
+    "LavaRock" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203704_ca9cf642-bbb4-45fa-9b26-8901439b081c.glb"
+    "CharredTree" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203707_369c04ce-5e83-427b-aef5-793b023b88d0.glb"
+    "FireBrazier" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203925_105be5b3-d0f6-411d-9ed7-e0f73a2d2706.glb"
+    "SnowyPine" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203710_dc8a36bc-690c-4c0e-926e-187499efabbc.glb"
+    "IceRock" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203712_5828abd4-cb9c-4e97-91ad-8b8160809db6.glb"
+    "Snowman" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203713_d7d366dc-8d3b-4e0e-8d08-3fc0b13751dd.glb"
+    "FloatingIsland" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203714_b668cb0e-fc5c-48b8-b5b9-809a5039b85c.glb"
+    "RuinedColumn" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203716_3424e4bf-5868-4b99-97a8-38861620cb8b.glb"
+    "StarLantern" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203717_046700b4-5a99-4829-92ce-31e6de5aa90d.glb"
     "MerchantTent" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_200802_63cfd9f7-3dd7-4a70-8806-b9ee08a1395a.glb"
 }
 $ok = 0

@@ -146,6 +146,23 @@ WorldBuilder.MeshNames = {
 	"ManaChest",
 	"MerchantStall",
 	"MagicTree",
+	-- decorations (only placed when the model exists)
+	"HubLamp",
+	"FlowerPlanter",
+	"Bench",
+	"HubBanner",
+	"GiantMushroom",
+	"FlowerBush",
+	"MossRock",
+	"LavaRock",
+	"CharredTree",
+	"FireBrazier",
+	"SnowyPine",
+	"IceRock",
+	"Snowman",
+	"FloatingIsland",
+	"RuinedColumn",
+	"StarLantern",
 }
 local CRYSTAL_MESH = { "MeadowCrystal", "EmberCrystal", "FrostCrystal", "SkyCrystal" }
 
@@ -232,11 +249,91 @@ local function light(parent: Instance, color: Color3, range: number, brightness:
 	l.Parent = parent
 end
 
+-- An invisible anchor that holds a light (for imported props that should glow)
+local function glowAt(parent: Instance, position: Vector3, color: Color3, range: number)
+	local anchor = part({
+		Name = "Glow",
+		Size = Vector3.one,
+		Position = position,
+		Transparency = 1,
+		CanCollide = false,
+		CanQuery = false,
+		CanTouch = false,
+		Parent = parent,
+	})
+	light(anchor, color, range, 1.2)
+end
+
+-- Decorations along the edges of each realm (only when their model has been imported).
+-- Size = height in studs (or longest side when ByLongest); Lift raises it off the ground.
+type DecorDef = {
+	Name: string,
+	Count: number,
+	Size: number,
+	ByLongest: boolean?,
+	Lift: number?,
+	Bob: number?,
+	Glow: Color3?,
+}
+local ZONE_DECOR: { [number]: { DecorDef } } = {
+	[1] = {
+		{ Name = "GiantMushroom", Count = 6, Size = 8 },
+		{ Name = "FlowerBush", Count = 10, Size = 3.5 },
+		{ Name = "MossRock", Count = 6, Size = 4 },
+	},
+	[2] = {
+		{ Name = "LavaRock", Count = 8, Size = 4.5, Glow = Color3.fromRGB(255, 120, 40) },
+		{ Name = "CharredTree", Count = 6, Size = 12 },
+		{ Name = "FireBrazier", Count = 4, Size = 5.5, Glow = Color3.fromRGB(255, 160, 60) },
+	},
+	[3] = {
+		{ Name = "SnowyPine", Count = 10, Size = 14 },
+		{ Name = "IceRock", Count = 6, Size = 4.5 },
+		{ Name = "Snowman", Count = 2, Size = 6 },
+	},
+	[4] = {
+		{ Name = "FloatingIsland", Count = 4, Size = 9, ByLongest = true, Lift = 12, Bob = 1.2 },
+		{ Name = "RuinedColumn", Count = 6, Size = 11 },
+		{ Name = "StarLantern", Count = 6, Size = 8, Glow = Color3.fromRGB(255, 220, 120) },
+	},
+}
+
 local function zoneStartZ(index: number): number
 	return HUB_END + (index - 1) * ZONE_LENGTH
 end
 
 -- Random spot on the zone's sides, keeping the central lane (|x| < 15) clear
+local function placeZoneDecor(folder: Instance, zoneIndex: number, z0: number)
+	local list = ZONE_DECOR[zoneIndex]
+	if not list then
+		return
+	end
+	-- own random stream, so adding models never shifts the rest of the layout
+	local drng = Random.new(4242 + zoneIndex)
+	for t, d in list do
+		if not meshTemplate(d.Name) then
+			continue
+		end
+		for i = 1, d.Count do
+			local side = if (i + t) % 2 == 0 then -1 else 1
+			-- outer strip (|x| 39-47) stays clear of crystals, eggs and chests
+			local x = side * drng:NextNumber(39, 47)
+			local frac = (i - 1 + t / (#list + 1)) / d.Count
+			local z = z0 + 10 + frac * (ZONE_LENGTH - 20) + drng:NextNumber(-3, 3)
+			local base = CFrame.new(x, d.Lift or 0, z) * CFrame.Angles(0, drng:NextNumber(0, math.pi * 2), 0)
+			local m = placeMesh(folder, d.Name, base, d.Size, not d.ByLongest)
+			if m then
+				if d.Bob then
+					m:SetAttribute("Bob", d.Bob)
+				end
+				if d.Glow then
+					glowAt(m, Vector3.new(x, (d.Lift or 0) + d.Size * 0.7, z), d.Glow, 14)
+				end
+			end
+		end
+	end
+end
+
 local function sideSpot(z0: number, length: number): Vector3
 	local side = if rng:NextNumber() < 0.5 then -1 else 1
 	return Vector3.new(side * rng:NextNumber(16, WIDTH / 2 - 4), 0, rng:NextNumber(z0 + 6, z0 + length - 6))
@@ -1650,7 +1747,21 @@ function WorldBuilder.Build(): BuiltWorld
 			Vector3.new(44, 0, 40),
 		}
 	do
-		makeLamp(hub, pos, rgb(200, 160, 255))
+		if placeMesh(hub, "HubLamp", CFrame.new(pos), 12, true) then
+			glowAt(hub, pos + Vector3.new(0, 11, 0), rgb(200, 160, 255), 18)
+		else
+			makeLamp(hub, pos, rgb(200, 160, 255))
+		end
+	end
+	-- Hub decorations (only placed when their model has been imported)
+	for _, pos in { Vector3.new(-44, 0, -22), Vector3.new(44, 0, -22), Vector3.new(-44, 0, 20), Vector3.new(44, 0, 20) } do
+		placeMesh(hub, "FlowerPlanter", CFrame.new(pos), 5)
+	end
+	for _, x in { -16, 16 } do
+		placeMesh(hub, "Bench", CFrame.new(x, 0, -42), 7)
+	end
+	for _, pos in { Vector3.new(-42, 0, -55), Vector3.new(42, 0, -55), Vector3.new(-12, 0, 47), Vector3.new(12, 0, 47) } do
+		placeMesh(hub, "HubBanner", CFrame.new(pos), 13, true)
 	end
 
 	for i, id in Houses.Order do
@@ -1708,6 +1819,7 @@ function WorldBuilder.Build(): BuiltWorld
 		if decorate then
 			decorate(decorFolder, zone, z0)
 		end
+		placeZoneDecor(decorFolder, zone.Index, z0)
 
 		-- Crystals spread over the zone (grid with jitter)
 		local crystalFolder = Instance.new("Folder")

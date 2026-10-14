@@ -22,6 +22,31 @@ block versions. Any prop without a model keeps its built-in look, so you can add
 Spare: `MerchantTent.glb` is a tent version of the stall ([image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_200722_00b44a06-b6fe-4802-83ac-fc904f99c72f.png)).
 It isn't used unless you rename it to `MerchantStall` (and remove the wagon).
 
+## Decorations (hub and every realm)
+
+These only appear once their model is imported (there is no built-in version). They are placed
+automatically along the outer edges of each realm, clear of crystals, eggs and chests, and in
+free spots around the hub.
+
+| Model name | Where | What gets placed | Preview image |
+|---|---|---|---|
+| `HubLamp` | Hub | 6 lamp posts (replace the old lamps) | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203617_4cd25554-9844-484c-9942-870c16b8f7b1.png) |
+| `FlowerPlanter` | Hub | 4 flower planters | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203617_e2976d72-a026-4d4d-813f-e2de53f21526.png) |
+| `Bench` | Hub | 2 benches near spawn | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203618_ab110492-71ff-4792-a455-cdf84093d404.png) |
+| `HubBanner` | Hub | 4 banners | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203616_85aa92c2-f079-4067-9e18-1494273f3ad4.png) |
+| `GiantMushroom` | Enchanted Meadow | 6 giant mushrooms | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203616_6d9ee802-33d7-406d-bf94-4e89d7d8952f.png) |
+| `FlowerBush` | Enchanted Meadow | 10 flower bushes | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203616_0e7cce9d-c206-4ffe-81df-64c95da6f7b5.png) |
+| `MossRock` | Enchanted Meadow | 6 mossy rocks | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203817_87a430ed-c315-4c2c-9f9c-af658c44658f.png) |
+| `LavaRock` | Ember Rift | 8 glowing lava rocks | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203617_e1573818-8300-4b1f-92ce-9f5268cf53a1.png) |
+| `CharredTree` | Ember Rift | 6 burnt trees | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203632_3395b6fb-1b53-40f6-a6f8-f4f873fdde0d.png) |
+| `FireBrazier` | Ember Rift | 4 glowing braziers | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203900_27347b92-8689-4c42-8110-c6d92c8bd0ed.png) |
+| `SnowyPine` | Frostpeak | 10 snowy pine trees | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203634_a33b376e-6c0c-446b-9dae-1015eb490aa1.png) |
+| `IceRock` | Frostpeak | 6 ice rocks | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203634_4cb97e5e-e3cc-4e41-affe-e039217968c9.png) |
+| `Snowman` | Frostpeak | 2 snowmen | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203632_74b61b26-f3d9-4df4-9355-9a54da7067c7.png) |
+| `FloatingIsland` | Sky Sanctum | 4 bobbing floating islands | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203633_bec82ab9-66b3-4651-afef-33ad62a9fc63.png) |
+| `RuinedColumn` | Sky Sanctum | 6 ruined columns | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203632_da560f91-3b08-4ddf-9352-1b776e3d5e21.png) |
+| `StarLantern` | Sky Sanctum | 6 glowing star lanterns | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203633_f2cfeaff-65d0-4def-8090-e80a90d465ef.png) |
+
 ## Add them to the game
 
 1. Run `powershell -ExecutionPolicy Bypass -File scripts\download-world.ps1` in the roblox
@@ -29,7 +54,7 @@ It isn't used unless you rename it to `MerchantStall` (and remove the wagon).
 2. In Studio: **File → Import 3D**, select all the `.glb` files, and import them into Workspace.
    Keep the file names (e.g. `MeadowEgg`) as the model names.
 3. Press **Play**. The server moves them into `ReplicatedStorage.WorldMeshes` and builds the world
-   with them. The Output shows `World 3D models ready: 12/12`.
+   with them. The Output shows `World 3D models ready: 28/28`.
 4. That's it: leave them in Workspace. Every time the game starts they are picked up
    automatically (or drag them into `ReplicatedStorage > WorldMeshes` yourself, same result).
 
