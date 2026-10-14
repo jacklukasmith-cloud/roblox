@@ -535,24 +535,76 @@ local function buildCreatures(screen: Frame)
 end
 
 -- Shop panel ------------------------------------------------------------------------------
-local function shopCard(parent: Instance, order: number, item, owned: boolean, onBuy: () -> ())
+-- Live icon + price for a pass/product straight from Roblox (cached), so the shop always matches
+-- what you set on the Creator Hub. Returns nil if it can't be fetched.
+local productInfoCache: { [string]: { Icon: string?, Price: number? } | false } = {}
+local function productInfo(id: number, infoType: Enum.InfoType)
+	local key = `{infoType.Name}:{id}`
+	local cached = productInfoCache[key]
+	if cached ~= nil then
+		return cached or nil
+	end
+	local ok, info = pcall(function()
+		return MarketplaceService:GetProductInfo(id, infoType)
+	end)
+	if not ok or type(info) ~= "table" then
+		return nil -- try again next time the shop opens
+	end
+	local iconId = info.IconImageAssetId
+	local result = {
+		Icon = if type(iconId) == "number" and iconId > 0 then `rbxassetid://{iconId}` else nil,
+		Price = if type(info.PriceInRobux) == "number" then info.PriceInRobux else nil,
+	}
+	productInfoCache[key] = result
+	return result
+end
+
+local SHOP_EMOJI = {
+	VIP = "👑",
+	DoubleEssence = "💎",
+	AutoCollect = "⛏️",
+	LuckyHatch = "🍀",
+	TripleHatch = "🥚",
+	ExtraEquip = "🐾",
+	LongerOffline = "🌙",
+	EssencePouch = "👝",
+	EssenceChest = "🧰",
+	LuckPotion = "🧪",
+	MerchantRestock = "🔄",
+}
+
+local function shopCard(
+	parent: Instance,
+	order: number,
+	item,
+	owned: boolean,
+	onBuy: () -> (),
+	infoType: Enum.InfoType?
+)
 	local card = Ui.new("Frame", {
 		LayoutOrder = order,
 		Size = UDim2.new(1, -8, 0, 74),
 		BackgroundColor3 = T.Card,
 		Parent = parent,
 	}, { Ui.corner(10), Ui.stroke(T.Gold, 1.5) })
-	local textX = 10
-	if item.Icon and item.Icon ~= "" then
-		Ui.new("ImageLabel", {
-			Image = item.Icon,
-			BackgroundTransparency = 1,
-			Position = UDim2.fromOffset(8, 7),
-			Size = UDim2.fromOffset(60, 60),
-			Parent = card,
-		}, { Ui.corner(30) })
-		textX = 76
-	end
+	-- Icon: Config.Icon if set, otherwise the icon uploaded on the Creator Hub (fetched below)
+	local textX = 76
+	local icon = Ui.new("ImageLabel", {
+		Image = item.Icon or "",
+		BackgroundColor3 = T.GlassLight,
+		BackgroundTransparency = 0.3,
+		Position = UDim2.fromOffset(8, 7),
+		Size = UDim2.fromOffset(60, 60),
+		Parent = card,
+	}, { Ui.corner(30) })
+	-- emoji until (or unless) a real icon is available
+	local fallback = Ui.text({
+		Size = UDim2.fromScale(1, 1),
+		Text = SHOP_EMOJI[item.Key] or "⭐",
+		Visible = item.Icon == nil or item.Icon == "",
+		MaxTextSize = 32,
+		Parent = icon,
+	})
 	Ui.text({
 		Text = item.Name,
 		Position = UDim2.fromOffset(textX, 8),
@@ -581,6 +633,21 @@ local function shopCard(parent: Instance, order: number, item, owned: boolean, o
 		end
 	end)
 	button.Active = not owned
+	if item.Id ~= 0 and infoType then
+		task.spawn(function()
+			local info = productInfo(item.Id, infoType)
+			if not info or not card.Parent then
+				return
+			end
+			if (item.Icon == nil or item.Icon == "") and info.Icon then
+				icon.Image = info.Icon
+				fallback.Visible = false
+			end
+			if info.Price and not owned then
+				button.Text = `R$ {info.Price}`
+			end
+		end)
+	end
 	return card
 end
 
@@ -607,7 +674,7 @@ local function buildShop(screen: Frame)
 				else
 					MarketplaceService:PromptGamePassPurchase(player, pass.Id)
 				end
-			end)
+			end, Enum.InfoType.GamePass)
 		end
 		Ui.text({
 			LayoutOrder = 100,
@@ -623,7 +690,7 @@ local function buildShop(screen: Frame)
 				else
 					MarketplaceService:PromptProductPurchase(player, product.Id)
 				end
-			end)
+			end, Enum.InfoType.Product)
 		end
 	end
 	Ui.onPanelOpen("Shop", render)
