@@ -39,8 +39,10 @@ type CrystalState = {
 	Main: BasePart,
 	Parts: { { Part: BasePart, Transparency: number, CanCollide: boolean } },
 	Zone: number,
+	BaseHP: number,
 	MaxHP: number,
 	HP: number,
+	SizeReward: number,
 	RewardMultiplier: number,
 	RespawnTime: number,
 	Kind: string,
@@ -96,6 +98,43 @@ local function updateBar(state: CrystalState)
 	state.Label.Text = Format.Number(math.ceil(state.HP))
 end
 
+-- Rolls this crystal's strength (normal crystals only) and resizes it to match,
+-- keeping its base on the ground
+local sizeRng = Random.new()
+local function rollSize(state: CrystalState)
+	if state.Kind ~= "Crystal" then
+		return
+	end
+	local sizes = Config.CrystalSizes
+	local total = 0
+	for _, size in sizes do
+		total += size.Weight
+	end
+	local roll = sizeRng:NextNumber() * total
+	local chosen = sizes[1]
+	for _, size in sizes do
+		roll -= size.Weight
+		if roll <= 0 then
+			chosen = size
+			break
+		end
+	end
+	state.MaxHP = state.BaseHP * chosen.HP
+	state.HP = state.MaxHP
+	state.SizeReward = chosen.Reward
+	state.Model:SetAttribute("Size", chosen.Name)
+	local model = state.Model
+	if math.abs(model:GetScale() - chosen.Scale) > 1e-3 then
+		local before = model:GetBoundingBox()
+		local _, sizeBefore = model:GetBoundingBox()
+		local bottom = before.Position.Y - sizeBefore.Y / 2
+		model:ScaleTo(chosen.Scale)
+		local after, sizeAfter = model:GetBoundingBox()
+		local shift = bottom - (after.Position.Y - sizeAfter.Y / 2)
+		model:PivotTo(model:GetPivot() + Vector3.new(0, shift, 0))
+	end
+end
+
 local function breakCrystal(state: CrystalState)
 	state.Broken = true
 	local damage = state.Damage
@@ -115,7 +154,8 @@ local function breakCrystal(state: CrystalState)
 			end
 			combo.ExpiresAt = now + Config.Combo.Window
 			local comboMult = 1 + (combo.Count - 1) * Config.Combo.Step
-			local earned = Economy.AwardCrystal(player, state.Zone, share, state.RewardMultiplier * comboMult)
+			local earned =
+				Economy.AwardCrystal(player, state.Zone, share, state.RewardMultiplier * state.SizeReward * comboMult)
 			crystalBroken:FireClient(
 				player,
 				state.Model,
@@ -158,6 +198,7 @@ local function breakCrystal(state: CrystalState)
 	end
 	task.delay(state.RespawnTime, function()
 		state.HP = state.MaxHP
+		rollSize(state)
 		state.Broken = false
 		for _, entry in state.Parts do
 			entry.Part.Transparency = entry.Transparency
@@ -237,8 +278,10 @@ function Crystals.Register(model: Model, zoneIndex: number, options: Options?)
 		Main = main,
 		Parts = parts,
 		Zone = zoneIndex,
+		BaseHP = maxHP,
 		MaxHP = maxHP,
 		HP = maxHP,
+		SizeReward = 1,
 		RewardMultiplier = o.RewardMultiplier or 1,
 		RespawnTime = o.RespawnTime or Config.CrystalRespawnTime,
 		Kind = o.Kind or "Crystal",
@@ -251,6 +294,7 @@ function Crystals.Register(model: Model, zoneIndex: number, options: Options?)
 	}
 	states[model] = state
 	model:SetAttribute("Breakable", state.Kind)
+	rollSize(state)
 	updateBar(state)
 	-- A ClickDetector inside a Model makes every part of it clickable
 	local detector = Instance.new("ClickDetector")

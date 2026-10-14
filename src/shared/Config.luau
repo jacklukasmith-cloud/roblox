@@ -28,16 +28,25 @@ Config.StarterCreature = "GlowSprite" -- every new player gets one, so they can 
 
 -- Critical hits: each creature attack tick can crit for bonus damage
 Config.Crit = {
-	Chance = 0.12,
+	Chance = 0.08,
 	Multiplier = 2.5,
 }
 
 -- Combos: breaking crystals back-to-back (within Window seconds of the last break) builds a combo.
--- Each step adds Step to the Essence multiplier, up to Max steps (x2 at 20).
+-- Each step adds Step to the Essence multiplier, up to Max steps (about x1.9 at 30).
 Config.Combo = {
-	Window = 6,
-	Step = 0.05,
-	Max = 20,
+	Window = 3,
+	Step = 0.03,
+	Max = 30,
+}
+
+-- Crystal strength: every crystal rolls a size when it spawns/respawns (Weight = how common).
+-- HP and Reward multiply the realm's base crystal; Scale is how big it looks.
+Config.CrystalSizes = {
+	{ Name = "Normal", Weight = 50, HP = 1, Reward = 1, Scale = 1 },
+	{ Name = "Strong", Weight = 30, HP = 1.5, Reward = 1.5, Scale = 1.15 },
+	{ Name = "Tough", Weight = 17, HP = 2, Reward = 2, Scale = 1.3 },
+	{ Name = "Giant", Weight = 3, HP = 10, Reward = 12, Scale = 2 },
 }
 
 -- Boss raids: a giant creature appears in a realm; everyone attacks it together
