@@ -179,12 +179,27 @@ local function buildBoss(zoneIndex: number, creatureId: string): (Model, BasePar
 	CreatureModels.Place(rig, CFrame.new(position) * CFrame.Angles(0, math.pi, 0))
 	rig.Model:SetAttribute("Bob", 1)
 	rig.Model.Parent = model
+	-- Creature parts normally ignore the mouse; the boss has to be clickable/tappable anywhere
+	for _, d in rig.Model:GetDescendants() do
+		if d:IsA("BasePart") then
+			d.CanQuery = true
+		end
+	end
+	-- and the invisible hitbox covers the whole body (it also anchors the health bar and range checks)
+	local boxCFrame, boxSize = rig.Model:GetBoundingBox()
+	local bottom = boxCFrame.Position.Y - boxSize.Y / 2
+	if bottom < 0.5 then -- big creatures would otherwise sink into the ground
+		rig.Model:PivotTo(rig.Model:GetPivot() + Vector3.new(0, 0.5 - bottom, 0))
+		boxCFrame, boxSize = rig.Model:GetBoundingBox()
+	end
+	main.Size = boxSize + Vector3.new(2, 2, 2)
+	main.CFrame = CFrame.new(boxCFrame.Position)
 
 	local helpers = WorldBuilder.Helpers
-	helpers.HealthBar(main, BOSS_COLOR, 320, 14)
+	helpers.HealthBar(main, BOSS_COLOR, 320, boxSize.Y / 2 + 3)
 	helpers.Burst(main, BOSS_COLOR)
 	helpers.Light(main, BOSS_COLOR, 40, 3)
-	local title = helpers.Billboard(main, UDim2.fromOffset(360, 40), Vector3.new(0, 17, 0), 200)
+	local title = helpers.Billboard(main, UDim2.fromOffset(360, 40), Vector3.new(0, boxSize.Y / 2 + 6.5, 0), 200)
 	helpers.Label(title, {
 		Text = `⚔️ BOSS: {Creatures.DisplayName(creatureId, "Rainbow")}`,
 		TextColor3 = Color3.fromRGB(255, 220, 90),
@@ -255,8 +270,11 @@ function BossRaid.GoTo(player: Player): (boolean, string?)
 	if not character then
 		return false
 	end
-	local spot = boss.Main.Position + Vector3.new(0, -3, -24)
-	character:PivotTo(CFrame.lookAt(spot, Vector3.new(boss.Main.Position.X, spot.Y, boss.Main.Position.Z)))
+	local center = boss.Main.Position
+	local spot = Vector3.new(center.X, 4, center.Z - boss.Main.Size.Z / 2 - 16)
+	character:PivotTo(CFrame.lookAt(spot, Vector3.new(center.X, spot.Y, center.Z)))
+	-- send their creatures straight at it
+	Crystals.Target(player, boss.Model)
 	return true
 end
 

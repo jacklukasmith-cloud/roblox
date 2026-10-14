@@ -332,9 +332,12 @@ local function nearestCrystal(player: Player, range: number): Model?
 	end
 	local best, bestDist = nil, range
 	for model, state in states do
-		if not state.Broken and state.Kind ~= "Boss" and state.Zone <= data.ZonesUnlocked then
+		if not state.Broken and state.Zone <= data.ZonesUnlocked then
 			local dist = (state.Main.Position - pos).Magnitude
-			if dist < bestDist then
+			if state.Kind == "Boss" and dist <= Config.MaxHitDistance then
+				return model -- a boss nearby always comes first
+			end
+			if state.Kind ~= "Boss" and dist < bestDist then
 				best, bestDist = model, dist
 			end
 		end
