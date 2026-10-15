@@ -8,13 +8,15 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local Config = require(ReplicatedStorage.Shared.Config)
 local Creatures = require(ReplicatedStorage.Shared.Creatures)
+local PetStats = require(ReplicatedStorage.Shared.PetStats)
 local CreatureModels = require(ReplicatedStorage.Shared.CreatureModels)
 local State = require(script.Parent.State)
 
 local Followers = {}
 
-type Follower = { Rig: CreatureModels.Rig, Offset: Vector3, Phase: number, Position: Vector3? }
+type Follower = { Rig: CreatureModels.Rig, Offset: Vector3, Phase: number, Speed: number, Position: Vector3? }
 
 local folder = Instance.new("Folder")
 folder.Name = "Followers"
@@ -74,7 +76,13 @@ local function rebuild(player: Player)
 		for i = rowStart, rowStart + rowSize - 1 do
 			local col = i - rowStart
 			local x = (col - (rowSize - 1) / 2) * spacing
-			table.insert(list, { Rig = rigs[i], Offset = Vector3.new(x, radius * 0.6 + 0.5, z), Phase = i * 0.9 })
+			table.insert(list, {
+				Rig = rigs[i],
+				Offset = Vector3.new(x, radius * 0.6 + 0.5, z),
+				Phase = i * 0.9,
+				-- studs/sec: rarer creatures are quicker (PetStats.Speed)
+				Speed = Config.PetMoveSpeed * PetStats.Speed(rigs[i].Model.Name),
+			})
 		end
 		z += radius + 0.6
 	end
@@ -130,6 +138,8 @@ function Followers.Start()
 			local character = player.Character
 			local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
 			if root and (root.Position - camPos).Magnitude < DRAW_DISTANCE then
+				local humanoid = character:FindFirstChildOfClass("Humanoid")
+				local runSpeed = if humanoid then humanoid.WalkSpeed else 16
 				-- Attacking a crystal? (Pet Simulator style: creatures surround it and pounce)
 				local targetValue = player:FindFirstChild("PetTarget") :: ObjectValue?
 				local target = targetValue and targetValue.Value
@@ -166,8 +176,16 @@ function Followers.Start()
 					if not pos or (pos - desired).Magnitude > 120 then
 						pos = desired -- first frame / teleported / respawned
 					end
-					local speed = if targetPos then alphaFast else alpha
-					pos = (pos :: Vector3):Lerp(desired, speed)
+					-- fly at the creature's own speed; ease in over the last couple of studs. When
+					-- following, never fall behind a running player.
+					local maxSpeed = if targetPos then f.Speed else math.max(f.Speed, runSpeed * 1.3)
+					local delta = desired - (pos :: Vector3)
+					local dist = delta.Magnitude
+					if dist > 2 then
+						pos = (pos :: Vector3) + delta.Unit * math.min(dist - 2, maxSpeed * dt)
+					else
+						pos = (pos :: Vector3):Lerp(desired, if targetPos then alphaFast else alpha)
+					end
 					f.Position = pos
 					if facing.Magnitude < 0.01 then
 						facing = Vector3.new(0, 0, -1)

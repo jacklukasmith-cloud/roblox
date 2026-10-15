@@ -64,6 +64,7 @@ local combos: { [Player]: { Count: number, ExpiresAt: number } } = {}
 local critRng = Random.new()
 local targets: { [Player]: Model } = {}
 local targetSince: { [Player]: number } = {}
+local targetDistance: { [Player]: number } = {}
 local lastWarn: { [Player]: number } = {}
 local notify = Remotes.Event("Notify")
 local crystalHit = Remotes.Event("CrystalHit")
@@ -114,6 +115,12 @@ end
 local function setTarget(player: Player, model: Model?)
 	if targets[player] ~= model then
 		targetSince[player] = os.clock()
+		-- how far the creatures have to fly (they start next to you)
+		local character = player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+		targetDistance[player] = if root and model
+			then math.max(0, ((model:GetPivot().Position - root.Position) * Vector3.new(1, 0, 1)).Magnitude - 3)
+			else 0
 	end
 	targets[player] = model
 	local value = targetValue(player)
@@ -575,7 +582,9 @@ local function tickPlayer(player: Player)
 		end
 		-- Creatures need a moment to fly over before they start hitting
 		-- (faster teams get there sooner)
-		local travel = Config.PetTravelTime / Economy.GetTeamSpeed(data)
+		-- a moment to get going, then the flight itself (both quicker for faster teams)
+		local teamSpeed = Economy.GetTeamSpeed(data)
+		local travel = (Config.PetTravelTime + (targetDistance[player] or 0) / Config.PetMoveSpeed) / teamSpeed
 		-- no creatures out = nobody attacking (your pickaxe still works)
 		local _, equipped = PlayerData.CountCreatures(data)
 		if state and equipped > 0 and os.clock() - (targetSince[player] or 0) >= travel then
@@ -617,6 +626,7 @@ Players.PlayerRemoving:Connect(function(player)
 	abilityReady[player] = nil
 	targets[player] = nil
 	targetSince[player] = nil
+	targetDistance[player] = nil
 	lastWarn[player] = nil
 	combos[player] = nil
 	for _, state in states do

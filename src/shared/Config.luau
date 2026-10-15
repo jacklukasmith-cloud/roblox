@@ -18,8 +18,9 @@ Config.MaxReceiptHistory = 50
 -- Click a crystal to send your creatures at it; they deal your Power as damage every tick.
 Config.BaseClickPower = 1
 Config.PetAttackInterval = 0.25 -- seconds between creature attack ticks
-Config.PetDamageMultiplier = 0.75 -- damage per tick = Power * this (3 Power/sec)
-Config.PetTravelTime = 0.6 -- creatures fly to the target first; damage starts after this
+Config.PetDamageMultiplier = 0.5 -- damage per tick = Power * this (2 Power/sec)
+Config.PetTravelTime = 0.6 -- wind-up before creatures set off; then they fly at PetMoveSpeed
+Config.PetMoveSpeed = 11 -- studs/sec a Speed-1 creature flies at (players walk at 16); x its Speed stat
 Config.MaxHitDistance = 45 -- studs from character to crystal when choosing a target
 Config.MaxAttackDistance = 70 -- creatures give up if you walk further than this away
 Config.CrystalRespawnTime = 4
