@@ -750,8 +750,11 @@ local function makeEggStand(parent: Instance, eggId: string, position: Vector3):
 	pillStroke.Transparency = 0.35
 	pillStroke.Thickness = 1.5
 	pillStroke.Parent = pill
+	local requiredZone = egg.RequiresZone and Zones.Get(egg.RequiresZone)
 	label(pill, {
-		Text = `{priceIcon}  {Format.Number(egg.Cost)}`,
+		Text = if requiredZone
+			then `{priceIcon} {Format.Number(egg.Cost)} · needs {requiredZone.Name}`
+			else `{priceIcon}  {Format.Number(egg.Cost)}`,
 		Font = Enum.Font.GothamBold,
 		Position = UDim2.fromScale(0.08, 0.14),
 		Size = UDim2.fromScale(0.84, 0.72),

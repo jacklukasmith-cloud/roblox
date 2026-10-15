@@ -11,6 +11,7 @@ export type EggDef = {
 	Id: string,
 	Name: string,
 	Zone: number, -- 0 = hub
+	RequiresZone: number?, -- realm you must have unlocked to hatch it (defaults to Zone)
 	Cost: number,
 	Currency: "Essence" | "Trophies",
 	Color: Color3,
@@ -90,6 +91,8 @@ Eggs.List = {
 		Id = "ChampionEgg",
 		Name = "Champion Egg",
 		Zone = 0,
+		-- sits in the hub, but its creatures would skip whole realms for new players
+		RequiresZone = 3,
 		Cost = 15,
 		Currency = "Trophies",
 		Color = rgb(0, 255, 225),

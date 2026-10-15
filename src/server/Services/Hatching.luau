@@ -80,8 +80,10 @@ function Hatching.Hatch(player: Player, eggId: string, count: number): (boolean,
 		return false, "Triple Hatch is a game pass"
 	end
 	count = if count == 3 then 3 else 1
-	if egg.Zone > data.ZonesUnlocked then
-		return false, "Unlock this zone first"
+	local required = egg.RequiresZone or egg.Zone
+	if required > data.ZonesUnlocked then
+		local zone = Zones.Get(required)
+		return false, `Unlock {if zone then zone.Name else "this realm"} first`
 	end
 	local total = PlayerData.CountCreatures(data)
 	if total + count > Config.MaxInventory then
