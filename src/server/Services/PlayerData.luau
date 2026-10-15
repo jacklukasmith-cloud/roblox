@@ -85,7 +85,7 @@ local function reconcile(data: any, template: any)
 	end
 end
 
-type Profile = { Data: Data, CanSave: boolean, Dirty: boolean }
+type Profile = { Data: Data, CanSave: boolean, Dirty: boolean, Leaving: boolean? }
 
 local profiles: { [Player]: Profile } = {}
 local loadedEvent = Instance.new("BindableEvent")
@@ -202,31 +202,30 @@ function PlayerData.OnLeaving(callback: (Player) -> ())
 	table.insert(leavingCallbacks, callback)
 end
 
-Players.PlayerRemoving:Connect(function(player)
-	if not profiles[player] then
+-- Final save, exactly once per player (leaving and server shutdown can both ask for it;
+-- saving the same key twice in a row only queues the second request)
+local function finalSave(player: Player)
+	local profile = profiles[player]
+	if not profile or profile.Leaving then
 		return
 	end
+	profile.Leaving = true
 	for _, callback in leavingCallbacks do
 		pcall(callback, player)
 	end
 	PlayerData.Save(player)
 	profiles[player] = nil
-end)
+end
+
+Players.PlayerRemoving:Connect(finalSave)
 
 game:BindToClose(function()
-	local pending = 0
 	for player in profiles do
-		pending += 1
-		task.spawn(function()
-			for _, callback in leavingCallbacks do
-				pcall(callback, player)
-			end
-			PlayerData.Save(player)
-			pending -= 1
-		end)
+		task.spawn(finalSave, player)
 	end
+	-- wait for every final save (including ones PlayerRemoving already started)
 	local deadline = os.clock() + 25
-	while pending > 0 and os.clock() < deadline do
+	while next(profiles) ~= nil and os.clock() < deadline do
 		task.wait(0.2)
 	end
 end)
@@ -235,8 +234,10 @@ end)
 task.spawn(function()
 	while true do
 		task.wait(Config.AutosaveInterval)
-		for player in profiles do
-			task.spawn(PlayerData.Save, player)
+		for player, profile in profiles do
+			if not profile.Leaving then -- their final save is already running
+				task.spawn(PlayerData.Save, player)
+			end
 		end
 	end
 end)

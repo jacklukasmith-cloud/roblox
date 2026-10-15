@@ -10,6 +10,7 @@
 	  Hub (spawn, boards, Houses, Merchant, Champion Egg) -> Meadow -> Ember -> Frost -> Sky
 ]]
 
+local InsertService = game:GetService("InsertService")
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -1686,22 +1687,54 @@ local function setupLighting()
 	effect("ColorCorrectionEffect", { Saturation = 0.12, Contrast = 0.06, Brightness = 0.02 })
 end
 
+--[[
+	The Creator Hub lists two kinds of ID: an Image ID works directly, but a Decal ID only shows
+	an image once it's converted (Studio does this when you paste into Properties; scripts don't).
+	So each ID is loaded once: if it's a Decal, its image is used instead.
+]]
+local resolvedImages: { [string]: string } = {}
+local function resolveImage(id: string): string
+	local number = string.match(id, "%d+")
+	if not number then
+		return id
+	end
+	if resolvedImages[number] then
+		return resolvedImages[number]
+	end
+	local image = "rbxassetid://" .. number
+	local ok, asset = pcall(function()
+		return InsertService:LoadAsset(tonumber(number) :: number)
+	end)
+	if ok and asset then
+		for _, d in asset:GetDescendants() do
+			if d:IsA("Decal") and (d :: Decal).Texture ~= "" then
+				image = (d :: Decal).Texture
+				print(`[Mythic Tamers] Ground texture {number} is a Decal ID - using its image ({image})`)
+				break
+			end
+		end
+		asset:Destroy()
+	end
+	resolvedImages[number] = image
+	return image
+end
+
 -- Lays a tiling image (Config.GroundTextures) over the top of a floor part
 local function groundTexture(floor: BasePart, key: any)
 	local id = Config.GroundTextures[key]
 	if type(id) ~= "string" or id == "" then
 		return
 	end
-	if tonumber(id) then
-		id = "rbxassetid://" .. id
-	end
 	local texture = Instance.new("Texture")
 	texture.Name = "GroundTexture"
 	texture.Face = Enum.NormalId.Top
-	texture.Texture = id
 	texture.StudsPerTileU = Config.GroundTextures.TileStuds
 	texture.StudsPerTileV = Config.GroundTextures.TileStuds
 	texture.Parent = floor
+	-- loading an asset waits on the network, so the world doesn't wait for it
+	task.spawn(function()
+		texture.Texture = resolveImage(id)
+	end)
 end
 
 -- Build ------------------------------------------------------------------------------------------
