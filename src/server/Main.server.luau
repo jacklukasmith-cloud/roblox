@@ -25,6 +25,7 @@ local WorldBuilder = require(Services.WorldBuilder)
 local DailyRewards = require(Services.DailyRewards)
 local BossRaid = require(Services.BossRaid)
 local Seasons = require(Services.Seasons)
+local Celebrations = require(Services.Celebrations)
 
 local notify = Remotes.Event("Notify")
 local dataChanged = Remotes.Event("DataChanged")
@@ -326,6 +327,7 @@ bind("Fuse", function(player, creatureId, variant)
 	if ok then
 		-- reuse the hatch reveal for a big "Fusion!" moment
 		Remotes.Event("HatchResult"):FireClient(player, Eggs.EggFor(creatureId), { result }, { Title = "Fusion!" })
+		Celebrations.Announce(player, result.Id, result.Variant, "fused")
 	end
 	return ok, message
 end)
@@ -352,6 +354,7 @@ Leaderboards.Start()
 DailyRewards.Start()
 BossRaid.Start()
 Seasons.Start()
+Celebrations.Start()
 Admin.Start()
 
 print("[Mythic Tamers] Server ready")

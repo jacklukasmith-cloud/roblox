@@ -18,6 +18,7 @@ local Economy = require(script.Parent.Economy)
 local DailyRewards = require(script.Parent.DailyRewards)
 local Monetization = require(script.Parent.Monetization)
 local WorldService = require(script.Parent.WorldService)
+local Celebrations = require(script.Parent.Celebrations)
 
 local Hatching = {}
 
@@ -46,21 +47,7 @@ local function addCreature(player: Player, data: PlayerData.Data, creatureId: st
 end
 
 local function announceRare(player: Player, result)
-	local def = Creatures.Get(result.Id)
-	if not def then
-		return
-	end
-	local order = Creatures.Rarities[def.Rarity].Order
-	if order >= 5 or result.Variant == "Rainbow" then
-		-- Server-wide shout-outs for big pulls (social proof, like PS99's hatch announcements)
-		for _, other in game:GetService("Players"):GetPlayers() do
-			notify:FireClient(
-				other,
-				`{player.DisplayName} hatched a {Creatures.DisplayName(result.Id, result.Variant)}!`,
-				Creatures.Rarities[def.Rarity].Color
-			)
-		end
-	end
+	Celebrations.Announce(player, result.Id, result.Variant)
 end
 
 function Hatching.Hatch(player: Player, eggId: string, count: number): (boolean, string?)

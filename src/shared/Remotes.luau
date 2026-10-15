@@ -16,6 +16,7 @@ local EVENTS = {
 	"CrystalHit", -- server -> client: crystal model, damage (for damage numbers)
 	"CrystalBroken", -- server -> client: crystal model, essence earned, orb count, combo, window
 	"BossUpdate", -- server -> all: boss raid state for the boss bar
+	"BigPull", -- server -> all: someone pulled something rare (banner + fireworks)
 }
 
 local FUNCTIONS = {

@@ -112,6 +112,7 @@ local function grant(player: Player, product)
 			{ Title = "Exclusive!" }
 		)
 		notify:FireClient(player, `Thank you! {product.Name} joined your team!`, Color3.fromRGB(255, 95, 200))
+		require(script.Parent.Celebrations).Announce(player, g.Creature, "Normal", "got")
 	elseif g.Kind == "MerchantRestock" then
 		data.Merchant.Bought = {}
 		notify:FireClient(player, "The Merchant restocked just for you!", Color3.fromRGB(255, 200, 120))

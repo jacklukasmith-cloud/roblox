@@ -12,6 +12,7 @@
 	  !give EmberFox             hatch a specific creature (add "Shiny" or "Rainbow" after the name)
 	  !giveall                   get one of every creature and equip your best
 	  !boss                      spawn a boss raid now (on this server)
+	  !bigpull Phoenix Rainbow   show the big-pull banner + fireworks (Legendary+ or Rainbow)
 	  !seasonend                 end the season now on this server and hand out rewards
 	  !hatchtest Phoenix Rainbow play the hatch animation for any creatures (up to 3, nothing is
 	                             added to your inventory), e.g. !hatchtest GlowSprite MoonRabbit Shiny
@@ -93,6 +94,19 @@ local function runPersonal(player: Player, command: string, args: { string }): b
 		local Seasons = require(script.Parent.Seasons) :: any
 		local count = Seasons.EndNowForTesting()
 		notify:FireClient(player, `[TEST] Season rewards given to {count} player(s)`, Color3.fromRGB(140, 255, 200))
+		return true
+	elseif command == "bigpull" then
+		-- preview the big-pull banner + fireworks, e.g. !bigpull Phoenix Rainbow
+		local wanted = string.lower(args[1] or "VoidLeviathan")
+		local id = "VoidLeviathan"
+		for _, def in Creatures.Ordered do
+			if string.lower(def.Id) == wanted then
+				id = def.Id
+			end
+		end
+		local variant = if args[2] == "Shiny" or args[2] == "Rainbow" then args[2] else "Normal"
+		local Celebrations = require(script.Parent.Celebrations) :: any
+		Celebrations.Announce(player, id, variant, nil, true)
 		return true
 	elseif command == "boss" then
 		local BossRaid = require(script.Parent.BossRaid) :: any
