@@ -9,6 +9,7 @@ local Shared = ReplicatedStorage.Shared
 local Config = require(Shared.Config)
 local Creatures = require(Shared.Creatures)
 local Eggs = require(Shared.Eggs)
+local PetStats = require(Shared.PetStats)
 local Zones = require(Shared.Zones)
 local Format = require(Shared.Format)
 local Remotes = require(Shared.Remotes)
@@ -43,6 +44,34 @@ function Economy.GetPower(data: PlayerData.Data): number
 		end
 	end
 	return power
+end
+
+-- Creature damage per attack tick (before PetDamageMultiplier): each equipped creature's Power x
+-- its Speed, plus every Rally ability's bonus for the whole team.
+function Economy.GetTeamDamage(data: PlayerData.Data): number
+	local total, rally = Config.BaseClickPower, 0
+	for _, entry in data.Creatures do
+		if entry.Equipped then
+			total += Creatures.GetPower(entry.Id, entry.Variant, entry.Level) * PetStats.Speed(entry.Id, entry.Level)
+			local ability = PetStats.Ability(entry.Id)
+			if ability and ability.Kind == "Rally" then
+				rally += ability.Bonus or 0
+			end
+		end
+	end
+	return total * (1 + rally)
+end
+
+-- Average Speed of the equipped team (how quickly they fly over to a target)
+function Economy.GetTeamSpeed(data: PlayerData.Data): number
+	local sum, count = 0, 0
+	for _, entry in data.Creatures do
+		if entry.Equipped then
+			sum += PetStats.Speed(entry.Id, entry.Level)
+			count += 1
+		end
+	end
+	return if count > 0 then sum / count else 1
 end
 
 -- Gives XP to every equipped creature (capped at Creatures.MaxLevel) and tells the owner about
@@ -370,7 +399,7 @@ function Economy.GrantOffline(player: Player)
 		else Config.Offline.MaxHours
 	local seconds = math.min(away, maxHours * 3600)
 	local zone = Zones.Get(data.ZonesUnlocked) or Zones.List[1]
-	local damagePerHit = math.min(Economy.GetPower(data), zone.CrystalHP)
+	local damagePerHit = math.min(Economy.GetTeamDamage(data), zone.CrystalHP)
 	local perSecond = Config.Offline.Efficiency * damagePerHit * (zone.CrystalReward / zone.CrystalHP)
 	local amount = perSecond * seconds * Economy.GetRebirthMultiplier(data)
 	if amount >= 1 then

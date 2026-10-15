@@ -14,6 +14,7 @@ local Format = require(ReplicatedStorage.Shared.Format)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local State = require(script.Parent.State)
 local Sound = require(script.Parent.Sound)
+local Followers = require(script.Parent.Followers)
 
 local Breaking = {}
 
@@ -388,7 +389,54 @@ local function stepCombo()
 	(comboFill :: Frame).Size = UDim2.fromScale(math.clamp(left / comboWindow, 0, 1), 1)
 end
 
+-- Creature abilities: the ability's name pops up over the creature that used it, with a flash
+-- on whatever it hit
+local ABILITY_FX = {
+	FireBurst = { Text = "🔥 Fire Burst!", Color = Color3.fromRGB(255, 130, 50) },
+	SpiritFlame = { Text = "🌌 Spirit Flame!", Color = Color3.fromRGB(150, 195, 255) },
+	FrostShatter = { Text = "❄️ Shatter!", Color = Color3.fromRGB(170, 225, 255) },
+	StormStrike = { Text = "⚡ Storm Strike!", Color = Color3.fromRGB(255, 240, 120) },
+	LuckyFind = { Text = "🍀 Lucky! x2", Color = Color3.fromRGB(120, 255, 140) },
+}
+
+local function abilityFlash(target: BasePart, color: Color3)
+	if State.PotatoMode then
+		return
+	end
+	local light = Instance.new("PointLight")
+	light.Color = color
+	light.Range = 16
+	light.Brightness = 6
+	light.Parent = target
+	TweenService:Create(light, TweenInfo.new(0.5), { Brightness = 0 }):Play()
+	task.delay(0.6, function()
+		light:Destroy()
+	end)
+	local burst = target:FindFirstChild("Burst") :: ParticleEmitter?
+	if burst then
+		burst:Emit(12)
+	end
+end
+
+local function onAbility(id: any, kind: any, model: any)
+	local fx = ABILITY_FX[kind]
+	if not fx then
+		return
+	end
+	local target = if typeof(model) == "Instance" and model:IsA("Model") then model.PrimaryPart else nil
+	local rig = if type(id) == "string" then Followers.ModelFor(player, id) else nil
+	local anchor = (rig and rig.PrimaryPart) or target
+	if anchor then
+		floatText(anchor, fx.Text, fx.Color, 7, Vector3.new(0, 3, 0))
+	end
+	if target and kind ~= "LuckyFind" then
+		abilityFlash(target, fx.Color)
+	end
+	Sound.Play("Chime", if kind == "LuckyFind" then 1.7 else 1.1, 0.45, 0.15)
+end
+
 function Breaking.Start()
+	Remotes.Event("PetAbility").OnClientEvent:Connect(onAbility)
 	task.spawn(watchTarget)
 
 	Remotes.Event("CrystalHit").OnClientEvent:Connect(function(model, dealt, crit)

@@ -13,6 +13,8 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local PetStats = require(ReplicatedStorage.Shared.PetStats)
+local Creatures = require(ReplicatedStorage.Shared.Creatures)
 local Config = require(ReplicatedStorage.Shared.Config)
 local Format = require(ReplicatedStorage.Shared.Format)
 local Zones = require(ReplicatedStorage.Shared.Zones)
@@ -51,6 +53,8 @@ type CrystalState = {
 	Broken: boolean,
 	Damage: { [Player]: number },
 	Swung: { [Player]: boolean }, -- players who landed a pickaxe hit (hands-on bonus)
+	ShatterUntil: number, -- Frost Shatter: takes extra damage until this os.clock()
+	ShatterBonus: number,
 	Bar: Frame,
 	Label: TextLabel,
 }
@@ -63,6 +67,31 @@ local targetSince: { [Player]: number } = {}
 local lastWarn: { [Player]: number } = {}
 local notify = Remotes.Event("Notify")
 local crystalHit = Remotes.Event("CrystalHit")
+local petAbility = Remotes.Event("PetAbility")
+local abilityReady: { [Player]: { [string]: number } } = {}
+local luckRng = Random.new()
+
+-- Lucky Find: combined chance from every equipped Meadow creature, and the best one (for the effect)
+local function luckyFind(player: Player): (number, string?)
+	local data = PlayerData.Get(player)
+	if not data then
+		return 0, nil
+	end
+	local miss, bestId, bestChance = 1, nil, 0
+	for _, entry in data.Creatures or {} do
+		if entry.Equipped then
+			local ability = PetStats.Ability(entry.Id)
+			if ability and ability.Kind == "LuckyFind" then
+				local chance = ability.Chance or 0
+				miss *= 1 - chance
+				if chance > bestChance then
+					bestId, bestChance = entry.Id, chance
+				end
+			end
+		end
+	end
+	return 1 - miss, bestId
+end
 local crystalBroken = Remotes.Event("CrystalBroken")
 
 local function characterPosition(player: Player): Vector3?
@@ -200,6 +229,12 @@ local function breakCrystal(state: CrystalState)
 			local comboMult = 1 + (combo.Count - 1) * Config.Combo.Step
 			-- hands-on bonus: you swung your pickaxe at it yourself
 			local handsOn = if swung[player] then Config.Pickaxe.HandsOnBonus else 1
+			-- Lucky Find ability: sometimes doubles this break's Essence
+			local luckChance, luckyId = luckyFind(player)
+			if luckChance > 0 and luckRng:NextNumber() < luckChance then
+				handsOn *= 2
+				petAbility:FireClient(player, luckyId, "LuckyFind", state.Model)
+			end
 			local earned = Economy.AwardCrystal(
 				player,
 				state.Zone,
@@ -283,6 +318,9 @@ local function damage(player: Player, state: CrystalState, amount: number, crit:
 	if state.Broken or amount <= 0 then
 		return
 	end
+	if os.clock() < state.ShatterUntil then
+		amount *= 1 + state.ShatterBonus
+	end
 	local dealt = math.min(amount, state.HP)
 	state.HP -= dealt
 	state.Damage[player] = (state.Damage[player] or 0) + dealt
@@ -355,6 +393,8 @@ function Crystals.Register(model: Model, zoneIndex: number, options: Options?)
 		Broken = false,
 		Damage = {},
 		Swung = {},
+		ShatterUntil = 0,
+		ShatterBonus = 0,
 		Bar = (gui :: any).Back.Fill,
 		Label = (gui :: any).Back.Amount,
 	}
@@ -468,6 +508,53 @@ local function nearestCrystal(player: Player, range: number): Model?
 	return best
 end
 
+-- Creature abilities with a cooldown, used while the team is attacking `state`
+local function useAbilities(player: Player, data: any, state: CrystalState)
+	local now = os.clock()
+	local ready = abilityReady[player]
+	if not ready then
+		ready = {}
+		abilityReady[player] = ready
+	end
+	for uid, entry in data.Creatures or {} do
+		local ability = entry.Equipped and PetStats.Ability(entry.Id)
+		if ability and ability.Cooldown and now >= (ready[uid] or 0) and not state.Broken then
+			ready[uid] = now + ability.Cooldown
+			local power = Creatures.GetPower(entry.Id, entry.Variant, entry.Level) * Config.PetDamageMultiplier
+			if ability.Kind == "FireBurst" or ability.Kind == "SpiritFlame" then
+				petAbility:FireClient(player, entry.Id, ability.Kind, state.Model)
+				damage(player, state, power * (ability.Mult or 1), false)
+			elseif ability.Kind == "FrostShatter" then
+				if now >= state.ShatterUntil then
+					state.ShatterBonus = 0
+				end
+				state.ShatterUntil = now + (ability.Duration or 4)
+				state.ShatterBonus = math.max(state.ShatterBonus, ability.Bonus or 0)
+				petAbility:FireClient(player, entry.Id, ability.Kind, state.Model)
+			elseif ability.Kind == "StormStrike" then
+				-- lightning jumps to up to 2 other crystals near the target
+				local hits = 0
+				for model, other in states do
+					if hits >= 2 then
+						break
+					end
+					if
+						other ~= state
+						and not other.Broken
+						and other.Kind == "Crystal"
+						and (other.Main.Position - state.Main.Position).Magnitude <= 30
+						and canAttack(player, other, math.huge, false)
+					then
+						hits += 1
+						petAbility:FireClient(player, entry.Id, ability.Kind, model)
+						damage(player, other, power * (ability.Mult or 1), false)
+					end
+				end
+			end
+		end
+	end
+end
+
 -- One player's creature attack tick (runs every PetAttackInterval)
 local function tickPlayer(player: Player)
 	local data = PlayerData.Get(player)
@@ -487,13 +574,16 @@ local function tickPlayer(player: Player)
 			end
 		end
 		-- Creatures need a moment to fly over before they start hitting
-		if state and os.clock() - (targetSince[player] or 0) >= Config.PetTravelTime then
-			local amount = Economy.GetPower(data) * Config.PetDamageMultiplier
+		-- (faster teams get there sooner)
+		local travel = Config.PetTravelTime / Economy.GetTeamSpeed(data)
+		if state and os.clock() - (targetSince[player] or 0) >= travel then
+			local amount = Economy.GetTeamDamage(data) * Config.PetDamageMultiplier
 			local crit = critRng:NextNumber() < Config.Crit.Chance
 			if crit then
 				amount *= Config.Crit.Multiplier
 			end
 			damage(player, state, amount, crit)
+			useAbilities(player, data, state)
 		end
 	end
 end
@@ -522,6 +612,7 @@ for _, player in Players:GetPlayers() do
 end
 
 Players.PlayerRemoving:Connect(function(player)
+	abilityReady[player] = nil
 	targets[player] = nil
 	targetSince[player] = nil
 	lastWarn[player] = nil

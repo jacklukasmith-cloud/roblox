@@ -69,7 +69,7 @@ local function serverDps(zoneIndex: number): number
 	for _, player in Players:GetPlayers() do
 		local data = PlayerData.Get(player)
 		if data and data.ZonesUnlocked >= zoneIndex then
-			total += Economy.GetPower(data) * Config.PetDamageMultiplier / Config.PetAttackInterval
+			total += Economy.GetTeamDamage(data) * Config.PetDamageMultiplier / Config.PetAttackInterval
 		end
 	end
 	return math.max(total, 1)

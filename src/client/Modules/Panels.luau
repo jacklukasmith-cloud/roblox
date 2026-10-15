@@ -12,6 +12,7 @@ local Shared = ReplicatedStorage.Shared
 local Config = require(Shared.Config)
 local Creatures = require(Shared.Creatures)
 local Eggs = require(Shared.Eggs)
+local PetStats = require(Shared.PetStats)
 local Merchant = require(Shared.Merchant)
 local Format = require(Shared.Format)
 local Remotes = require(Shared.Remotes)
@@ -611,6 +612,8 @@ local function buildCreatures(screen: Frame)
 		detailRarity.TextColor3 = rarityColor:Lerp(Color3.new(1, 1, 1), 0.3)
 		local level = entry.Level or 1
 		local power = Creatures.GetPower(def.Id, variant, level)
+		local speed = PetStats.Speed(def.Id, level)
+		local ability = PetStats.Ability(def.Id)
 		local multiplier = (Creatures.Variants[variant] or Creatures.Variants.Normal).Multiplier
 		local bonuses = {}
 		if multiplier > 1 then
@@ -634,8 +637,12 @@ local function buildCreatures(screen: Frame)
 			if level >= Creatures.MaxLevel
 				then `⭐ Level {level}  (MAX)`
 				else `⭐ Level {level}  ·  {math.floor(entry.XP or 0)}/{Creatures.XPToNext(level)} XP`,
-			`⚔️ Damage  {Format.Number(power * Config.PetDamageMultiplier / Config.PetAttackInterval)} / sec`,
-			`🥚 Found in  {if egg then egg.Name else "?"}`,
+			`⚡ Speed  {math.floor(speed * 100 + 0.5) / 100}  ·  ⚔️ {Format.Number(
+				power * speed * Config.PetDamageMultiplier / Config.PetAttackInterval
+			)} dmg/sec`,
+			if ability
+				then `{ability.Icon} {ability.Name} · {ability.Short}`
+				else `🥚 From the {if egg then egg.Name else "?"}`,
 			`📦 Owned  {copies}` .. (if nextVariant
 				then `  ·  Fuse {math.min(copies, Creatures.FuseCost)}/{Creatures.FuseCost} → {nextVariant}`
 				else ""),
@@ -646,6 +653,7 @@ local function buildCreatures(screen: Frame)
 			row.TextColor3 = if i == 1
 				then T.Power
 				elseif i == 2 then Color3.fromRGB(255, 215, 90)
+				elseif i == 4 then Color3.fromRGB(200, 175, 255)
 				elseif i == 6 and entry.Equipped then T.Good
 				else T.Text
 		end

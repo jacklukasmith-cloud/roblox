@@ -19,6 +19,7 @@ local EVENTS = {
 	"BigPull", -- server -> all: someone pulled something rare (banner + fireworks)
 	"PetLevelUp", -- server -> client: { {Uid, Id, Variant, Level} } your creatures that levelled up
 	"PickaxeHit", -- server -> client: model hit (or nil), crit, streak, "too far" hint
+	"PetAbility", -- server -> client: creature id, ability kind, target model (ability effects)
 }
 
 local FUNCTIONS = {
