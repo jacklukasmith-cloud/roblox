@@ -1686,6 +1686,24 @@ local function setupLighting()
 	effect("ColorCorrectionEffect", { Saturation = 0.12, Contrast = 0.06, Brightness = 0.02 })
 end
 
+-- Lays a tiling image (Config.GroundTextures) over the top of a floor part
+local function groundTexture(floor: BasePart, key: any)
+	local id = Config.GroundTextures[key]
+	if type(id) ~= "string" or id == "" then
+		return
+	end
+	if tonumber(id) then
+		id = "rbxassetid://" .. id
+	end
+	local texture = Instance.new("Texture")
+	texture.Name = "GroundTexture"
+	texture.Face = Enum.NormalId.Top
+	texture.Texture = id
+	texture.StudsPerTileU = Config.GroundTextures.TileStuds
+	texture.StudsPerTileV = Config.GroundTextures.TileStuds
+	texture.Parent = floor
+end
+
 -- Build ------------------------------------------------------------------------------------------
 
 export type BuiltWorld = {
@@ -1718,7 +1736,7 @@ function WorldBuilder.Build(): BuiltWorld
 
 	-- Hub ------------------------------------------------------------------------------------
 	local hubMid = (HUB_START + HUB_END) / 2
-	part({
+	local hubFloor = part({
 		Name = "HubFloor",
 		Size = Vector3.new(WIDTH, 2, HUB_END - HUB_START),
 		Position = Vector3.new(0, -1, hubMid),
@@ -1726,6 +1744,7 @@ function WorldBuilder.Build(): BuiltWorld
 		Material = Enum.Material.Cobblestone,
 		Parent = hub,
 	})
+	groundTexture(hubFloor, "Hub")
 	-- Plaza + path to the realms
 	disc(hub, Vector3.new(0, 0.05, 5), 46, 0.2, rgb(120, 105, 160), Enum.Material.Slate)
 	disc(hub, Vector3.new(0, 0.02, 5), 48, 0.2, rgb(170, 110, 255), Enum.Material.Neon)
@@ -1812,7 +1831,7 @@ function WorldBuilder.Build(): BuiltWorld
 		folder.Name = zone.Name
 		folder.Parent = zonesFolder
 
-		part({
+		local ground = part({
 			Name = "Ground",
 			Size = Vector3.new(WIDTH, 2, ZONE_LENGTH),
 			Position = Vector3.new(0, -1, z0 + ZONE_LENGTH / 2),
@@ -1820,6 +1839,7 @@ function WorldBuilder.Build(): BuiltWorld
 			Material = zone.GroundMaterial,
 			Parent = folder,
 		})
+		groundTexture(ground, zone.Index)
 		part({
 			Name = "Path",
 			Size = Vector3.new(16, 0.2, ZONE_LENGTH),

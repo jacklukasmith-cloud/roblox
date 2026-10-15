@@ -28,3 +28,18 @@ Upload on the Creator Hub: your experience → **Places → Thumbnails** (you ca
 |---|---|
 | A: title on top, hero with creatures | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_214435_6df9e2f9-6b47-44be-8fe7-9b83060fdc6c.png) |
 | B: title on the left, egg hatching a rainbow dragon | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_214436_ae7553dc-7a3d-4414-99e8-a00fc0cebfe6.png) |
+
+## Ground textures (seamless, tiling)
+
+Upload each image on the Creator Hub (**Creations → Development Items → Images**, or Studio's
+**Asset Manager → Import**), copy its asset ID and paste it into `Config.GroundTextures` in
+`src/shared/Config.luau`. Leave an entry empty to keep the plain material. `TileStuds` sets how
+big each copy of the image is (bigger = less repetition).
+
+| Area | Config key | Image |
+|---|---|---|
+| Hub (cobblestone) | `Hub` | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261015_001801_ac0a97b1-fcd7-4428-b24b-54acfa10463a.png) |
+| Enchanted Meadow (grass) | `[1]` | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261015_001801_ef9d3f1c-7d7f-4936-82d4-9834efeaed91.png) |
+| Ember Rift (lava rock) | `[2]` | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261015_001801_a65d6f23-c162-4e1e-bfbf-51f92fbcf75c.png) |
+| Frostpeak (snow) | `[3]` | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261015_001801_51bf965a-9dc6-4aab-bd13-b4f72bfd7b50.png) |
+| Sky Sanctum (marble) | `[4]` | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261015_001801_a27ba085-05c1-4ad2-8432-b485c0dd7d91.png) |

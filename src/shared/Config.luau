@@ -63,6 +63,18 @@ Config.Boss = {
 	Scale = 3.2, -- creature model size
 }
 
+-- Ground textures (Higgsfield images, see docs/ICONS.md). Upload each image on the Creator Hub
+-- (Creations -> Development Items -> Images) and paste its ID here, e.g. "rbxassetid://123".
+-- Empty = keep the plain material. TileStuds = how many studs one copy of the image covers.
+Config.GroundTextures = {
+	TileStuds = 16,
+	Hub = "",
+	[1] = "", -- Enchanted Meadow (grass)
+	[2] = "", -- Ember Rift (lava rock)
+	[3] = "", -- Frostpeak (snow)
+	[4] = "", -- Sky Sanctum (marble)
+}
+
 -- Big breakables: one Mana Chest per realm
 Config.Chest = {
 	HPMultiplier = 25,
