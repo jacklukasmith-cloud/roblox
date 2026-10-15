@@ -1286,7 +1286,16 @@ end
 local function buildBestiary(screen: Frame)
 	local _, content = Ui.panel(screen, "Bestiary", "Bestiary", nil, "📖")
 	local header = Ui.text({ Size = UDim2.new(1, 0, 0, 26), Text = "", TextColor3 = T.Good, Parent = content })
-	local grid = scrolling(content, { Position = UDim2.fromOffset(0, 34), Size = UDim2.new(1, 0, 1, -34) })
+	local milestoneLabel = Ui.text({
+		Position = UDim2.fromOffset(0, 28),
+		Size = UDim2.new(1, 0, 0, 20),
+		Text = "",
+		Font = T.FontRegular,
+		TextColor3 = Color3.fromRGB(255, 215, 90),
+		MaxTextSize = 15,
+		Parent = content,
+	})
+	local grid = scrolling(content, { Position = UDim2.fromOffset(0, 54), Size = UDim2.new(1, 0, 1, -54) })
 	Ui.autoGrid(grid, 112, 110)
 
 	local function render()
@@ -1323,6 +1332,13 @@ local function buildBestiary(screen: Frame)
 				Parent = card,
 			})
 		end
+		local hatched = d.Stats and d.Stats.CreaturesHatched or 0
+		local nextMilestone = Config.HatchMilestones[(d.Stats and d.Stats.HatchMilestones or 0) + 1]
+		milestoneLabel.Text = if nextMilestone
+			then `🥚 Hatched {Format.Number(hatched)} / {Format.Number(nextMilestone.At)}  ·  next milestone: a bonus Rare+ creature{if nextMilestone.Title
+				then ` + "{nextMilestone.Title}"`
+				else ""}`
+			else `🥚 Hatched {Format.Number(hatched)}  ·  every milestone claimed!`
 		header.Text = `Discovered {found}/{#Creatures.Ordered}  -  Bestiary bonus: +{math.floor(
 			(d.BestiaryMultiplier - 1) * 100 + 0.5
 		)}% Essence`

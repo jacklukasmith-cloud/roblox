@@ -78,6 +78,18 @@ Config.GroundTextures = {
 -- Creature XP for each break you helped with (crystals also scale with their size: a Giant gives 12)
 Config.PetXP = { Crystal = 1, Chest = 6, Boss = 25 }
 
+-- Hatching milestones: every At total hatches gives a guaranteed Rare+ creature (Mystic) plus extras.
+-- Boost = a boost name from Config.Boosts for Seconds; Title shows up with your Season titles.
+Config.HatchMilestones = {
+	{ At = 100, Mystic = true, Trophies = 5 },
+	{ At = 250, Mystic = true, Boost = "Luck", Seconds = 600 },
+	{ At = 500, Mystic = true, Trophies = 15, Boost = "Shiny", Seconds = 600 },
+	{ At = 1000, Mystic = true, Trophies = 25, Title = "Egg Master" },
+	{ At = 2500, Mystic = true, Trophies = 50, Boost = "Luck", Seconds = 1800 },
+	{ At = 5000, Mystic = true, Trophies = 100, Title = "Hatch Legend" },
+}
+Config.MilestoneFullStorageTrophies = 10 -- given instead of the creature if storage is full
+
 -- Big breakables: one Mana Chest per realm
 Config.Chest = {
 	HPMultiplier = 25,

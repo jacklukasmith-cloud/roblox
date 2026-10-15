@@ -92,7 +92,57 @@ function Hatching.Hatch(player: Player, eggId: string, count: number): (boolean,
 	end
 	PlayerData.MarkChanged(player)
 	hatchResult:FireClient(player, eggId, results)
+	Hatching.CheckMilestones(player)
 	return true
+end
+
+-- Hatching milestones (Config.HatchMilestones): claimed in order, one per hatch, and paid out
+-- after the hatch reveal so the two don't overlap.
+function Hatching.CheckMilestones(player: Player)
+	local data = PlayerData.Get(player)
+	if not data then
+		return
+	end
+	local claimed = data.Stats.HatchMilestones or 0
+	local milestone = Config.HatchMilestones[claimed + 1]
+	if not milestone or data.Stats.CreaturesHatched < milestone.At then
+		return
+	end
+	data.Stats.HatchMilestones = claimed + 1 -- claim first so it can never pay twice
+	PlayerData.MarkChanged(player)
+	task.delay(Config.MilestoneDelay or 4, function()
+		local d = PlayerData.Get(player)
+		if not d or not player.Parent then
+			return
+		end
+		local parts = {}
+		local trophies = milestone.Trophies or 0
+		if milestone.Mystic then
+			if Hatching.MysticHatch(player, `{milestone.At} Hatches!`) then
+				table.insert(parts, "a bonus Rare+ creature")
+			else
+				trophies += Config.MilestoneFullStorageTrophies -- storage full: Trophies instead
+			end
+		end
+		if trophies > 0 then
+			d.Trophies += trophies
+			table.insert(parts, `+{trophies} Trophies`)
+		end
+		if milestone.Boost then
+			Economy.AddBoost(player, milestone.Boost, milestone.Seconds or 600)
+			table.insert(parts, `{milestone.Boost} boost for {Format.Time(milestone.Seconds or 600)}`)
+		end
+		if milestone.Title and not table.find(d.Titles, milestone.Title) then
+			table.insert(d.Titles, milestone.Title)
+			table.insert(parts, `the "{milestone.Title}" title`)
+		end
+		PlayerData.MarkChanged(player)
+		notify:FireClient(
+			player,
+			`🥚 {milestone.At} hatches! You got {table.concat(parts, " + ")}`,
+			Color3.fromRGB(255, 215, 80)
+		)
+	end)
 end
 
 function Hatching.BuyMerchantItem(player: Player, itemId: string): (boolean, string?)
@@ -135,7 +185,7 @@ end
 
 -- Hatch your best zone's egg with a guaranteed Rare or better (Mystic Egg). Returns false if
 -- storage is full.
-function Hatching.MysticHatch(player: Player): boolean
+function Hatching.MysticHatch(player: Player, title: string?): boolean
 	local data = PlayerData.Get(player)
 	if not data or PlayerData.CountCreatures(data) >= Config.MaxInventory then
 		return false
@@ -146,7 +196,7 @@ function Hatching.MysticHatch(player: Player): boolean
 	local result = addCreature(player, data, creatureId)
 	announceRare(player, result)
 	PlayerData.MarkChanged(player)
-	hatchResult:FireClient(player, egg.Id, { result })
+	hatchResult:FireClient(player, egg.Id, { result }, if title then { Title = title } else nil)
 	return true
 end
 
