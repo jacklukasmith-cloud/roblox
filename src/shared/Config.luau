@@ -99,6 +99,9 @@ Config.Pickaxe = {
 	GoldenSpeed = 0.75, -- Golden Pickaxe pass: cooldown multiplier (faster swings)
 	GoldenMesh = "PickaxeGolden",
 	AxeBossBonus = 1.5, -- the axe side (used automatically on bosses) deals this much more
+	StreakWindow = 1.2, -- seconds between hits to keep a mining streak going
+	StreakStep = 0.05, -- extra damage per streak step...
+	StreakMax = 10, -- ...up to this many steps (+50%)
 	Reach = 9, -- studs from you to the edge of what you're hitting
 	Tiers = {
 		{ Name = "Wooden Pickaxe", Mult = 0.5, Cost = 0, Color = Color3.fromRGB(150, 105, 60), Mesh = "PickaxeWooden" },

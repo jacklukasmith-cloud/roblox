@@ -372,11 +372,12 @@ function Crystals.Register(model: Model, zoneIndex: number, options: Options?)
 end
 
 -- A pickaxe swing: hits the closest breakable (crystal, chest or boss) within reach of the
--- player's character. Returns the model hit, or nil. Same damage path as creatures (crits, combos).
-function Crystals.Swing(player: Player, power: number, reach: number, bossMultiplier: number?): Model?
+-- player's character. Returns the model hit (or nil) and whether it was a crit. Same damage path as
+-- creatures (crits, combos).
+function Crystals.Swing(player: Player, power: number, reach: number, bossMultiplier: number?): (Model?, boolean)
 	local pos = characterPosition(player)
 	if not pos or power <= 0 then
-		return nil
+		return nil, false
 	end
 	local best, bestDist = nil, math.huge
 	local petTarget = targets[player]
@@ -395,7 +396,7 @@ function Crystals.Swing(player: Player, power: number, reach: number, bossMultip
 	end
 	local state = best and states[best]
 	if not state then
-		return nil
+		return nil, false
 	end
 	local amount = power * (if state.Kind == "Boss" then bossMultiplier or 1 else 1)
 	local crit = critRng:NextNumber() < Config.Crit.Chance
@@ -408,6 +409,22 @@ function Crystals.Swing(player: Player, power: number, reach: number, bossMultip
 		setTarget(player, best)
 	end
 	damage(player, state, amount, crit)
+	return best, crit
+end
+
+-- Distance from a player to the nearest unbroken breakable they could attack (for "get closer")
+function Crystals.NearestDistance(player: Player): number
+	local pos = characterPosition(player)
+	local best = math.huge
+	if pos then
+		for _, state in states do
+			if not state.Broken then
+				local size = state.Main.Size
+				local dist = (state.Main.Position - pos).Magnitude - math.max(size.X, size.Z) / 2
+				best = math.min(best, dist)
+			end
+		end
+	end
 	return best
 end
 

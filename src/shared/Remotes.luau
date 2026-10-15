@@ -18,6 +18,7 @@ local EVENTS = {
 	"BossUpdate", -- server -> all: boss raid state for the boss bar
 	"BigPull", -- server -> all: someone pulled something rare (banner + fireworks)
 	"PetLevelUp", -- server -> client: { {Uid, Id, Variant, Level} } your creatures that levelled up
+	"PickaxeHit", -- server -> client: model hit (or nil), crit, streak, "too far" hint
 }
 
 local FUNCTIONS = {

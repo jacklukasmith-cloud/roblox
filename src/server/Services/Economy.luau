@@ -419,6 +419,7 @@ function Economy.BuildSnapshot(player: Player)
 		OwnedPasses = Monetization.GetOwned(player),
 		Daily = DailyRewards.Snapshot(data),
 		Season = Seasons.Snapshot(player, data),
+		Pickaxe = (data :: any).Pickaxe or 1,
 	}
 end
 

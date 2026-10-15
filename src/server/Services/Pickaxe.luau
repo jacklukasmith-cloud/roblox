@@ -27,6 +27,8 @@ local Pickaxe = {}
 local cfg = Config.Pickaxe
 local notify = Remotes.Event("Notify")
 local lastSwing: { [Player]: number } = {}
+local streaks: { [Player]: { Count: number, LastHit: number } } = {}
+local pickaxeHit = Remotes.Event("PickaxeHit")
 local ANVIL_POSITION = Vector3.new(-30, 0, 18)
 
 local function tierOf(player: Player): number
@@ -184,8 +186,26 @@ function Pickaxe.Swing(player: Player, tool: Tool?): boolean
 	if not data then
 		return false
 	end
-	local power = Economy.GetPower(data) * cfg.Tiers[tierOf(player)].Mult * (if golden then cfg.GoldenDamage else 1)
-	local hit = Crystals.Swing(player, power, cfg.Reach, cfg.AxeBossBonus)
+	-- mining streak: keep landing hits for up to +50% damage
+	local streak = streaks[player]
+	if not streak or now - streak.LastHit > cfg.StreakWindow then
+		streak = { Count = 0, LastHit = 0 }
+		streaks[player] = streak
+	end
+	local power = Economy.GetPower(data)
+		* cfg.Tiers[tierOf(player)].Mult
+		* (if golden then cfg.GoldenDamage else 1)
+		* (1 + streak.Count * cfg.StreakStep)
+	local hit, crit = Crystals.Swing(player, power, cfg.Reach, cfg.AxeBossBonus)
+	if hit then
+		streak.Count = math.min(streak.Count + 1, cfg.StreakMax)
+		streak.LastHit = now
+		pickaxeHit:FireClient(player, hit, crit, streak.Count)
+	else
+		-- swinging at air next to something: tell them to step closer
+		local near = Crystals.NearestDistance(player) < cfg.Reach + 12
+		pickaxeHit:FireClient(player, nil, false, streak.Count, near)
+	end
 	-- pick side for crystals, turn it round to the axe side for bosses
 	if tool and hit then
 		local axe = hit:GetAttribute("Breakable") == "Boss"
@@ -374,6 +394,7 @@ function Pickaxe.Start()
 	end)
 	Players.PlayerRemoving:Connect(function(player)
 		lastSwing[player] = nil
+		streaks[player] = nil
 	end)
 	Monetization.OnPassPurchased(function(player, key)
 		if key == "GoldenPickaxe" then
