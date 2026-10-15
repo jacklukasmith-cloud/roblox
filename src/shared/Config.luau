@@ -68,11 +68,11 @@ Config.Boss = {
 -- Empty = keep the plain material. TileStuds = how many studs one copy of the image covers.
 Config.GroundTextures = {
 	TileStuds = 16,
-	Hub = "",
-	[1] = "", -- Enchanted Meadow (grass)
-	[2] = "", -- Ember Rift (lava rock)
-	[3] = "", -- Frostpeak (snow)
-	[4] = "", -- Sky Sanctum (marble)
+	Hub = "rbxassetid://84951941657028", -- stone
+	[1] = "rbxassetid://97461172258793", -- Enchanted Meadow (grass)
+	[2] = "rbxassetid://78449218687433", -- Ember Rift (lava rock)
+	[3] = "rbxassetid://104335708388109", -- Frostpeak (snow)
+	[4] = "rbxassetid://123790088154148", -- Sky Sanctum (marble)
 }
 
 -- Big breakables: one Mana Chest per realm
