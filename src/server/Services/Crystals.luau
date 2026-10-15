@@ -165,6 +165,12 @@ local function breakCrystal(state: CrystalState)
 				Config.Combo.Window
 			)
 			DailyRewards.Track(player, if state.Kind == "Chest" then "BreakChests" else "BreakCrystals", 1)
+			-- creature XP (bigger crystals give more)
+			local xp = if state.Kind == "Chest"
+				then Config.PetXP.Chest
+				elseif state.Kind == "Boss" then Config.PetXP.Boss
+				else Config.PetXP.Crystal * math.max(1, math.round(state.SizeReward))
+			Economy.GrantXP(player, xp)
 		end
 	end
 	-- Creatures attacking this crystal go back to their owners

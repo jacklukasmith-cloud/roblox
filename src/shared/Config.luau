@@ -75,6 +75,9 @@ Config.GroundTextures = {
 	[4] = "rbxassetid://123790088154148", -- Sky Sanctum (marble)
 }
 
+-- Creature XP for each break you helped with (crystals also scale with their size: a Giant gives 12)
+Config.PetXP = { Crystal = 1, Chest = 6, Boss = 25 }
+
 -- Big breakables: one Mana Chest per realm
 Config.Chest = {
 	HPMultiplier = 25,

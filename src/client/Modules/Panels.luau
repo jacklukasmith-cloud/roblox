@@ -508,10 +508,10 @@ local function buildCreatures(screen: Frame)
 		Parent = detail,
 	}, { Ui.new("UIListLayout", { Padding = UDim.new(0, 3), SortOrder = Enum.SortOrder.LayoutOrder }) })
 	local statRows: { TextLabel } = {}
-	for i = 1, 5 do
+	for i = 1, 6 do
 		statRows[i] = Ui.text({
 			LayoutOrder = i,
-			Size = UDim2.new(1, 0, 0.2, -3),
+			Size = UDim2.new(1, 0, 1 / 6, -3),
 			Text = "",
 			Font = T.Font,
 			TextXAlignment = Enum.TextXAlignment.Left,
@@ -579,8 +579,16 @@ local function buildCreatures(screen: Frame)
 		detailName.TextColor3 = rarityColor
 		detailRarity.Text = if variant == "Normal" then def.Rarity else `{def.Rarity}  ·  {variant}`
 		detailRarity.TextColor3 = rarityColor:Lerp(Color3.new(1, 1, 1), 0.3)
-		local power = Creatures.GetPower(def.Id, variant)
+		local level = entry.Level or 1
+		local power = Creatures.GetPower(def.Id, variant, level)
 		local multiplier = (Creatures.Variants[variant] or Creatures.Variants.Normal).Multiplier
+		local bonuses = {}
+		if multiplier > 1 then
+			table.insert(bonuses, `x{multiplier} {variant}`)
+		end
+		if level > 1 then
+			table.insert(bonuses, `+{math.floor((Creatures.LevelMultiplier(level) - 1) * 100 + 0.5)}% Lv`)
+		end
 		local copies = 0
 		for _, other in d.Creatures do
 			if other.Id == entry.Id and (other.Variant or "Normal") == variant then
@@ -590,7 +598,12 @@ local function buildCreatures(screen: Frame)
 		local nextVariant = Creatures.FuseNext[variant]
 		local egg = Eggs.Get(Eggs.EggFor(def.Id))
 		local rows = {
-			`💪 Power  {Format.Number(power)}{if multiplier > 1 then `  (x{multiplier} {variant})` else ""}`,
+			`💪 Power  {Format.Number(math.floor(power + 0.5))}{if #bonuses > 0
+				then `  ({table.concat(bonuses, " · ")})`
+				else ""}`,
+			if level >= Creatures.MaxLevel
+				then `⭐ Level {level}  (MAX)`
+				else `⭐ Level {level}  ·  {math.floor(entry.XP or 0)}/{Creatures.XPToNext(level)} XP`,
 			`⚔️ Damage  {Format.Number(power * Config.PetDamageMultiplier / Config.PetAttackInterval)} / sec`,
 			`🥚 Found in  {if egg then egg.Name else "?"}`,
 			`📦 Owned  {copies}` .. (if nextVariant
@@ -600,7 +613,11 @@ local function buildCreatures(screen: Frame)
 		}
 		for i, row in statRows do
 			row.Text = rows[i] or ""
-			row.TextColor3 = if i == 1 then T.Power elseif i == 5 and entry.Equipped then T.Good else T.Text
+			row.TextColor3 = if i == 1
+				then T.Power
+				elseif i == 2 then Color3.fromRGB(255, 215, 90)
+				elseif i == 6 and entry.Equipped then T.Good
+				else T.Text
 		end
 		actionButton.Text = if entry.Equipped then "Unequip" else "Equip"
 		actionButton.BackgroundColor3 = if entry.Equipped then T.Card else T.Good
@@ -615,7 +632,10 @@ local function buildCreatures(screen: Frame)
 		local list = {}
 		local equipped = 0
 		for uid, entry in d.Creatures do
-			table.insert(list, { Uid = uid, Entry = entry, Power = Creatures.GetPower(entry.Id, entry.Variant) })
+			table.insert(
+				list,
+				{ Uid = uid, Entry = entry, Power = Creatures.GetPower(entry.Id, entry.Variant, entry.Level) }
+			)
 			if entry.Equipped then
 				equipped += 1
 			end
@@ -740,7 +760,11 @@ local function buildCreatures(screen: Frame)
 		for _, item in list do
 			table.insert(
 				keyParts,
-				item.Uid .. (if item.Entry.Equipped then "E" else "") .. (if selected[item.Uid] then "S" else "")
+				item.Uid
+					.. (if item.Entry.Equipped then "E" else "")
+					.. (if selected[item.Uid] then "S" else "")
+					.. "L"
+					.. tostring(item.Entry.Level or 1)
 			)
 		end
 		local key = table.concat(keyParts, ",")
@@ -766,6 +790,19 @@ local function buildCreatures(screen: Frame)
 				local icon = creatureIcon(card, def, item.Entry.Variant, 58)
 				icon.AnchorPoint = Vector2.new(0.5, 0)
 				icon.Position = UDim2.new(0.5, 0, 0, 8)
+				if (item.Entry.Level or 1) > 1 then
+					Ui.text({
+						Text = `Lv {item.Entry.Level}`,
+						Position = UDim2.fromOffset(5, 4),
+						Size = UDim2.fromOffset(34, 16),
+						Font = T.FontHeavy,
+						TextColor3 = Color3.fromRGB(255, 215, 90),
+						TextXAlignment = Enum.TextXAlignment.Left,
+						MaxTextSize = 13,
+						ZIndex = 3,
+						Parent = card,
+					})
+				end
 				Ui.text({
 					Text = Creatures.DisplayName(def.Id, item.Entry.Variant),
 					Position = UDim2.fromOffset(4, 66),
@@ -774,7 +811,7 @@ local function buildCreatures(screen: Frame)
 					Parent = card,
 				})
 				Ui.text({
-					Text = "Power " .. Format.Number(item.Power),
+					Text = "Power " .. Format.Number(math.floor(item.Power + 0.5)),
 					Position = UDim2.fromOffset(4, 90),
 					Size = UDim2.new(1, -8, 0, 18),
 					Parent = card,

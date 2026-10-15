@@ -16,7 +16,7 @@ local Config = require(ReplicatedStorage.Shared.Config)
 
 local PlayerData = {}
 
-export type CreatureEntry = { Id: string, Variant: string, Equipped: boolean }
+export type CreatureEntry = { Id: string, Variant: string, Equipped: boolean, Level: number?, XP: number? }
 
 export type Data = {
 	Version: number,

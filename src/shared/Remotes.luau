@@ -17,6 +17,7 @@ local EVENTS = {
 	"CrystalBroken", -- server -> client: crystal model, essence earned, orb count, combo, window
 	"BossUpdate", -- server -> all: boss raid state for the boss bar
 	"BigPull", -- server -> all: someone pulled something rare (banner + fireworks)
+	"PetLevelUp", -- server -> client: { {Uid, Id, Variant, Level} } your creatures that levelled up
 }
 
 local FUNCTIONS = {

@@ -83,6 +83,20 @@ local function track(player: Player)
 	rebuild(player)
 end
 
+-- The rig following a player for a creature id (first match), e.g. for level-up sparkles
+function Followers.ModelFor(player: Player, creatureId: string): Model?
+	local entry = byPlayer[player]
+	if not entry then
+		return nil
+	end
+	for _, f in entry.List do
+		if f.Rig.Model.Name == creatureId then
+			return f.Rig.Model
+		end
+	end
+	return nil
+end
+
 function Followers.Start()
 	Players.PlayerAdded:Connect(track)
 	for _, player in Players:GetPlayers() do

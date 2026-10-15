@@ -18,6 +18,7 @@ local Modules = script.Parent
 local Ui = require(Modules.Ui)
 local Layout = require(Modules.Layout)
 local Sound = require(Modules.Sound)
+local Followers = require(Modules.Followers)
 
 local T = Ui.Theme
 local GOLD = Color3.fromRGB(255, 215, 80)
@@ -228,6 +229,33 @@ function Celebrate.Build(root: Frame)
 			showing = false
 		end)
 	end
+
+	-- Your creatures levelling up: toast + chime + a sparkle on the pet itself
+	Remotes.Event("PetLevelUp").OnClientEvent:Connect(function(ups)
+		if type(ups) ~= "table" then
+			return
+		end
+		for i, up in ups do
+			local def = type(up) == "table" and Creatures.Get(up.Id)
+			if def then
+				task.delay((i - 1) * 0.4, function()
+					local maxed = up.Level >= Creatures.MaxLevel
+					Ui.toast(
+						`⭐ {Creatures.DisplayName(up.Id, up.Variant)} reached Level {up.Level}{if maxed
+							then " (MAX)!"
+							else "!"}`,
+						GOLD
+					)
+					Sound.Play("Chime", 1.6 + math.min(up.Level, 25) * 0.01, 0.6)
+					local model = Followers.ModelFor(player, up.Id)
+					local pivot = model and model:GetPivot()
+					if pivot then
+						burst(pivot.Position + Vector3.new(0, 1.5, 0), { GOLD, Creatures.Rarities[def.Rarity].Color })
+					end
+				end)
+			end
+		end
+	end)
 
 	Remotes.Event("BigPull").OnClientEvent:Connect(function(pull)
 		if type(pull) ~= "table" or type(pull.Id) ~= "string" then

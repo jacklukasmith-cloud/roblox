@@ -271,13 +271,25 @@ function Creatures.RarityOrder(id: string): number
 	return if def then Creatures.Rarities[def.Rarity].Order else 0
 end
 
-function Creatures.GetPower(id: string, variant: string?): number
+-- Levels: equipped creatures earn XP when crystals break; each level adds PowerPerLevel power
+Creatures.MaxLevel = 25
+Creatures.PowerPerLevel = 0.04
+
+function Creatures.XPToNext(level: number): number
+	return math.floor(8 * level ^ 1.5)
+end
+
+function Creatures.LevelMultiplier(level: number?): number
+	return 1 + (math.clamp(level or 1, 1, Creatures.MaxLevel) - 1) * Creatures.PowerPerLevel
+end
+
+function Creatures.GetPower(id: string, variant: string?, level: number?): number
 	local def = Creatures.List[id]
 	if not def then
 		return 0
 	end
 	local v = Creatures.Variants[variant or "Normal"] or Creatures.Variants.Normal
-	return def.Power * v.Multiplier
+	return def.Power * v.Multiplier * Creatures.LevelMultiplier(level)
 end
 
 function Creatures.DisplayName(id: string, variant: string?): string

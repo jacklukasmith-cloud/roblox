@@ -23,6 +23,7 @@ local Seasons = require(script.Parent.Seasons)
 local Economy = {}
 
 local notify = Remotes.Event("Notify")
+local petLevelUp = Remotes.Event("PetLevelUp")
 local bonuses = Config.GamePassBonuses
 
 local function boostActive(data: PlayerData.Data, name: string): boolean
@@ -37,10 +38,43 @@ function Economy.GetPower(data: PlayerData.Data): number
 	local power = Config.BaseClickPower
 	for _, entry in data.Creatures do
 		if entry.Equipped then
-			power += Creatures.GetPower(entry.Id, entry.Variant)
+			power += Creatures.GetPower(entry.Id, entry.Variant, entry.Level)
 		end
 	end
 	return power
+end
+
+-- Gives XP to every equipped creature (capped at Creatures.MaxLevel) and tells the owner about
+-- any level-ups. Levels live on the creature entries (missing = level 1, 0 XP).
+function Economy.GrantXP(player: Player, amount: number)
+	local data = PlayerData.Get(player)
+	if not data or amount <= 0 then
+		return
+	end
+	local ups = {}
+	for uid, entry in data.Creatures do
+		local level = entry.Level or 1
+		if entry.Equipped and level < Creatures.MaxLevel then
+			local xp = (entry.XP or 0) + amount
+			while level < Creatures.MaxLevel and xp >= Creatures.XPToNext(level) do
+				xp -= Creatures.XPToNext(level)
+				level += 1
+			end
+			if level >= Creatures.MaxLevel then
+				xp = 0
+			end
+			if level ~= (entry.Level or 1) then
+				table.insert(ups, { Uid = uid, Id = entry.Id, Variant = entry.Variant, Level = level })
+			end
+			entry.Level = level
+			entry.XP = xp
+		end
+	end
+	PlayerData.MarkChanged(player)
+	if #ups > 0 then
+		petLevelUp:FireClient(player, ups)
+		Economy.UpdateFollowerAttribute(player)
+	end
 end
 
 function Economy.GetRebirthMultiplier(data: PlayerData.Data): number
@@ -181,7 +215,7 @@ function Economy.EquipBest(player: Player)
 	local list = {}
 	for uid, entry in data.Creatures do
 		entry.Equipped = false
-		table.insert(list, { Uid = uid, Power = Creatures.GetPower(entry.Id, entry.Variant) })
+		table.insert(list, { Uid = uid, Power = Creatures.GetPower(entry.Id, entry.Variant, entry.Level) })
 	end
 	table.sort(list, function(a, b)
 		return a.Power > b.Power
@@ -217,12 +251,19 @@ function Economy.Fuse(player: Player, creatureId: string, variant: string): (boo
 		return tonumber(a) < tonumber(b)
 	end)
 	local wasEquipped = false
+	local bestLevel = 1
 	for i = 1, Creatures.FuseCost do
-		wasEquipped = wasEquipped or data.Creatures[matches[i]].Equipped
+		local used = data.Creatures[matches[i]]
+		wasEquipped = wasEquipped or used.Equipped
+		bestLevel = math.max(bestLevel, used.Level or 1)
 		data.Creatures[matches[i]] = nil
 	end
 	local uid = PlayerData.NewCreature(data, creatureId, nextVariant)
 	data.Creatures[uid].Equipped = wasEquipped
+	-- the fused creature keeps the best level of the copies used
+	if bestLevel > 1 then
+		data.Creatures[uid].Level = bestLevel
+	end
 	PlayerData.MarkChanged(player)
 	return true, nil, { Id = creatureId, Variant = nextVariant, New = false }
 end
@@ -378,10 +419,11 @@ function Economy.UpdateFollowerAttribute(player: Player)
 	local list = {}
 	for _, entry in data.Creatures do
 		if entry.Equipped then
-			table.insert(
-				list,
-				{ Id = entry.Id, Variant = entry.Variant, Power = Creatures.GetPower(entry.Id, entry.Variant) }
-			)
+			table.insert(list, {
+				Id = entry.Id,
+				Variant = entry.Variant,
+				Power = Creatures.GetPower(entry.Id, entry.Variant, entry.Level),
+			})
 		end
 	end
 	table.sort(list, function(a, b)
