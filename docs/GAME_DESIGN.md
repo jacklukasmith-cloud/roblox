@@ -75,10 +75,12 @@ receipts are recorded in the save file, so purchases can't be granted twice.
 ## Roadmap ideas (next updates)
 1. **Trading** with a confirm screen, a 5-second lock and a trade log. This is what drives Adopt Me's and PS99's economies.
 2. **Quest NPCs** (Bee Swarm style): daily and weekly quests that reward potions and eggs.
-3. **Creature fusion**: combine 5 of a kind into a Shiny, 5 Shinies into a Rainbow. This adds a reason to keep duplicates.
+3. ~~Creature fusion~~ (done)
 4. **Limited-time event eggs** (Halloween, Winter) with exclusive creatures that never return.
-5. **Boss raids**: a giant crystal golem every hour that everyone in the server fights together.
+5. ~~Boss raids~~ (done)
 6. **Skill minigame** (Fisch style): a timing bar on Legendary crystals for bonus rewards.
 7. **Hand-made meshes**: the procedural creatures can be swapped for Blender/Studio meshes later. `CreatureModels.Build`
    is the only place that needs to change. A game thumbnail is also still needed.
 8. **Rewarded video ads**, if eligible, for a free potion, and **subscriptions** (monthly VIP perks).
+9. **Very rare wild pets** (planned, not built yet): wild creatures that roam a realm now and then, can't be
+   hatched, and must be found and tamed. A server-wide "a wild ... appeared!" moment, like the boss raids.
