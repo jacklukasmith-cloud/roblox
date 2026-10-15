@@ -395,7 +395,7 @@ function Ui.initToasts(parent: Instance)
 		Name = "Toasts",
 		AnchorPoint = Vector2.new(0.5, 1),
 		Position = UDim2.new(0.5, 0, 1, -130),
-		Size = UDim2.fromOffset(560, 170),
+		Size = UDim2.fromOffset(440, 110),
 		BackgroundTransparency = 1,
 		ZIndex = 30,
 		Parent = parent,
@@ -425,7 +425,7 @@ function Ui.toast(text: string, color: Color3?)
 	end
 	toastCount += 1
 	local pill = Ui.glass({
-		Size = UDim2.new(1, 0, 0, 34),
+		Size = UDim2.new(1, 0, 0, 30),
 		BackgroundTransparency = 0.12,
 		LayoutOrder = toastCount, -- newest at the bottom, nearest the currency bar
 		ZIndex = 30,
@@ -446,7 +446,7 @@ function Ui.toast(text: string, color: Color3?)
 		Size = UDim2.new(1, -48, 1, -10),
 		Position = UDim2.fromOffset(34, 5),
 		ZIndex = 31,
-		MaxTextSize = 20,
+		MaxTextSize = 18,
 		Parent = pill,
 	})
 	local scale = Ui.new("UIScale", { Scale = 0.6, Parent = pill })
@@ -457,13 +457,13 @@ function Ui.toast(text: string, color: Color3?)
 			table.insert(pills, child)
 		end
 	end
-	if #pills > Layout.pick(2, 4) then
+	if #pills > 2 then -- never more than 2 on screen
 		table.sort(pills, function(a, b)
 			return a.LayoutOrder < b.LayoutOrder
 		end)
 		pills[1]:Destroy() -- oldest
 	end
-	task.delay(4, function()
+	task.delay(3, function()
 		if pill.Parent then
 			TweenService:Create(pill, TweenInfo.new(0.4), { BackgroundTransparency = 1 }):Play()
 			TweenService:Create(label, TweenInfo.new(0.4), { TextTransparency = 1 }):Play()

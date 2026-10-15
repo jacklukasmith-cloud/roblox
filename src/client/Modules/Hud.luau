@@ -130,7 +130,7 @@ function Hud.Build(root: Frame)
 			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),
 	})
-	local essenceSeg, essenceValue = segment(bar, 1, "💎", "Essence", T.Essence)
+	local essenceSeg, essenceValue, essenceCaption = segment(bar, 1, "💎", "Essence", T.Essence)
 	local plus = Ui.button({
 		Text = "+",
 		Variant = "Success",
@@ -244,7 +244,8 @@ function Hud.Build(root: Frame)
 		Ui.padding(10),
 		Ui.new("UIListLayout", { Padding = UDim.new(0, 6), SortOrder = Enum.SortOrder.LayoutOrder }),
 	})
-	local expanded = true
+	local expanded = false
+	local userChose = false -- once the player opens/closes it, keep their choice
 	local houseHeader = Ui.new("TextButton", {
 		LayoutOrder = 0,
 		Text = "",
@@ -321,6 +322,7 @@ function Hud.Build(root: Frame)
 	end
 	houseHeader.Activated:Connect(function()
 		Sound.Play("Click", 1.1)
+		userChose = true
 		setExpanded(not expanded)
 	end)
 
@@ -347,7 +349,7 @@ function Hud.Build(root: Frame)
 		plus.Size = UDim2.fromOffset(if c then 28 else 32, if c then 28 else 32)
 		bar.Size = UDim2.fromOffset(if c then 470 else 600, if c then 54 else 60)
 		div1.Visible, div2.Visible = true, true
-		multLabel.Visible = not c
+		multLabel.Visible = false -- the Essence caption shows the multiplier instead
 		bottom.Position = UDim2.new(0.5, 0, 1, if c then -6 else -14)
 		local bannerW, bannerH = if c then 240 else 300, if c then 26 else 30
 		banner.Size = UDim2.fromOffset(bannerW, bannerH)
@@ -362,12 +364,12 @@ function Hud.Build(root: Frame)
 				top.Position = UDim2.new(0.5, 0, 0, -barH / scale + (barH / scale - bannerH) / 2)
 			end
 		end
-		weatherText.Visible = not c -- phones: keep the top of the screen clear
+		weatherText.Visible = false -- refreshWorld shows it while a weather is active
 		weatherText.Size = UDim2.fromOffset(420, 14)
 		topList.Size = UDim2.fromOffset(if c then 200 else 240, 20)
 		house.Size = UDim2.fromOffset(if c then 190 else 230, 40)
 		house.Position = UDim2.new(1, if c then -8 else -14, if c then 0.3 else 0.5, 0)
-		setExpanded(not c) -- phones start collapsed; tap the header to open
+		setExpanded(if userChose then expanded else false) -- starts collapsed; tap the header to open
 	end
 	Layout.Changed:Connect(arrange)
 	pcall(function()
@@ -387,6 +389,9 @@ function Hud.Build(root: Frame)
 		powerValue.Text = Format.Number(d.Power)
 		multLabel.Text =
 			`Essence x{math.floor(d.EssenceMultiplier * 100) / 100}  ·  Luck x{math.floor(d.Luck * 100) / 100}`
+		essenceCaption.Text = if d.EssenceMultiplier > 1.001
+			then `ESSENCE  x{math.floor(d.EssenceMultiplier * 10 + 0.5) / 10}`
+			else "ESSENCE"
 		local now = State.Now()
 		local seen = {}
 		for name, endsAt in d.Boosts do
@@ -471,6 +476,8 @@ function Hud.Build(root: Frame)
 		local now = State.Now()
 		local weather = Weather.Types[w.Weather.Id] or Weather.Types.Clear
 		local nextWeather = Weather.Types[w.Weather.NextId] or Weather.Types.Clear
+		-- the weather line only shows while there's actual weather (and never on phones)
+		weatherText.Visible = weather.Id ~= "Clear" and not Layout.Compact
 		if weather.Id == "Clear" then
 			weatherText.Text = `Clear skies  ·  {nextWeather.Name} in {Format.Time(w.Weather.NextAt - now)}`
 			weatherText.TextColor3 = T.SubText

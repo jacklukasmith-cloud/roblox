@@ -299,7 +299,7 @@ local function buildMenu(root: Frame)
 		local c = Layout.Compact
 		-- Phones: 3x2 block; everything else: 2x3. Touch devices keep it in the top-left (clear of the
 		-- thumbstick); PC/console keep it left-centre (clear of the chat window).
-		local tileSize = if c then 54 else 70
+		local tileSize = if c then 48 else 58
 		local cols = if c then 3 else 2
 		grid.CellSize = UDim2.fromOffset(tileSize, tileSize)
 		local rows = math.ceil(gridCount / cols)
