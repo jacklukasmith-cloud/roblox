@@ -103,6 +103,7 @@ Testing commands (only affect you; everyone is an admin in Studio):
 | `!bigpull Phoenix Rainbow` | Preview the big-pull banner and fireworks (Legendary or better, or any Rainbow) |
 | `!treasure` | Hide a Lost Treasure now (add a realm number, e.g. `!treasure 2`) |
 | `!boss` | Spawn a boss raid now (add a realm number, e.g. `!boss 2`) |
+| `!reset confirm` | Wipe all your progress back to a brand-new save (Robux purchases and game passes are kept) |
 | `!seasonend` | End the season now on this server and hand out the rewards (for testing) |
 
 ## Daily rewards & quests

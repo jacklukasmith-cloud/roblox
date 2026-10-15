@@ -155,6 +155,26 @@ function PlayerData.WaitFor(player: Player, timeout: number?): Data?
 	return PlayerData.Get(player)
 end
 
+-- Wipes a player's progress back to a brand-new save (keeps the purchase receipts so Robux
+-- products are never granted twice). Changes the table in place so nothing holds a stale copy.
+function PlayerData.Reset(player: Player): boolean
+	local profile = profiles[player]
+	if not profile then
+		return false
+	end
+	local data = profile.Data :: any
+	local receipts = data.ProcessedReceipts
+	for key in data do
+		data[key] = nil
+	end
+	for key, value in defaultData() :: any do
+		data[key] = value
+	end
+	data.ProcessedReceipts = receipts or {}
+	profile.Dirty = true
+	return true
+end
+
 function PlayerData.MarkChanged(player: Player)
 	local profile = profiles[player]
 	if profile then

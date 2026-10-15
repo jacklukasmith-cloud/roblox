@@ -15,6 +15,8 @@
 	  !bigpull Phoenix Rainbow   show the big-pull banner + fireworks (Legendary+ or Rainbow)
 	  !treasure [realm]          hide a Lost Treasure now
 	  !seasonend                 end the season now on this server and hand out rewards
+	  !reset confirm             wipe ALL your progress (pets, Essence, pickaxe, realms...) back to a
+	                             new save. Robux purchases and game passes are kept.
 	  !hatchtest Phoenix Rainbow play the hatch animation for any creatures (up to 3, nothing is
 	                             added to your inventory), e.g. !hatchtest GlowSprite MoonRabbit Shiny
 
@@ -91,6 +93,23 @@ local function runPersonal(player: Player, command: string, args: { string }): b
 		end
 		Economy.EquipBest(player)
 		notify:FireClient(player, `[TEST] Gave {#list} creature(s)`, Color3.fromRGB(140, 255, 200))
+	elseif command == "reset" then
+		if string.lower(args[1] or "") ~= "confirm" then
+			notify:FireClient(
+				player,
+				"[TEST] This wipes ALL your progress. Type !reset confirm to do it",
+				Color3.fromRGB(255, 200, 120)
+			)
+			return true
+		end
+		PlayerData.Reset(player)
+		-- the starter creature, same as a brand-new player
+		local uid = PlayerData.NewCreature(data, Config.StarterCreature, "Normal")
+		data.Creatures[uid].Equipped = true
+		data.Bestiary[Config.StarterCreature] = true
+		local Pickaxe = require(script.Parent.Pickaxe) :: any
+		pcall(Pickaxe.Give, player)
+		notify:FireClient(player, "[TEST] Progress wiped - fresh start!", Color3.fromRGB(140, 255, 200))
 	elseif command == "seasonend" then
 		local Seasons = require(script.Parent.Seasons) :: any
 		local count = Seasons.EndNowForTesting()
