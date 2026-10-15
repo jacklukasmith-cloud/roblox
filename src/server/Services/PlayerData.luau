@@ -112,6 +112,22 @@ local function keyFor(player: Player): string
 	return "Player_" .. player.UserId
 end
 
+--[[
+	Session lock: the save holds { JobId, Time } of the server that's using it. Another server
+	won't load it while it's held (it waits for the final save, which releases it), and a server
+	never overwrites a save another server has taken over. A lock older than SESSION_STALE (a
+	crashed server) is ignored.
+]]
+local SESSION_STALE = Config.AutosaveInterval * 2.5
+local LOCK_WAIT_TRIES, LOCK_WAIT_SECONDS = 10, 2
+
+local function lockedElsewhere(record: any): boolean
+	local session = type(record) == "table" and record._Session
+	return type(session) == "table"
+		and session.JobId ~= game.JobId
+		and os.time() - (tonumber(session.Time) or 0) < SESSION_STALE
+end
+
 local function retry<T>(attempts: number, fn: () -> T): (boolean, T | string)
 	local lastErr
 	for attempt = 1, attempts do
@@ -152,14 +168,24 @@ function PlayerData.Save(player: Player): boolean
 		return false
 	end
 	profile.Data.LastOnline = os.time()
-	local snapshot = profile.Data
+	local snapshot = profile.Data :: any
+	local release = profile.Leaving == true
+	local takenOver = false
 	local ok, err = retry(3, function()
-		return (store :: DataStore):UpdateAsync(keyFor(player), function()
+		return (store :: DataStore):UpdateAsync(keyFor(player), function(old)
+			if lockedElsewhere(old) then
+				takenOver = true
+				return nil -- another server owns this save now: never overwrite it
+			end
+			snapshot._Session = if release then nil else { JobId = game.JobId, Time = os.time() }
 			return snapshot
 		end)
 	end)
 	if not ok then
 		warn(`[PlayerData] Failed to save {player.Name}: {err}`)
+	elseif takenOver then
+		warn(`[PlayerData] {player.Name}'s save is in use by another server; not overwriting it`)
+		return false
 	end
 	return ok
 end
@@ -168,9 +194,28 @@ local function load(player: Player)
 	local data: Data
 	local canSave = store ~= nil
 	if store then
-		local ok, result = retry(3, function()
-			return (store :: DataStore):GetAsync(keyFor(player))
-		end)
+		-- claim the save (session lock); if another server still has it (the player just
+		-- hopped servers), wait for its final save, then take over
+		local ok, result
+		for attempt = 1, LOCK_WAIT_TRIES + 1 do
+			local locked = false
+			local force = attempt > LOCK_WAIT_TRIES
+			ok, result = retry(3, function()
+				return (store :: DataStore):UpdateAsync(keyFor(player), function(old)
+					if not force and lockedElsewhere(old) then
+						locked = true
+						return nil
+					end
+					local record = if type(old) == "table" then old else {}
+					record._Session = { JobId = game.JobId, Time = os.time() }
+					return record
+				end)
+			end)
+			if not ok or not locked or not player.Parent then
+				break
+			end
+			task.wait(LOCK_WAIT_SECONDS)
+		end
 		if ok then
 			data = if type(result) == "table" then result else defaultData()
 		elseif RunService:IsStudio() then
