@@ -22,6 +22,7 @@ local HatchAnim = require(Modules.HatchAnim)
 local BossBar = require(Modules.BossBar)
 local Celebrate = require(Modules.Celebrate)
 local PickaxeButton = require(Modules.PickaxeButton)
+local Guide = require(Modules.Guide)
 
 local player = Players.LocalPlayer
 
@@ -74,6 +75,7 @@ end)
 start("Boss bar", function()
 	BossBar.Build(root)
 end)
+start("New-player guide", Guide.Start)
 start("Pickaxe button", function()
 	PickaxeButton.Build(root)
 end)
