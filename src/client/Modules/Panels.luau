@@ -443,13 +443,42 @@ local function buildCreatures(screen: Frame)
 		Parent = bar,
 	}, function()
 		local uids = {}
+		local precious = 0
+		local d = State.Data
 		for uid in selected do
 			table.insert(uids, uid)
+			local entry = d and d.Creatures[uid]
+			local def = entry and Creatures.Get(entry.Id)
+			-- Epic+, Shiny/Rainbow, levelled or Robux-only creatures deserve a second look
+			if
+				def
+				and (
+					Creatures.Rarities[def.Rarity].Order >= 4
+					or (entry.Variant or "Normal") ~= "Normal"
+					or (entry.Level or 1) > 1
+				)
+			then
+				precious += 1
+			end
 		end
-		if #uids > 0 then
+		if #uids == 0 then
+			return
+		end
+		local function release()
 			invoke("Release", uids)
+			selected = {}
+			refresh(true)
 		end
-		selected = {}
+		if precious > 0 then
+			Ui.confirm(
+				`Release {#uids} creature{if #uids == 1 then "" else "s"}?`,
+				`{precious} of them {if precious == 1 then "is" else "are"} rare, Shiny/Rainbow or levelled. Released creatures are gone forever.`,
+				"Release",
+				release
+			)
+		else
+			release()
+		end
 	end)
 
 	local grid = scrolling(content, { Position = UDim2.fromOffset(0, 48), Size = UDim2.new(1, 0, 1, -48) })
@@ -1260,7 +1289,19 @@ local function buildRebirth(screen: Frame)
 		Size = UDim2.fromOffset(200, 50),
 		BackgroundColor3 = Color3.fromRGB(255, 120, 230),
 	}, function()
-		invoke("Rebirth")
+		local d = State.Data
+		if d and d.Essence < d.RebirthCost then
+			invoke("Rebirth") -- the server explains what's missing
+			return
+		end
+		Ui.confirm(
+			"Rebirth?",
+			"Your Essence and unlocked realms reset. You keep your creatures and get a permanent Essence boost.",
+			"Rebirth",
+			function()
+				invoke("Rebirth")
+			end
+		)
 	end).Parent =
 		content
 

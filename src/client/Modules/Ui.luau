@@ -419,6 +419,77 @@ function Ui.initToasts(parent: Instance)
 end
 
 local toastCount = 0
+-- "Are you sure?" dialog for things that can't be undone. Calls onConfirm only on the confirm button.
+function Ui.confirm(title: string, message: string, confirmText: string, onConfirm: () -> ())
+	local root = toastHolder and toastHolder.Parent
+	if not root then
+		onConfirm()
+		return
+	end
+	local old = root:FindFirstChild("ConfirmDialog")
+	if old then
+		old:Destroy()
+	end
+	local backdrop = Ui.new("TextButton", {
+		Name = "ConfirmDialog",
+		Text = "",
+		AutoButtonColor = false,
+		BackgroundColor3 = Color3.new(0, 0, 0),
+		BackgroundTransparency = 0.45,
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 50,
+		Parent = root,
+	})
+	local box = Ui.glass({
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromOffset(380, 190),
+		Active = true,
+		Parent = backdrop,
+	}, { Ui.corner(16) })
+	Ui.text({
+		Position = UDim2.fromOffset(18, 14),
+		Size = UDim2.new(1, -36, 0, 30),
+		Text = title,
+		Font = T.FontHeavy,
+		MaxTextSize = 24,
+		Parent = box,
+	})
+	Ui.text({
+		Position = UDim2.fromOffset(18, 50),
+		Size = UDim2.new(1, -36, 0, 64),
+		Text = message,
+		Font = T.FontRegular,
+		TextColor3 = T.SubText,
+		TextWrapped = true,
+		MaxTextSize = 17,
+		Parent = box,
+	})
+	local function close()
+		backdrop:Destroy()
+	end
+	Ui.button({
+		AnchorPoint = Vector2.new(0, 1),
+		Position = UDim2.new(0, 18, 1, -16),
+		Size = UDim2.new(0.5, -24, 0, 44),
+		Text = "Cancel",
+		Variant = "Secondary",
+		Parent = box,
+	}, close)
+	Ui.button({
+		AnchorPoint = Vector2.new(1, 1),
+		Position = UDim2.new(1, -18, 1, -16),
+		Size = UDim2.new(0.5, -24, 0, 44),
+		Text = confirmText,
+		Variant = "Danger",
+		Parent = box,
+	}, function()
+		close()
+		onConfirm()
+	end)
+	backdrop.MouseButton1Click:Connect(close)
+end
+
 function Ui.toast(text: string, color: Color3?)
 	if not toastHolder then
 		return
