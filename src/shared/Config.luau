@@ -90,6 +90,16 @@ Config.HatchMilestones = {
 }
 Config.MilestoneFullStorageTrophies = 10 -- given instead of the creature if storage is full
 
+-- Lost Treasures: a glowing chest hidden in a realm; first to open it wins
+Config.Treasure = {
+	FirstDelay = { 60, 120 }, -- seconds after the server starts
+	Interval = { 90, 180 }, -- seconds between treasures (after the last one ends)
+	Lifetime = 120, -- seconds before it vanishes
+	CrystalRewards = 25, -- Essence worth this many of that realm's crystals
+	XP = 10, -- creature XP
+	MysticChance = 0.15, -- chance of a bonus Rare+ creature
+}
+
 -- Big breakables: one Mana Chest per realm
 Config.Chest = {
 	HPMultiplier = 25,

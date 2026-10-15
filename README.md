@@ -101,6 +101,7 @@ Testing commands (only affect you; everyone is an admin in Studio):
 | `!giveall` | One of every creature |
 | `!hatchtest Phoenix Rainbow` | Play the hatch animation for up to 3 creatures (nothing is added) |
 | `!bigpull Phoenix Rainbow` | Preview the big-pull banner and fireworks (Legendary or better, or any Rainbow) |
+| `!treasure` | Hide a Lost Treasure now (add a realm number, e.g. `!treasure 2`) |
 | `!boss` | Spawn a boss raid now (add a realm number, e.g. `!boss 2`) |
 | `!seasonend` | End the season now on this server and hand out the rewards (for testing) |
 
