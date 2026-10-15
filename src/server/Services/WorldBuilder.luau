@@ -1686,6 +1686,98 @@ local function setupLighting()
 	effect("ColorCorrectionEffect", { Saturation = 0.12, Contrast = 0.06, Brightness = 0.02 })
 end
 
+-- Terrain ground --------------------------------------------------------------------------------
+--[[
+	The hub and realm floors are Roblox Terrain: real swaying grass blades in the Meadow,
+	glowing lava cracks in the Ember Rift, snow and ice in Frostpeak, pale crystal salt in the
+	Sky Sanctum. Each realm uses its own materials because Terrain colours are per material.
+	If Terrain isn't available the old flat parts are used instead.
+]]
+local GROUND_STYLES = {
+	[0] = { Base = Enum.Material.Cobblestone, BaseColor = rgb(110, 98, 145) },
+	{ -- Enchanted Meadow
+		Base = Enum.Material.Grass,
+		BaseColor = rgb(96, 172, 74),
+		Patch = Enum.Material.LeafyGrass,
+		PatchColor = rgb(72, 148, 62),
+		Path = Enum.Material.Ground,
+		PathColor = rgb(156, 120, 84),
+	},
+	{ -- Ember Rift
+		Base = Enum.Material.Basalt,
+		BaseColor = rgb(62, 46, 44),
+		Patch = Enum.Material.CrackedLava,
+		PatchColor = rgb(255, 110, 40),
+		Path = Enum.Material.Asphalt,
+		PathColor = rgb(58, 48, 48),
+	},
+	{ -- Frostpeak
+		Base = Enum.Material.Snow,
+		BaseColor = rgb(236, 245, 255),
+		Patch = Enum.Material.Glacier,
+		PatchColor = rgb(165, 212, 255),
+		Path = Enum.Material.Pavement,
+		PathColor = rgb(188, 208, 232),
+	},
+	{ -- Sky Sanctum
+		Base = Enum.Material.Salt,
+		BaseColor = rgb(250, 246, 236),
+		Patch = Enum.Material.Limestone,
+		PatchColor = rgb(236, 222, 192),
+		Path = Enum.Material.Sandstone,
+		PathColor = rgb(240, 206, 132),
+	},
+}
+
+local function getTerrain(): Terrain?
+	local ok, terrain = pcall(function()
+		return workspace.Terrain
+	end)
+	if ok and terrain and terrain:IsA("Terrain") then
+		return terrain
+	end
+	return nil
+end
+
+-- Fills one floor with terrain (top surface at y = 0). Returns false if Terrain can't be used.
+local function terrainFloor(index: number, z0: number, length: number): boolean
+	local terrain = getTerrain()
+	local style = GROUND_STYLES[index]
+	if not terrain or not style then
+		return false
+	end
+	local ok = pcall(function()
+		local midZ = z0 + length / 2
+		-- floors overlap their neighbours by 2 studs so no seam opens on the 4-stud voxel grid
+		terrain:SetMaterialColor(style.Base, style.BaseColor)
+		terrain:FillBlock(CFrame.new(0, -2, midZ), Vector3.new(WIDTH, 4, length + 4), style.Base)
+		if style.Patch then
+			terrain:SetMaterialColor(style.Patch, style.PatchColor)
+			local prng = Random.new(900 + index)
+			for _ = 1, 12 do
+				local side = if prng:NextInteger(0, 1) == 0 then -1 else 1
+				local x = side * prng:NextNumber(12, WIDTH / 2 - 6)
+				local z = prng:NextNumber(z0 + 8, z0 + length - 8)
+				terrain:FillCylinder(CFrame.new(x, -2, z), 4, prng:NextNumber(3, 8), style.Patch)
+			end
+		end
+		if style.Path then
+			terrain:SetMaterialColor(style.Path, style.PathColor)
+			terrain:FillBlock(CFrame.new(0, -2, midZ), Vector3.new(14, 4, length + 4), style.Path)
+		end
+	end)
+	return ok
+end
+
+local function enableGrassBlades()
+	local terrain = getTerrain()
+	if terrain then
+		pcall(function()
+			(terrain :: any).Decoration = true
+		end)
+	end
+end
+
 -- Build ------------------------------------------------------------------------------------------
 
 export type BuiltWorld = {
@@ -1718,14 +1810,17 @@ function WorldBuilder.Build(): BuiltWorld
 
 	-- Hub ------------------------------------------------------------------------------------
 	local hubMid = (HUB_START + HUB_END) / 2
-	part({
-		Name = "HubFloor",
-		Size = Vector3.new(WIDTH, 2, HUB_END - HUB_START),
-		Position = Vector3.new(0, -1, hubMid),
-		Color = rgb(85, 75, 120),
-		Material = Enum.Material.Cobblestone,
-		Parent = hub,
-	})
+	enableGrassBlades()
+	if not terrainFloor(0, HUB_START, HUB_END - HUB_START) then
+		part({
+			Name = "HubFloor",
+			Size = Vector3.new(WIDTH, 2, HUB_END - HUB_START),
+			Position = Vector3.new(0, -1, hubMid),
+			Color = rgb(85, 75, 120),
+			Material = Enum.Material.Cobblestone,
+			Parent = hub,
+		})
+	end
 	-- Plaza + path to the realms
 	disc(hub, Vector3.new(0, 0.05, 5), 46, 0.2, rgb(120, 105, 160), Enum.Material.Slate)
 	disc(hub, Vector3.new(0, 0.02, 5), 48, 0.2, rgb(170, 110, 255), Enum.Material.Neon)
@@ -1812,22 +1907,24 @@ function WorldBuilder.Build(): BuiltWorld
 		folder.Name = zone.Name
 		folder.Parent = zonesFolder
 
-		part({
-			Name = "Ground",
-			Size = Vector3.new(WIDTH, 2, ZONE_LENGTH),
-			Position = Vector3.new(0, -1, z0 + ZONE_LENGTH / 2),
-			Color = zone.GroundColor,
-			Material = zone.GroundMaterial,
-			Parent = folder,
-		})
-		part({
-			Name = "Path",
-			Size = Vector3.new(16, 0.2, ZONE_LENGTH),
-			Position = Vector3.new(0, 0.05, z0 + ZONE_LENGTH / 2),
-			Color = zone.GroundColor:Lerp(WHITE, 0.25),
-			Material = Enum.Material.Slate,
-			Parent = folder,
-		})
+		if not terrainFloor(zone.Index, z0, ZONE_LENGTH) then
+			part({
+				Name = "Ground",
+				Size = Vector3.new(WIDTH, 2, ZONE_LENGTH),
+				Position = Vector3.new(0, -1, z0 + ZONE_LENGTH / 2),
+				Color = zone.GroundColor,
+				Material = zone.GroundMaterial,
+				Parent = folder,
+			})
+			part({
+				Name = "Path",
+				Size = Vector3.new(16, 0.2, ZONE_LENGTH),
+				Position = Vector3.new(0, 0.05, z0 + ZONE_LENGTH / 2),
+				Color = zone.GroundColor:Lerp(WHITE, 0.25),
+				Material = Enum.Material.Slate,
+				Parent = folder,
+			})
+		end
 
 		local decorFolder = Instance.new("Folder")
 		decorFolder.Name = "Decor"
