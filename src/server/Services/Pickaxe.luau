@@ -25,7 +25,6 @@ local Monetization = require(script.Parent.Monetization)
 local Pickaxe = {}
 
 local cfg = Config.Pickaxe
-local notify = Remotes.Event("Notify")
 local lastSwing: { [Player]: number } = {}
 local streaks: { [Player]: { Count: number, LastHit: number } } = {}
 local pickaxeHit = Remotes.Event("PickaxeHit")
@@ -347,32 +346,42 @@ local function buildAnvil(): BasePart?
 	helpers.Light(top, Color3.fromRGB(255, 160, 80), 14, 1.5)
 	local sign = helpers.Billboard(top, UDim2.fromOffset(240, 56), Vector3.new(0, 7.5, 0), 120)
 	helpers.Label(sign, { Text = "⛏ Blacksmith\nUpgrade your pickaxe", TextColor3 = Color3.fromRGB(255, 200, 120) })
-	local prompt = Instance.new("ProximityPrompt")
-	prompt.ActionText = "Upgrade Pickaxe"
-	prompt.ObjectText = "Blacksmith"
-	prompt.HoldDuration = 0.4
-	prompt.MaxActivationDistance = 10
-	prompt.RequiresLineOfSight = false
-	prompt.Parent = top
+	-- the shop circle: walk into it and the Blacksmith window opens (client: BlacksmithPanel)
+	local padCenter = p + Vector3.new(8, 0, 0)
+	local ring = newPart({
+		Name = "BlacksmithPad",
+		Anchored = true,
+		Shape = Enum.PartType.Cylinder,
+		Size = Vector3.new(0.2, 9, 9),
+		CFrame = CFrame.new(padCenter + Vector3.new(0, 0.12, 0)) * CFrame.Angles(0, 0, math.pi / 2),
+		Color = Color3.fromRGB(255, 170, 80),
+		Material = Enum.Material.Neon,
+		Transparency = 0.25,
+		CanCollide = false,
+		CanQuery = false,
+		Parent = model,
+	})
+	newPart({
+		Name = "PadInner",
+		Anchored = true,
+		Shape = Enum.PartType.Cylinder,
+		Size = Vector3.new(0.22, 7.6, 7.6),
+		CFrame = CFrame.new(padCenter + Vector3.new(0, 0.13, 0)) * CFrame.Angles(0, 0, math.pi / 2),
+		Color = Color3.fromRGB(60, 40, 30),
+		Material = Enum.Material.SmoothPlastic,
+		Transparency = 0.15,
+		CanCollide = false,
+		CanQuery = false,
+		Parent = model,
+	})
+	local padSign = helpers.Billboard(ring, UDim2.fromOffset(200, 34), Vector3.new(0, 3, 0), 60)
+	helpers.Label(padSign, { Text = "⛏ Step in to shop", TextColor3 = Color3.fromRGB(255, 200, 120) })
 	model.Parent = hub
 	return top
 end
 
 function Pickaxe.Start()
-	local anvil = buildAnvil()
-	local prompt = anvil and anvil:FindFirstChildOfClass("ProximityPrompt")
-	if prompt then
-		prompt.Triggered:Connect(function(player)
-			local ok, message = Pickaxe.Upgrade(player)
-			if message then
-				notify:FireClient(
-					player,
-					message,
-					if ok then Color3.fromRGB(255, 200, 120) else Color3.fromRGB(255, 130, 130)
-				)
-			end
-		end)
-	end
+	buildAnvil()
 	local function hook(player: Player)
 		player.CharacterAdded:Connect(function()
 			task.wait(0.2)

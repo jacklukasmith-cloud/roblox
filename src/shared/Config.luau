@@ -103,14 +103,22 @@ Config.Pickaxe = {
 	StreakStep = 0.05, -- extra damage per streak step...
 	StreakMax = 10, -- ...up to this many steps (+50%)
 	Reach = 9, -- studs from you to the edge of what you're hitting
+	-- Order matters: you buy them one after another at the Blacksmith. Mesh = imported 3D model name.
 	Tiers = {
 		{ Name = "Wooden Pickaxe", Mult = 0.5, Cost = 0, Color = Color3.fromRGB(150, 105, 60), Mesh = "PickaxeWooden" },
 		{
 			Name = "Stone Pickaxe",
-			Mult = 0.8,
+			Mult = 0.7,
 			Cost = 1500,
 			Color = Color3.fromRGB(150, 150, 160),
 			Mesh = "PickaxeStone",
+		},
+		{
+			Name = "Copper Pickaxe",
+			Mult = 0.9,
+			Cost = 8000,
+			Color = Color3.fromRGB(205, 120, 70),
+			Mesh = "PickaxeCopper",
 		},
 		{
 			Name = "Iron Pickaxe",
@@ -120,18 +128,53 @@ Config.Pickaxe = {
 			Mesh = "PickaxeIron",
 		},
 		{
-			Name = "Crystal Pickaxe",
+			Name = "Frost Pickaxe",
+			Mult = 1.5,
+			Cost = 120000,
+			Color = Color3.fromRGB(170, 220, 255),
+			Mesh = "PickaxeFrost",
+		},
+		{
+			Name = "Ember Pickaxe",
 			Mult = 1.8,
 			Cost = 400000,
+			Color = Color3.fromRGB(255, 120, 50),
+			Mesh = "PickaxeEmber",
+		},
+		{
+			Name = "Crystal Pickaxe",
+			Mult = 2.2,
+			Cost = 1500000,
 			Color = Color3.fromRGB(110, 230, 255),
 			Mesh = "PickaxeCrystal",
 		},
 		{
+			Name = "Emerald Pickaxe",
+			Mult = 2.7,
+			Cost = 5000000,
+			Color = Color3.fromRGB(60, 210, 120),
+			Mesh = "PickaxeEmerald",
+		},
+		{
 			Name = "Mythic Pickaxe",
-			Mult = 2.8,
-			Cost = 8000000,
+			Mult = 3.3,
+			Cost = 15000000,
 			Color = Color3.fromRGB(255, 90, 200),
 			Mesh = "PickaxeMythic",
+		},
+		{
+			Name = "Void Pickaxe",
+			Mult = 4,
+			Cost = 50000000,
+			Color = Color3.fromRGB(140, 70, 220),
+			Mesh = "PickaxeVoid",
+		},
+		{
+			Name = "Celestial Pickaxe",
+			Mult = 5,
+			Cost = 150000000,
+			Color = Color3.fromRGB(255, 245, 200),
+			Mesh = "PickaxeCelestial",
 		},
 	},
 }

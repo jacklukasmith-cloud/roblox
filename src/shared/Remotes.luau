@@ -37,6 +37,7 @@ local FUNCTIONS = {
 	"GoToBoss",
 	"EquipTitle",
 	"TogglePickaxe",
+	"UpgradePickaxe",
 }
 
 local Remotes = {}

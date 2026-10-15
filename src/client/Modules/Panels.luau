@@ -19,6 +19,7 @@ local CreatureModels = require(Shared.CreatureModels)
 local Ui = require(script.Parent.Ui)
 local DailyPanel = require(script.Parent.DailyPanel)
 local SeasonPanel = require(script.Parent.SeasonPanel)
+local BlacksmithPanel = require(script.Parent.BlacksmithPanel)
 local Layout = require(script.Parent.Layout)
 local State = require(script.Parent.State)
 
@@ -1493,6 +1494,7 @@ function Panels.Build(screen: Frame)
 	buildSettings(screen)
 	DailyPanel.Build(screen)
 	SeasonPanel.Build(screen)
+	BlacksmithPanel.Build(screen)
 
 	-- The merchant stall in the hub opens the panel
 	task.spawn(function()

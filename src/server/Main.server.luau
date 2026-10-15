@@ -317,6 +317,10 @@ bind("EquipTitle", function(player, title)
 	return Seasons.EquipTitle(player, title)
 end)
 
+bind("UpgradePickaxe", function(player)
+	return Pickaxe.Upgrade(player)
+end)
+
 bind("TogglePickaxe", function(player)
 	return Pickaxe.Toggle(player)
 end)
