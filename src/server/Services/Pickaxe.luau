@@ -142,7 +142,18 @@ local function buildTool(tier: number, golden: boolean?): Tool
 		weld.Part1 = piece
 		weld.Parent = piece
 	end
-	if attachMesh(tool, handle, if golden then cfg.GoldenMesh else info.Mesh) then
+	-- a broken import must never stop you getting your pickaxe: fall back to the block head
+	local ok, attached = pcall(attachMesh, tool, handle, if golden then cfg.GoldenMesh else info.Mesh)
+	if not ok then
+		warn(`[Pickaxe] couldn't use the model for {info.Name}: {attached}`)
+		local look = tool:FindFirstChild("Look")
+		if look then
+			look:Destroy()
+		end
+		handle.Transparency = 0
+		attached = false
+	end
+	if attached then
 		if golden then
 			local sparkles = Instance.new("Sparkles")
 			sparkles.SparkleColor = Color3.fromRGB(255, 215, 80)
@@ -217,18 +228,26 @@ function Pickaxe.Swing(player: Player, tool: Tool?): boolean
 	return hit ~= nil
 end
 
--- Puts the right pickaxe in the player's backpack (replacing an older one)
-function Pickaxe.Give(player: Player)
+-- Puts the right pickaxe in the player's backpack (replacing an older one). If the old one was
+-- in their hand (or equip is true) the new one goes straight into their hand.
+function Pickaxe.Give(player: Player, equip: boolean?)
 	local tier = tierOf(player)
 	local golden = hasGolden(player)
-	local containers = { player:FindFirstChildOfClass("Backpack"), player.Character }
+	local character = player.Character
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	local wantHeld = equip == true
+	local containers = { player:FindFirstChildOfClass("Backpack"), character }
 	for _, container in containers do
 		if container then
 			local old = container:FindFirstChild("Pickaxe")
 			if old and old:IsA("Tool") then
 				if old:GetAttribute("Tier") == tier and old:GetAttribute("Golden") == golden then
+					if wantHeld and humanoid and old.Parent ~= character then
+						humanoid:EquipTool(old)
+					end
 					return
 				end
+				wantHeld = wantHeld or container == character
 				old:Destroy()
 			end
 		end
@@ -242,6 +261,9 @@ function Pickaxe.Give(player: Player)
 		Pickaxe.Swing(player, tool)
 	end)
 	tool.Parent = backpack
+	if wantHeld and humanoid and humanoid.Health > 0 then
+		humanoid:EquipTool(tool)
+	end
 end
 
 -- Takes the pickaxe out / puts it away (the game hides Roblox's hotbar). Returns held?
@@ -282,7 +304,10 @@ function Pickaxe.Upgrade(player: Player): (boolean, string?)
 	data.Essence -= nextTier.Cost
 	data.Pickaxe = tier + 1
 	PlayerData.MarkChanged(player)
-	Pickaxe.Give(player)
+	local ok, err = pcall(Pickaxe.Give, player, true)
+	if not ok then
+		warn(`[Pickaxe] give after upgrade failed: {err}`)
+	end
 	return true, `⛏ {nextTier.Name}! Swings now deal {nextTier.Mult}x your Power`
 end
 
@@ -407,7 +432,7 @@ function Pickaxe.Start()
 	end)
 	Monetization.OnPassPurchased(function(player, key)
 		if key == "GoldenPickaxe" then
-			Pickaxe.Give(player)
+			Pickaxe.Give(player, true)
 		end
 	end)
 end
