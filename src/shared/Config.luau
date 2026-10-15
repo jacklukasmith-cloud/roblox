@@ -105,6 +105,7 @@ Config.OrbsPerChest = 20
 Config.BaseEquipSlots = 4
 Config.MaxInventory = 150
 Config.BestiaryBonusPerSpecies = 0.02 -- +2% Essence per species discovered
+Config.IndexSetBonus = 0.1 -- +10% Essence for each egg whose whole set you've discovered
 
 -- Rebirth -------------------------------------------------------------------------
 Config.Rebirth = {

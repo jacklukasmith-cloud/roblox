@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage.Shared
 local Config = require(Shared.Config)
 local Creatures = require(Shared.Creatures)
+local Eggs = require(Shared.Eggs)
 local Zones = require(Shared.Zones)
 local Format = require(Shared.Format)
 local Remotes = require(Shared.Remotes)
@@ -86,7 +87,13 @@ function Economy.GetBestiaryMultiplier(data: PlayerData.Data): number
 	for _ in data.Bestiary do
 		count += 1
 	end
-	return 1 + count * Config.BestiaryBonusPerSpecies
+	local sets = 0
+	for _, eggId in Eggs.Order do
+		if Eggs.SetProgress(eggId, data.Bestiary) then
+			sets += 1
+		end
+	end
+	return 1 + count * Config.BestiaryBonusPerSpecies + sets * Config.IndexSetBonus
 end
 
 function Economy.GetEssenceMultiplier(player: Player, data: PlayerData.Data): number

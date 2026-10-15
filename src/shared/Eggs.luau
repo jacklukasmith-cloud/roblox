@@ -153,6 +153,32 @@ function Eggs.Roll(egg: EggDef, luck: number, rng: Random, minRarityOrder: numbe
 end
 
 -- The egg a creature hatches from (first match), for showing the right egg colour
+-- Index sets: every creature an egg can hatch. Discovering them all completes the set.
+function Eggs.SetOf(eggId: string): { string }
+	local egg = Eggs.Get(eggId)
+	local list = {}
+	if egg then
+		for _, drop in egg.Drops do
+			if not table.find(list, drop.Creature) then
+				table.insert(list, drop.Creature)
+			end
+		end
+	end
+	return list
+end
+
+-- (complete, found, total) for an egg's set against a Bestiary table
+function Eggs.SetProgress(eggId: string, bestiary: { [string]: boolean }): (boolean, number, number)
+	local set = Eggs.SetOf(eggId)
+	local found = 0
+	for _, id in set do
+		if bestiary[id] then
+			found += 1
+		end
+	end
+	return #set > 0 and found == #set, found, #set
+end
+
 function Eggs.EggFor(creatureId: string): string
 	for _, id in Eggs.Order do
 		local egg = Eggs.Get(id)

@@ -32,6 +32,20 @@ local function addCreature(player: Player, data: PlayerData.Data, creatureId: st
 	local uid = PlayerData.NewCreature(data, creatureId, variant)
 	local isNew = not data.Bestiary[creatureId]
 	data.Bestiary[creatureId] = true
+	if isNew then
+		-- did this discovery complete an egg's Index set?
+		local eggId = Eggs.EggFor(creatureId)
+		local egg = Eggs.Get(eggId)
+		if egg and table.find(Eggs.SetOf(eggId), creatureId) and Eggs.SetProgress(eggId, data.Bestiary) then
+			task.delay(Config.MilestoneDelay or 4, function()
+				notify:FireClient(
+					player,
+					`📖 {egg.Name} set complete! +{math.floor(Config.IndexSetBonus * 100)}% Essence forever`,
+					Color3.fromRGB(255, 215, 80)
+				)
+			end)
+		end
+	end
 	data.Stats.CreaturesHatched += 1
 	DailyRewards.Track(player, "HatchEggs", 1)
 	local def = Creatures.Get(creatureId)

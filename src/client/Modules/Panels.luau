@@ -1295,7 +1295,16 @@ local function buildBestiary(screen: Frame)
 		MaxTextSize = 15,
 		Parent = content,
 	})
-	local grid = scrolling(content, { Position = UDim2.fromOffset(0, 54), Size = UDim2.new(1, 0, 1, -54) })
+	local setsLabel = Ui.text({
+		Position = UDim2.fromOffset(0, 50),
+		Size = UDim2.new(1, 0, 0, 20),
+		Text = "",
+		Font = T.FontRegular,
+		TextColor3 = T.SubText,
+		MaxTextSize = 15,
+		Parent = content,
+	})
+	local grid = scrolling(content, { Position = UDim2.fromOffset(0, 76), Size = UDim2.new(1, 0, 1, -76) })
 	Ui.autoGrid(grid, 112, 110)
 
 	local function render()
@@ -1332,6 +1341,18 @@ local function buildBestiary(screen: Frame)
 				Parent = card,
 			})
 		end
+		-- Index sets: discover everything an egg can hatch for a permanent bonus
+		local sets = {}
+		for _, eggId in Eggs.Order do
+			local egg = Eggs.Get(eggId)
+			local complete, have, total = Eggs.SetProgress(eggId, d.Bestiary)
+			if egg and total > 0 then
+				local short = string.gsub(egg.Name, " Egg$", "")
+				table.insert(sets, if complete then `{short} ✅` else `{short} {have}/{total}`)
+			end
+		end
+		setsLabel.Text =
+			`📖 Sets (+{math.floor(Config.IndexSetBonus * 100)}% Essence each): {table.concat(sets, "  ·  ")}`
 		local hatched = d.Stats and d.Stats.CreaturesHatched or 0
 		local nextMilestone = Config.HatchMilestones[(d.Stats and d.Stats.HatchMilestones or 0) + 1]
 		milestoneLabel.Text = if nextMilestone
