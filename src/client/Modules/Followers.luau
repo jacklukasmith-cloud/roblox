@@ -49,9 +49,14 @@ local function rebuild(player: Player)
 		local parts = string.split(token, ":")
 		local id, variant = parts[1], parts[2] or "Normal"
 		if Creatures.Get(id) then
-			local rig = CreatureModels.Build(id, variant)
-			rig.Model.Parent = folder
-			table.insert(rigs, rig)
+			-- one broken model must not leave the others un-tracked (they'd never be removed)
+			local ok, rig = pcall(CreatureModels.Build, id, variant)
+			if ok then
+				rig.Model.Parent = folder
+				table.insert(rigs, rig)
+			else
+				warn(`[Mythic Tamers] Couldn't build follower {id}: {rig}`)
+			end
 		end
 	end
 

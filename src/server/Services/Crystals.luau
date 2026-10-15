@@ -576,7 +576,9 @@ local function tickPlayer(player: Player)
 		-- Creatures need a moment to fly over before they start hitting
 		-- (faster teams get there sooner)
 		local travel = Config.PetTravelTime / Economy.GetTeamSpeed(data)
-		if state and os.clock() - (targetSince[player] or 0) >= travel then
+		-- no creatures out = nobody attacking (your pickaxe still works)
+		local _, equipped = PlayerData.CountCreatures(data)
+		if state and equipped > 0 and os.clock() - (targetSince[player] or 0) >= travel then
 			local amount = Economy.GetTeamDamage(data) * Config.PetDamageMultiplier
 			local crit = critRng:NextNumber() < Config.Crit.Chance
 			if crit then
