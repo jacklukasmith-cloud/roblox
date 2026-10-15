@@ -15,6 +15,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage.Shared
 local Config = require(Shared.Config)
 local Creatures = require(Shared.Creatures)
+local Eggs = require(Shared.Eggs)
 local CreatureModels = require(Shared.CreatureModels)
 local Zones = require(Shared.Zones)
 local Format = require(Shared.Format)
@@ -43,29 +44,49 @@ type Active = {
 
 local active: Active? = nil
 local nextSpawnAt = 0 -- os.time() of the next scheduled boss
-local rotation = 0
 local rng = Random.new()
 
-local function bossCandidates(): { string }
-	local list = {}
-	for _, def in Creatures.Ordered do
-		if Creatures.Rarities[def.Rarity].Order >= 5 and def.Rarity ~= "Exclusive" then
-			table.insert(list, def.Id)
-		end
+-- The boss is one of the two strongest creatures from that realm's own egg, so early realms get
+-- gentler bosses (a Meadow boss is a Moon Rabbit or Fae Dragonling, Sky Sanctum brings the Void Leviathan)
+local function bossCandidates(zoneIndex: number): { string }
+	local zone = Zones.Get(zoneIndex)
+	local list = if zone then Eggs.SetOf(zone.EggId) else {}
+	table.sort(list, function(a, b)
+		return Creatures.RarityOrder(a) > Creatures.RarityOrder(b)
+	end)
+	while #list > 2 do
+		table.remove(list)
+	end
+	if #list == 0 then
+		list = { "Phoenix" }
 	end
 	return list
 end
 
--- Total damage per second of everyone in the server (sizes the boss's HP)
-local function serverDps(): number
+-- Damage per second of the players who can actually reach the realm (sizes the boss's HP)
+local function serverDps(zoneIndex: number): number
 	local total = 0
 	for _, player in Players:GetPlayers() do
 		local data = PlayerData.Get(player)
-		if data then
+		if data and data.ZonesUnlocked >= zoneIndex then
 			total += Economy.GetPower(data) * Config.PetDamageMultiplier / Config.PetAttackInterval
 		end
 	end
 	return math.max(total, 1)
+end
+
+-- A realm somebody on the server has unlocked, leaning towards the furthest one
+local function pickZone(): number
+	local best = 1
+	for _, player in Players:GetPlayers() do
+		local data = PlayerData.Get(player)
+		if data then
+			best = math.max(best, data.ZonesUnlocked)
+		end
+	end
+	best = math.clamp(best, 1, #Zones.List)
+	-- 60% the furthest realm anyone has reached, otherwise any realm up to it
+	return if rng:NextNumber() < 0.6 then best else rng:NextInteger(1, best)
 end
 
 local function topDamage(damage: { [Player]: number }, count: number): { { Player: Player, Damage: number } }
@@ -175,7 +196,8 @@ local function buildBoss(zoneIndex: number, creatureId: string): (Model, BasePar
 	main.Parent = model
 	model.PrimaryPart = main
 
-	local rig = CreatureModels.Build(creatureId, "Rainbow", Config.Boss.Scale)
+	-- bosses in later realms are bigger
+	local rig = CreatureModels.Build(creatureId, "Rainbow", Config.Boss.Scale * (0.75 + 0.15 * zoneIndex))
 	CreatureModels.Place(rig, CFrame.new(position) * CFrame.Angles(0, math.pi, 0))
 	rig.Model:SetAttribute("Bob", 1)
 	rig.Model.Parent = model
@@ -219,16 +241,15 @@ function BossRaid.Spawn(zoneIndex: number?): boolean
 	if active then
 		return false
 	end
-	rotation += 1
-	local zoneIdx = zoneIndex or ((rotation - 1) % #Zones.List) + 1
+	local zoneIdx = zoneIndex or pickZone()
 	local zone = Zones.Get(zoneIdx)
 	if not zone then
 		return false
 	end
-	local candidates = bossCandidates()
+	local candidates = bossCandidates(zoneIdx)
 	local creatureId = candidates[rng:NextInteger(1, #candidates)]
 	local model, main = buildBoss(zoneIdx, creatureId)
-	local hp = serverDps() * Config.Boss.TargetSeconds
+	local hp = serverDps(zoneIdx) * Config.Boss.TargetSeconds
 	Crystals.Register(model, zoneIdx, {
 		HPMultiplier = math.max(hp / zone.CrystalHP, 40),
 		RewardMultiplier = Config.Boss.RewardMultiplier,
@@ -253,6 +274,11 @@ function BossRaid.Spawn(zoneIndex: number?): boolean
 	end
 	broadcast()
 	return true
+end
+
+-- Removes the current boss without rewards (admin / tests)
+function BossRaid.Despawn()
+	despawn()
 end
 
 -- Teleports a player next to the boss (if they've unlocked its realm)
