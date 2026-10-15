@@ -887,6 +887,7 @@ local SHOP_EMOJI = {
 	TripleHatch = "🥚",
 	ExtraEquip = "🐾",
 	LongerOffline = "🌙",
+	GoldenPickaxe = "⛏",
 	EssencePouch = "👝",
 	EssenceChest = "🧰",
 	LuckPotion = "🧪",

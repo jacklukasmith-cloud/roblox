@@ -50,6 +50,7 @@ type CrystalState = {
 	OnBreak: ((damage: { [Player]: number }) -> ())?,
 	Broken: boolean,
 	Damage: { [Player]: number },
+	Swung: { [Player]: boolean }, -- players who landed a pickaxe hit (hands-on bonus)
 	Bar: Frame,
 	Label: TextLabel,
 }
@@ -180,6 +181,8 @@ local function breakCrystal(state: CrystalState)
 	state.Broken = true
 	local damage = state.Damage
 	state.Damage = {}
+	local swung = state.Swung
+	state.Swung = {}
 	local orbs = if state.Kind == "Crystal" then Config.OrbsPerBreak else Config.OrbsPerChest
 	local now = os.clock()
 	for player, dealt in damage do
@@ -195,8 +198,14 @@ local function breakCrystal(state: CrystalState)
 			end
 			combo.ExpiresAt = now + Config.Combo.Window
 			local comboMult = 1 + (combo.Count - 1) * Config.Combo.Step
-			local earned =
-				Economy.AwardCrystal(player, state.Zone, share, state.RewardMultiplier * state.SizeReward * comboMult)
+			-- hands-on bonus: you swung your pickaxe at it yourself
+			local handsOn = if swung[player] then Config.Pickaxe.HandsOnBonus else 1
+			local earned = Economy.AwardCrystal(
+				player,
+				state.Zone,
+				share,
+				state.RewardMultiplier * state.SizeReward * comboMult * handsOn
+			)
 			crystalBroken:FireClient(
 				player,
 				state.Model,
@@ -345,6 +354,7 @@ function Crystals.Register(model: Model, zoneIndex: number, options: Options?)
 		OnBreak = o.OnBreak,
 		Broken = false,
 		Damage = {},
+		Swung = {},
 		Bar = (gui :: any).Back.Fill,
 		Label = (gui :: any).Back.Amount,
 	}
@@ -359,6 +369,46 @@ function Crystals.Register(model: Model, zoneIndex: number, options: Options?)
 		Crystals.Target(player, model)
 	end)
 	detector.Parent = model
+end
+
+-- A pickaxe swing: hits the closest breakable (crystal, chest or boss) within reach of the
+-- player's character. Returns the model hit, or nil. Same damage path as creatures (crits, combos).
+function Crystals.Swing(player: Player, power: number, reach: number, bossMultiplier: number?): Model?
+	local pos = characterPosition(player)
+	if not pos or power <= 0 then
+		return nil
+	end
+	local best, bestDist = nil, math.huge
+	local petTarget = targets[player]
+	for model, state in states do
+		if not state.Broken then
+			-- measure to the surface of big things (bosses), not their centre
+			local size = state.Main.Size
+			local radius = math.max(size.X, size.Z) / 2
+			local dist = (state.Main.Position - pos).Magnitude - radius
+			-- whatever your creatures are attacking wins if it's in reach, so you join the same fight
+			local score = if model == petTarget then dist - 1000 else dist
+			if dist <= reach and score < bestDist and canAttack(player, state, math.huge, true) then
+				best, bestDist = model, score
+			end
+		end
+	end
+	local state = best and states[best]
+	if not state then
+		return nil
+	end
+	local amount = power * (if state.Kind == "Boss" then bossMultiplier or 1 else 1)
+	local crit = critRng:NextNumber() < Config.Crit.Chance
+	if crit then
+		amount *= Config.Crit.Multiplier
+	end
+	state.Swung[player] = true
+	-- clicks don't reach crystals while a tool is held, so a swing also sends your creatures
+	if targets[player] ~= best then
+		setTarget(player, best)
+	end
+	damage(player, state, amount, crit)
+	return best
 end
 
 -- Removes a breakable (e.g. a boss that escaped); creatures attacking it return to their owners

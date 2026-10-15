@@ -61,3 +61,19 @@ free spots around the hub.
 Each model is scaled automatically (eggs ~6.8 studs tall, crystals ~6.5, chest ~9.5 wide, trees
 12-16 tall). To tweak one, add attributes to its model in WorldMeshes: **Scale** (e.g. `1.2`) and
 **Yaw** (degrees to turn it).
+
+## Pick-axes (the player's tool)
+
+Pick on one side, axe on the other. Same steps: import, name it exactly, leave it in Workspace.
+The game lines each one up with the pickaxe handle and sizes it automatically. If one is held
+upside down, add a **Flip** attribute (Bool, ticked) to its model in WorldMeshes; to turn it
+around the handle add **Roll** (degrees). Until a model is imported the block pickaxe is used.
+
+| Name it | Tier | Model | Concept |
+|---|---|---|---|
+| `PickaxeWooden` | Wooden | [GLB](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261015_005703_d8621ce8-6ee8-480f-be94-61fdc28eece6.glb) | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261015_005629_d8af502c-37a7-48bb-9c01-fb2d589b4af3.png) |
+| `PickaxeStone` | Stone | [GLB](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261015_005704_549a7515-9665-4ac1-8cc0-6737e1acd673.glb) | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261015_005631_8a4d65af-9ae5-4394-bdb8-57457da65ed7.png) |
+| `PickaxeIron` | Iron | [GLB](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261015_005705_f009c550-5e35-4a4a-83e6-91997320a8ae.glb) | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261015_005630_686624b8-c989-4ba9-bbe9-bc56b9db62c1.png) |
+| `PickaxeCrystal` | Crystal | [GLB](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261015_005706_1cb528b0-d963-491e-ae01-763a24ae6f2c.glb) | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261015_005630_a8d014d6-7099-41bc-9457-7dd6c5329b5e.png) |
+| `PickaxeMythic` | Mythic | [GLB](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261015_005708_c48bd38a-4b90-49b5-94dd-7a817dbad85c.glb) | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261015_005630_35ed80b8-6e3f-4bc2-9e32-3f43fc737a24.png) |
+| `PickaxeGolden` | Golden | [GLB](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261015_005709_e8f14dde-0ed7-42c6-bc96-b9a5d400828c.glb) | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261015_005630_7d6c937c-722b-4f30-ae94-00bf060d5bd1.png) |

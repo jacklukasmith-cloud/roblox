@@ -135,6 +135,13 @@ end
 -- A Model or MeshPart named after a prop (see WorldBuilder.MeshNames) replaces the built-in
 -- version of that prop. Missing ones just keep the procedural look.
 WorldBuilder.MeshNames = {
+	-- pick-axe tools (one per tier + the Golden Pickaxe pass), used by Services/Pickaxe
+	"PickaxeWooden",
+	"PickaxeStone",
+	"PickaxeIron",
+	"PickaxeCrystal",
+	"PickaxeMythic",
+	"PickaxeGolden",
 	"MeadowEgg",
 	"EmberEgg",
 	"FrostEgg",

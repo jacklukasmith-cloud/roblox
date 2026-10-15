@@ -21,6 +21,7 @@ local EggBoards = require(Modules.EggBoards)
 local HatchAnim = require(Modules.HatchAnim)
 local BossBar = require(Modules.BossBar)
 local Celebrate = require(Modules.Celebrate)
+local PickaxeButton = require(Modules.PickaxeButton)
 
 local player = Players.LocalPlayer
 
@@ -72,6 +73,9 @@ start("HUD", function()
 end)
 start("Boss bar", function()
 	BossBar.Build(root)
+end)
+start("Pickaxe button", function()
+	PickaxeButton.Build(root)
 end)
 start("Celebrations", function()
 	Celebrate.Build(root)

@@ -42,6 +42,7 @@ export type Data = {
 	Season: { Week: number, Points: number, RewardedWeek: number },
 	Titles: { string },
 	Title: string,
+	Pickaxe: number, -- pickaxe tier (Config.Pickaxe.Tiers)
 	Quests: { Day: number, Progress: { [string]: number }, Claimed: { [string]: boolean }, BonusClaimed: boolean },
 }
 
@@ -70,6 +71,7 @@ local function defaultData(): Data
 		Season = { Week = -1, Points = 0, RewardedWeek = -1 },
 		Titles = {},
 		Title = "",
+		Pickaxe = 1,
 		Quests = { Day = -1, Progress = {}, Claimed = {}, BonusClaimed = false },
 	}
 end

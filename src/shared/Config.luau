@@ -90,6 +90,49 @@ Config.HatchMilestones = {
 }
 Config.MilestoneFullStorageTrophies = 10 -- given instead of the creature if storage is full
 
+-- Pickaxe: every player swings one at the nearest crystal/chest/boss. Damage per swing = your
+-- Power * the tier's Mult (creatures deal Power * 0.75 four times a second). Upgrade at the hub anvil.
+Config.Pickaxe = {
+	Cooldown = 0.45, -- seconds between swings
+	HandsOnBonus = 1.5, -- Essence multiplier on breaks you landed at least one swing on
+	GoldenDamage = 1.5, -- Golden Pickaxe pass: damage multiplier
+	GoldenSpeed = 0.75, -- Golden Pickaxe pass: cooldown multiplier (faster swings)
+	GoldenMesh = "PickaxeGolden",
+	AxeBossBonus = 1.5, -- the axe side (used automatically on bosses) deals this much more
+	Reach = 9, -- studs from you to the edge of what you're hitting
+	Tiers = {
+		{ Name = "Wooden Pickaxe", Mult = 0.5, Cost = 0, Color = Color3.fromRGB(150, 105, 60), Mesh = "PickaxeWooden" },
+		{
+			Name = "Stone Pickaxe",
+			Mult = 0.8,
+			Cost = 1500,
+			Color = Color3.fromRGB(150, 150, 160),
+			Mesh = "PickaxeStone",
+		},
+		{
+			Name = "Iron Pickaxe",
+			Mult = 1.2,
+			Cost = 25000,
+			Color = Color3.fromRGB(205, 210, 220),
+			Mesh = "PickaxeIron",
+		},
+		{
+			Name = "Crystal Pickaxe",
+			Mult = 1.8,
+			Cost = 400000,
+			Color = Color3.fromRGB(110, 230, 255),
+			Mesh = "PickaxeCrystal",
+		},
+		{
+			Name = "Mythic Pickaxe",
+			Mult = 2.8,
+			Cost = 8000000,
+			Color = Color3.fromRGB(255, 90, 200),
+			Mesh = "PickaxeMythic",
+		},
+	},
+}
+
 -- Golden crystals: a rare crystal that glows gold and pays extra (rolled each time a crystal spawns)
 Config.GoldenCrystal = { Chance = 0.03, Reward = 5 }
 
@@ -234,6 +277,14 @@ Config.GamePasses = {
 		Description = "Creatures gather offline for 24h instead of 8h",
 		PriceHint = 99, -- shown in the shop UI; set the real price on the Creator Hub
 		Icon = "", -- optional "rbxassetid://..." after uploading the icon
+	},
+	{
+		Key = "GoldenPickaxe",
+		Id = 0, -- create the game pass on the Creator Hub and paste its ID here
+		Name = "Golden Pickaxe",
+		Description = "+50% pickaxe damage, faster swings and a shining gold pickaxe",
+		PriceHint = 149, -- shown in the shop UI; set the real price on the Creator Hub
+		Icon = "",
 	},
 }
 

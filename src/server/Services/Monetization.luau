@@ -64,6 +64,12 @@ function Monetization.Refresh(player: Player)
 	PlayerData.MarkChanged(player)
 end
 
+-- Other services can react to a pass being bought (e.g. the pickaxe turning gold)
+local passCallbacks: { (Player, string) -> () } = {}
+function Monetization.OnPassPurchased(callback: (Player, string) -> ())
+	table.insert(passCallbacks, callback)
+end
+
 MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, passId, purchased)
 	local pass = passById[passId]
 	if not purchased or not pass then
@@ -74,6 +80,9 @@ MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, passI
 	applyPerks(player)
 	PlayerData.MarkChanged(player)
 	notify:FireClient(player, `Thank you! {pass.Name} unlocked!`, Color3.fromRGB(255, 215, 80))
+	for _, callback in passCallbacks do
+		task.spawn(callback, player, pass.Key)
+	end
 end)
 
 Players.PlayerRemoving:Connect(function(player)
