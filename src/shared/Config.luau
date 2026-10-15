@@ -90,6 +90,9 @@ Config.HatchMilestones = {
 }
 Config.MilestoneFullStorageTrophies = 10 -- given instead of the creature if storage is full
 
+-- Golden crystals: a rare crystal that glows gold and pays extra (rolled each time a crystal spawns)
+Config.GoldenCrystal = { Chance = 0.03, Reward = 5 }
+
 -- Lost Treasures: a glowing chest hidden in a realm; first to open it wins
 Config.Treasure = {
 	FirstDelay = { 60, 120 }, -- seconds after the server starts

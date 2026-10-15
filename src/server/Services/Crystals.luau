@@ -123,6 +123,47 @@ local function rollSize(state: CrystalState)
 	state.HP = state.MaxHP
 	state.SizeReward = chosen.Reward
 	state.Model:SetAttribute("Size", chosen.Name)
+	-- golden crystals: a gold glow (a Highlight works on textured meshes too) and extra Essence
+	local golden = sizeRng:NextNumber() < Config.GoldenCrystal.Chance
+	state.Model:SetAttribute("Golden", golden)
+	local glow = state.Model:FindFirstChild("GoldenGlow")
+	local sparkle = state.Main:FindFirstChild("GoldenSparkle")
+	if golden then
+		state.SizeReward *= Config.GoldenCrystal.Reward
+		if glow then
+			(glow :: Highlight).Enabled = true
+		else
+			local highlight = Instance.new("Highlight")
+			highlight.Name = "GoldenGlow"
+			highlight.FillColor = Color3.fromRGB(255, 205, 60)
+			highlight.FillTransparency = 0.45
+			highlight.OutlineColor = Color3.fromRGB(255, 240, 160)
+			highlight.DepthMode = Enum.HighlightDepthMode.Occluded
+			highlight.Parent = state.Model
+		end
+		if sparkle then
+			(sparkle :: ParticleEmitter).Enabled = true
+		else
+			local emitter = Instance.new("ParticleEmitter")
+			emitter.Name = "GoldenSparkle"
+			emitter.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+			emitter.Color = ColorSequence.new(Color3.fromRGB(255, 215, 80))
+			emitter.LightEmission = 1
+			emitter.Rate = 8
+			emitter.Lifetime = NumberRange.new(0.8, 1.3)
+			emitter.Speed = NumberRange.new(1, 3)
+			emitter.SpreadAngle = Vector2.new(180, 180)
+			emitter.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.6), NumberSequenceKeypoint.new(1, 0) })
+			emitter.Parent = state.Main
+		end
+	else
+		if glow then
+			glow:Destroy()
+		end
+		if sparkle then
+			sparkle:Destroy()
+		end
+	end
 	local model = state.Model
 	if math.abs(model:GetScale() - chosen.Scale) > 1e-3 then
 		local before = model:GetBoundingBox()
@@ -190,6 +231,15 @@ local function breakCrystal(state: CrystalState)
 	local billboard = state.Main:FindFirstChild("HealthGui") :: BillboardGui?
 	if billboard then
 		billboard.Enabled = false
+	end
+	-- a broken golden crystal stops glowing until it respawns (and re-rolls)
+	local glow = state.Model:FindFirstChild("GoldenGlow") :: Highlight?
+	if glow then
+		glow.Enabled = false
+	end
+	local sparkle = state.Main:FindFirstChild("GoldenSparkle") :: ParticleEmitter?
+	if sparkle then
+		sparkle.Enabled = false
 	end
 	local burst = state.Main:FindFirstChild("Burst") :: ParticleEmitter?
 	if burst then

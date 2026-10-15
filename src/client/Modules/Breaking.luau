@@ -426,6 +426,10 @@ function Breaking.Start()
 		local chest = model:GetAttribute("Breakable") == "Chest"
 		local key = if chest then "ChestBreak" else "Break"
 		Sound.Play(key, Sound.Pitch(key, if chest then 0.65 else 0.95 + math.random() * 0.15))
+		if model:GetAttribute("Golden") and model.PrimaryPart then
+			floatText(model.PrimaryPart, "GOLDEN!", Color3.fromRGB(255, 215, 80), 10, Vector3.new(0, 7, 0))
+			Sound.Play("Chime", 1.4, 0.7)
+		end
 		spawnOrbs(model, earned, if State.PotatoMode then math.min(count, 3) else count)
 	end)
 
