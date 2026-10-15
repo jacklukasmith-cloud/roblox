@@ -183,7 +183,7 @@ end
 local function buildBoss(zoneIndex: number, creatureId: string): (Model, BasePart)
 	local zone = Zones.Get(zoneIndex) :: Zones.ZoneDef
 	local z0 = WorldBuilder.Helpers.ZoneStart(zoneIndex)
-	local position = Vector3.new(0, 7, z0 + 68)
+	local position = Vector3.new(0, 7, z0 + 68 * WorldBuilder.Helpers.Spread)
 	local model = Instance.new("Model")
 	model.Name = "Boss"
 	local main = Instance.new("Part")

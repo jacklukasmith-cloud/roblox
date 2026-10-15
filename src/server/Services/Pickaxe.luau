@@ -28,7 +28,7 @@ local cfg = Config.Pickaxe
 local lastSwing: { [Player]: number } = {}
 local streaks: { [Player]: { Count: number, LastHit: number } } = {}
 local pickaxeHit = Remotes.Event("PickaxeHit")
-local ANVIL_POSITION = Vector3.new(-30, 0, 18)
+local ANVIL_PLAN = Vector3.new(-30, 0, 18) -- on the 100-wide map plan (spread out by WorldBuilder)
 
 local function tierOf(player: Player): number
 	local data = PlayerData.Get(player) :: any
@@ -297,7 +297,7 @@ local function buildAnvil(): BasePart?
 	model.Name = "Blacksmith"
 	local stone = Color3.fromRGB(95, 90, 105)
 	local iron = Color3.fromRGB(70, 72, 80)
-	local p = ANVIL_POSITION
+	local p = ANVIL_PLAN * Vector3.new(WorldBuilder.Helpers.Spread, 1, WorldBuilder.Helpers.Spread)
 	newPart({
 		Name = "Base",
 		Anchored = true,

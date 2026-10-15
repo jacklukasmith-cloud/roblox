@@ -25,9 +25,15 @@ local Format = require(Shared.Format)
 
 local WorldBuilder = {}
 
-local WIDTH = 100
-local HUB_START, HUB_END = -60, 50
-local ZONE_LENGTH = 130
+-- The map is laid out on a 100-stud-wide plan and then spread out by SPREAD: floors and realms
+-- get bigger and every placed thing moves outwards (keeping its own size), so nothing is crammed.
+local SPREAD = 1.35
+local function sp(x: number, y: number, z: number): Vector3
+	return Vector3.new(x * SPREAD, y, z * SPREAD)
+end
+local WIDTH = 100 * SPREAD
+local HUB_START, HUB_END = -60 * SPREAD, 50 * SPREAD
+local ZONE_LENGTH = 130 * SPREAD
 local CRYSTALS_PER_ZONE = 10
 
 local rgb = Color3.fromRGB
@@ -342,8 +348,8 @@ local function placeZoneDecor(folder: Instance, zoneIndex: number, z0: number)
 		end
 		for i = 1, d.Count do
 			local side = if (i + t) % 2 == 0 then -1 else 1
-			-- outer strip (|x| 39-47) stays clear of crystals, eggs and chests
-			local x = side * drng:NextNumber(39, 47)
+			-- outer strip (|x| 39-47 on the plan) stays clear of crystals, eggs and chests
+			local x = side * drng:NextNumber(39, 47) * SPREAD
 			local frac = (i - 1 + t / (#list + 1)) / d.Count
 			local z = z0 + 10 + frac * (ZONE_LENGTH - 20) + drng:NextNumber(-3, 3)
 			local base = CFrame.new(x, d.Lift or 0, z) * CFrame.Angles(0, drng:NextNumber(0, math.pi * 2), 0)
@@ -1795,11 +1801,11 @@ function WorldBuilder.Build(): BuiltWorld
 	})
 	groundTexture(hubFloor, "Hub")
 	-- Plaza + path to the realms
-	disc(hub, Vector3.new(0, 0.05, 5), 46, 0.2, rgb(120, 105, 160), Enum.Material.Slate)
-	disc(hub, Vector3.new(0, 0.02, 5), 48, 0.2, rgb(170, 110, 255), Enum.Material.Neon)
+	disc(hub, sp(0, 0.05, 5), 46 * SPREAD, 0.2, rgb(120, 105, 160), Enum.Material.Slate)
+	disc(hub, sp(0, 0.02, 5), 48 * SPREAD, 0.2, rgb(170, 110, 255), Enum.Material.Neon)
 	part({
-		Size = Vector3.new(14, 0.2, HUB_END - 28),
-		Position = Vector3.new(0, 0.05, (28 + HUB_END) / 2),
+		Size = Vector3.new(14, 0.2, HUB_END - 28 * SPREAD),
+		Position = Vector3.new(0, 0.05, (28 * SPREAD + HUB_END) / 2),
 		Color = rgb(120, 105, 160),
 		Material = Enum.Material.Slate,
 		Parent = hub,
@@ -1809,25 +1815,25 @@ function WorldBuilder.Build(): BuiltWorld
 	spawn.Name = "HubSpawn"
 	spawn.Anchored = true
 	spawn.Size = Vector3.new(10, 1, 10)
-	spawn.Position = Vector3.new(0, 0.5, -32)
+	spawn.Position = sp(0, 0.5, -32)
 	spawn.Color = rgb(150, 110, 255)
 	spawn.Material = Enum.Material.Neon
 	spawn.Duration = 0
 	spawn.Parent = hub
 
-	makeBoard(hub, "TrophyBoard", "Top Trophies", Vector3.new(-25, 11, -55), rgb(0, 255, 225))
-	makeBoard(hub, "EssenceBoard", "Weekly Season", Vector3.new(0, 11, -55), rgb(140, 255, 200))
-	makeBoard(hub, "HouseBoard", "House War", Vector3.new(25, 11, -55), rgb(255, 200, 90))
-	makeObelisk(hub, Vector3.new(0, 0, 5))
+	makeBoard(hub, "TrophyBoard", "Top Trophies", sp(-25, 11, -55), rgb(0, 255, 225))
+	makeBoard(hub, "EssenceBoard", "Weekly Season", sp(0, 11, -55), rgb(140, 255, 200))
+	makeBoard(hub, "HouseBoard", "House War", sp(25, 11, -55), rgb(255, 200, 90))
+	makeObelisk(hub, sp(0, 0, 5))
 
 	for _, pos in
 		{
-			Vector3.new(-44, 0, -45),
-			Vector3.new(44, 0, -45),
-			Vector3.new(-44, 0, 0),
-			Vector3.new(44, 0, 0),
-			Vector3.new(-44, 0, 40),
-			Vector3.new(44, 0, 40),
+			sp(-44, 0, -45),
+			sp(44, 0, -45),
+			sp(-44, 0, 0),
+			sp(44, 0, 0),
+			sp(-44, 0, 40),
+			sp(44, 0, 40),
 		}
 	do
 		if placeMesh(hub, "HubLamp", CFrame.new(pos), 12, true) then
@@ -1837,24 +1843,24 @@ function WorldBuilder.Build(): BuiltWorld
 		end
 	end
 	-- Hub decorations (only placed when their model has been imported)
-	for _, pos in { Vector3.new(-44, 0, -22), Vector3.new(44, 0, -22), Vector3.new(-44, 0, 20), Vector3.new(44, 0, 20) } do
+	for _, pos in { sp(-44, 0, -22), sp(44, 0, -22), sp(-44, 0, 20), sp(44, 0, 20) } do
 		placeMesh(hub, "FlowerPlanter", CFrame.new(pos), 5)
 	end
 	for _, x in { -16, 16 } do
-		placeMesh(hub, "Bench", CFrame.new(x, 0, -42), 7)
+		placeMesh(hub, "Bench", CFrame.new(sp(x, 0, -42)), 7)
 	end
-	for _, pos in { Vector3.new(-42, 0, -55), Vector3.new(42, 0, -55), Vector3.new(-12, 0, 47), Vector3.new(12, 0, 47) } do
+	for _, pos in { sp(-42, 0, -55), sp(42, 0, -55), sp(-12, 0, 47), sp(12, 0, 47) } do
 		placeMesh(hub, "HubBanner", CFrame.new(pos), 13, true)
 	end
 
 	-- Houses line the east side of the hub, facing the path, so the way to the realms stays clear
 	for i, id in Houses.Order do
-		local position = Vector3.new(32, 0, 2 + (i - 1) * 19)
+		local position = sp(32, 0, 2 + (i - 1) * 19)
 		table.insert(result.HousePedestals, makeHouse(hub, id, position, math.pi / 2))
 	end
 
 	-- Champion Egg under a golden arch, guarded by a Titan Unicorn statue
-	local championPos = Vector3.new(-36, 0, -16)
+	local championPos = sp(-36, 0, -16)
 	table.insert(result.EggStands, makeEggStand(hub, "ChampionEgg", championPos))
 	for _, side in { -1, 1 } do
 		column(hub, championPos + Vector3.new(side * 7, 0, 3), 14, 1.6, GOLD, Enum.Material.Metal)
@@ -1868,7 +1874,7 @@ function WorldBuilder.Build(): BuiltWorld
 	})
 	statue(hub, "TitanUnicorn", championPos + Vector3.new(0, 18.5, 3), 1.2)
 
-	makeMerchant(hub, Vector3.new(36, 0, -16))
+	makeMerchant(hub, sp(36, 0, -16))
 
 	-- Zones ------------------------------------------------------------------------------------
 	local zonesFolder = Instance.new("Folder")
@@ -1922,14 +1928,14 @@ function WorldBuilder.Build(): BuiltWorld
 		for i = 1, CRYSTALS_PER_ZONE do
 			local col = (i - 1) % 5
 			local row = (i - 1) // 5
-			local x = -32 + col * 16 + rng:NextNumber(-2, 2)
-			local z = z0 + 48 + row * 40 + rng:NextNumber(-5, 5)
+			local x = (-32 + col * 16 + rng:NextNumber(-2, 2)) * SPREAD
+			local z = z0 + (48 + row * 40 + rng:NextNumber(-5, 5)) * SPREAD
 			local crystal = makeCrystal(crystalFolder, zone, Vector3.new(x, 0, z))
 			table.insert(result.Crystals, { Model = crystal, Zone = zone.Index })
 		end
 
-		table.insert(result.EggStands, makeEggStand(folder, zone.EggId, Vector3.new(-32, 0, z0 + 22)))
-		local chest = makeChest(crystalFolder, zone, Vector3.new(30, 0, z0 + 22))
+		table.insert(result.EggStands, makeEggStand(folder, zone.EggId, Vector3.new(-32 * SPREAD, 0, z0 + 22 * SPREAD)))
+		local chest = makeChest(crystalFolder, zone, Vector3.new(30 * SPREAD, 0, z0 + 22 * SPREAD))
 		table.insert(result.Chests, { Model = chest, Zone = zone.Index })
 
 		-- Archway at the entrance of every zone, with a locked force field for paid zones
@@ -1974,6 +1980,7 @@ WorldBuilder.Helpers = {
 	Label = label,
 	Light = light,
 	ZoneStart = zoneStartZ,
+	Spread = SPREAD, -- multiply plan positions (x and z offsets) by this
 }
 
 return WorldBuilder

@@ -176,7 +176,8 @@ function Treasures.Spawn(zoneIndex: number?): boolean
 	-- between the outer crystal columns and the decorations along the edges
 	local side = if rng:NextInteger(0, 1) == 0 then -1 else 1
 	local z0 = WorldBuilder.Helpers.ZoneStart(zoneIdx)
-	local position = Vector3.new(side * rng:NextNumber(21, 27), 0, z0 + rng:NextNumber(20, 115))
+	local spread = WorldBuilder.Helpers.Spread
+	local position = Vector3.new(side * rng:NextNumber(21, 27) * spread, 0, z0 + rng:NextNumber(20, 115) * spread)
 	local model, body = buildChest(position)
 	local world = workspace:FindFirstChild("World")
 	model.Parent = world or workspace

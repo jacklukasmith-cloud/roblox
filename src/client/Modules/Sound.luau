@@ -191,7 +191,7 @@ end
 
 -- Music ------------------------------------------------------------------------------------
 -- Which realm the local player is standing in (0 = hub); matches WorldBuilder's layout.
-local HUB_END, ZONE_LENGTH = 50, 130
+local HUB_END, ZONE_LENGTH = 50 * 1.35, 130 * 1.35 -- must match WorldBuilder (SPREAD)
 local MUSIC_KEYS = { [0] = "MusicHub", "MusicMeadow", "MusicEmber", "MusicFrost", "MusicSky" }
 
 -- Music box settings per realm: scale (semitones), base pitch, seconds per beat
