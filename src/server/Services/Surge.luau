@@ -119,7 +119,7 @@ task.spawn(function()
 		endsAt = os.time() + Config.Surge.Interval
 		skipWait = false
 		while os.time() < endsAt and not skipWait do
-			broadcast()
+			pcall(broadcast)
 			task.wait(1)
 		end
 		if #Players:GetPlayers() == 0 then
@@ -132,11 +132,15 @@ task.spawn(function()
 			notify:FireClient(player, "MANA SURGE! Double Essence - top 3 win Trophies!", Color3.fromRGB(190, 120, 255))
 		end
 		while os.time() < endsAt do
-			broadcast()
+			pcall(broadcast)
 			task.wait(1)
 		end
 		active = false
-		finish()
+		-- a failure while paying out must not stop every future surge
+		local ok, err = pcall(finish)
+		if not ok then
+			warn("[Surge] " .. tostring(err))
+		end
 	end
 end)
 

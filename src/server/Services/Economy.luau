@@ -158,7 +158,7 @@ function Economy.AwardCrystal(player: Player, zoneIndex: number, share: number, 
 	local base = zone.CrystalReward * share * (rewardMultiplier or 1)
 	local amount = base * Economy.GetEssenceMultiplier(player, data)
 	Economy.AddEssence(player, amount)
-	data.Stats.CrystalsBroken += share
+	data.Stats.CrystalsBroken += 1
 	-- Competitive scoring ignores paid boosts on purpose.
 	Surge.AddScore(player, base * Economy.GetRebirthMultiplier(data))
 	Seasons.AddPoints(player, base * Economy.GetRebirthMultiplier(data))
@@ -281,8 +281,13 @@ function Economy.Release(player: Player, uids: { string }): (boolean, string?)
 		return false, "No data"
 	end
 	local released = 0
+	if type(uids) ~= "table" then
+		return false
+	end
 	for _, uid in uids do
-		if type(uid) == "string" and data.Creatures[uid] then
+		local entry = type(uid) == "string" and data.Creatures[uid]
+		-- equipped creatures can't be released (the client also blocks this; never trust it)
+		if entry and not entry.Equipped then
 			data.Creatures[uid] = nil
 			released += 1
 		end

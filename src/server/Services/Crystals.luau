@@ -451,34 +451,43 @@ local function nearestCrystal(player: Player, range: number): Model?
 	return best
 end
 
--- One creature attack tick for every player (runs every PetAttackInterval)
+-- One player's creature attack tick (runs every PetAttackInterval)
+local function tickPlayer(player: Player)
+	local data = PlayerData.Get(player)
+	if data then
+		local model = targets[player]
+		local state = model and states[model]
+		if state and not canAttack(player, state, Config.MaxAttackDistance, false) then
+			setTarget(player, nil)
+			state = nil
+		end
+		-- Auto Collect pass: pick the nearest crystal automatically
+		if not state and data.AutoCollectEnabled and Monetization.Owns(player, "AutoCollect") then
+			local nearest = nearestCrystal(player, Config.AutoCollectRange)
+			if nearest then
+				setTarget(player, nearest)
+				state = states[nearest]
+			end
+		end
+		-- Creatures need a moment to fly over before they start hitting
+		if state and os.clock() - (targetSince[player] or 0) >= Config.PetTravelTime then
+			local amount = Economy.GetPower(data) * Config.PetDamageMultiplier
+			local crit = critRng:NextNumber() < Config.Crit.Chance
+			if crit then
+				amount *= Config.Crit.Multiplier
+			end
+			damage(player, state, amount, crit)
+		end
+	end
+end
+
+-- One creature attack tick for every player. Each player is isolated so one error (e.g. in a
+-- reward hook) can never stop crystal damage for the whole server.
 function Crystals.Tick()
 	for _, player in Players:GetPlayers() do
-		local data = PlayerData.Get(player)
-		if data then
-			local model = targets[player]
-			local state = model and states[model]
-			if state and not canAttack(player, state, Config.MaxAttackDistance, false) then
-				setTarget(player, nil)
-				state = nil
-			end
-			-- Auto Collect pass: pick the nearest crystal automatically
-			if not state and data.AutoCollectEnabled and Monetization.Owns(player, "AutoCollect") then
-				local nearest = nearestCrystal(player, Config.AutoCollectRange)
-				if nearest then
-					setTarget(player, nearest)
-					state = states[nearest]
-				end
-			end
-			-- Creatures need a moment to fly over before they start hitting
-			if state and os.clock() - (targetSince[player] or 0) >= Config.PetTravelTime then
-				local amount = Economy.GetPower(data) * Config.PetDamageMultiplier
-				local crit = critRng:NextNumber() < Config.Crit.Chance
-				if crit then
-					amount *= Config.Crit.Multiplier
-				end
-				damage(player, state, amount, crit)
-			end
+		local ok, err = pcall(tickPlayer, player)
+		if not ok then
+			warn("[Crystals] " .. tostring(err))
 		end
 	end
 end

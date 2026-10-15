@@ -122,40 +122,40 @@ function Hatching.CheckMilestones(player: Player)
 	if not milestone or data.Stats.CreaturesHatched < milestone.At then
 		return
 	end
-	data.Stats.HatchMilestones = claimed + 1 -- claim first so it can never pay twice
+	-- everything is paid right now (so leaving straight away can't lose it); only the bonus
+	-- creature's reveal and the message wait until your own hatch reveal has finished
+	data.Stats.HatchMilestones = claimed + 1
+	local delay = Config.MilestoneDelay or 4
+	local parts = {}
+	local trophies = milestone.Trophies or 0
+	if milestone.Mystic then
+		if Hatching.MysticHatch(player, `{milestone.At} Hatches!`, delay) then
+			table.insert(parts, "a bonus Rare+ creature")
+		else
+			trophies += Config.MilestoneFullStorageTrophies -- storage full: Trophies instead
+		end
+	end
+	if trophies > 0 then
+		data.Trophies += trophies
+		table.insert(parts, `+{trophies} Trophies`)
+	end
+	if milestone.Boost then
+		Economy.AddBoost(player, milestone.Boost, milestone.Seconds or 600)
+		table.insert(parts, `{milestone.Boost} boost for {Format.Time(milestone.Seconds or 600)}`)
+	end
+	if milestone.Title and not table.find(data.Titles, milestone.Title) then
+		table.insert(data.Titles, milestone.Title)
+		table.insert(parts, `the "{milestone.Title}" title`)
+	end
 	PlayerData.MarkChanged(player)
-	task.delay(Config.MilestoneDelay or 4, function()
-		local d = PlayerData.Get(player)
-		if not d or not player.Parent then
-			return
+	task.delay(delay, function()
+		if player.Parent then
+			notify:FireClient(
+				player,
+				`🥚 {milestone.At} hatches! You got {table.concat(parts, " + ")}`,
+				Color3.fromRGB(255, 215, 80)
+			)
 		end
-		local parts = {}
-		local trophies = milestone.Trophies or 0
-		if milestone.Mystic then
-			if Hatching.MysticHatch(player, `{milestone.At} Hatches!`) then
-				table.insert(parts, "a bonus Rare+ creature")
-			else
-				trophies += Config.MilestoneFullStorageTrophies -- storage full: Trophies instead
-			end
-		end
-		if trophies > 0 then
-			d.Trophies += trophies
-			table.insert(parts, `+{trophies} Trophies`)
-		end
-		if milestone.Boost then
-			Economy.AddBoost(player, milestone.Boost, milestone.Seconds or 600)
-			table.insert(parts, `{milestone.Boost} boost for {Format.Time(milestone.Seconds or 600)}`)
-		end
-		if milestone.Title and not table.find(d.Titles, milestone.Title) then
-			table.insert(d.Titles, milestone.Title)
-			table.insert(parts, `the "{milestone.Title}" title`)
-		end
-		PlayerData.MarkChanged(player)
-		notify:FireClient(
-			player,
-			`🥚 {milestone.At} hatches! You got {table.concat(parts, " + ")}`,
-			Color3.fromRGB(255, 215, 80)
-		)
 	end)
 end
 
@@ -199,7 +199,8 @@ end
 
 -- Hatch your best zone's egg with a guaranteed Rare or better (Mystic Egg). Returns false if
 -- storage is full.
-function Hatching.MysticHatch(player: Player, title: string?): boolean
+-- revealDelay: the creature is added straight away, but its reveal waits (e.g. after another reveal)
+function Hatching.MysticHatch(player: Player, title: string?, revealDelay: number?): boolean
 	local data = PlayerData.Get(player)
 	if not data or PlayerData.CountCreatures(data) >= Config.MaxInventory then
 		return false
@@ -210,7 +211,16 @@ function Hatching.MysticHatch(player: Player, title: string?): boolean
 	local result = addCreature(player, data, creatureId)
 	announceRare(player, result)
 	PlayerData.MarkChanged(player)
-	hatchResult:FireClient(player, egg.Id, { result }, if title then { Title = title } else nil)
+	local opts = if title then { Title = title } else nil
+	if revealDelay and revealDelay > 0 then
+		task.delay(revealDelay, function()
+			if player.Parent then
+				hatchResult:FireClient(player, egg.Id, { result }, opts)
+			end
+		end)
+	else
+		hatchResult:FireClient(player, egg.Id, { result }, opts)
+	end
 	return true
 end
 

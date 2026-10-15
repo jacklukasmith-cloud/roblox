@@ -189,15 +189,18 @@ local function checkReward(player: Player)
 		return
 	end
 	local playedLastWeek = data.Season.Week == lastWeek and data.Season.Points > 0
-	data.Season.RewardedWeek = lastWeek
-	PlayerData.MarkChanged(player)
 	if not playedLastWeek then
+		data.Season.RewardedWeek = lastWeek
+		PlayerData.MarkChanged(player)
 		return
 	end
 	local entries, global = fetchTop(lastWeek, 600)
 	if not global then
-		return -- can't know the real global rank (Studio / DataStore outage)
+		return -- can't know the real global rank (Studio / DataStore outage): try again next join
 	end
+	-- only marked as rewarded once the real ranking was read, so an outage can't lose a reward
+	data.Season.RewardedWeek = lastWeek
+	PlayerData.MarkChanged(player)
 	for rank, entry in entries do
 		if entry.UserId == player.UserId then
 			Seasons.GrantReward(player, rank, lastWeek)
@@ -281,6 +284,16 @@ function Seasons.EquipTitle(player: Player, title: string): (boolean, string?)
 	return true
 end
 
+-- Writes one player's score now (used when they leave, so their last points aren't lost)
+local function pushScore(player: Player)
+	local data = PlayerData.Get(player) :: any
+	local week = Season.Week()
+	local store = storeFor(week)
+	if store and data and data.Season and data.Season.Week == week and data.Season.Points > 0 then
+		pcall(store.SetAsync, store, tostring(player.UserId), math.floor(data.Season.Points))
+	end
+end
+
 local function pushScores()
 	local week = Season.Week()
 	local store = storeFor(week)
@@ -297,6 +310,7 @@ local function pushScores()
 end
 
 function Seasons.Start()
+	PlayerData.OnLeaving(pushScore)
 	PlayerData.Loaded:Connect(function(player)
 		task.spawn(checkReward, player)
 		applyTitle(player)
