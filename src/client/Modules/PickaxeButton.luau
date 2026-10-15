@@ -103,11 +103,15 @@ function PickaxeButton.Build(root: Frame)
 		end
 		busy = true
 		Sound.Play("Click", 1.2)
-		pcall(function()
-			Remotes.Function("TogglePickaxe"):InvokeServer()
+		local wasHeld = holding()
+		local ok, held = pcall(function()
+			return Remotes.Function("TogglePickaxe"):InvokeServer()
 		end)
 		busy = false
 		refresh()
+		if not wasHeld and not (ok and held) then
+			Ui.toast("Couldn't get your pickaxe out - try again in a moment", T.Bad)
+		end
 	end
 	button = Ui.button({
 		Name = "PickaxeButton",

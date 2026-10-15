@@ -252,11 +252,17 @@ function Pickaxe.Give(player: Player, equip: boolean?)
 			end
 		end
 	end
-	local backpack = player:FindFirstChildOfClass("Backpack")
-	if not backpack then
+	local backpack = player:FindFirstChildOfClass("Backpack") or player:WaitForChild("Backpack", 5)
+	if not backpack or not backpack:IsA("Backpack") then
+		warn(`[Pickaxe] {player.Name} has no Backpack yet - couldn't give the pickaxe`)
 		return
 	end
 	local tool = buildTool(tier, golden)
+	print(
+		`[Mythic Tamers] Gave {player.Name} the {tool.ToolTip} ({if tool:FindFirstChild("Look")
+			then "your 3D model"
+			else "block model"})`
+	)
 	tool.Activated:Connect(function()
 		Pickaxe.Swing(player, tool)
 	end)
@@ -408,12 +414,13 @@ end
 function Pickaxe.Start()
 	buildAnvil()
 	local function hook(player: Player)
+		-- spawn holding it (the hotbar is hidden, so otherwise it's easy to miss)
 		player.CharacterAdded:Connect(function()
 			task.wait(0.2)
-			Pickaxe.Give(player)
+			Pickaxe.Give(player, true)
 		end)
 		if player.Character then
-			task.spawn(Pickaxe.Give, player)
+			task.spawn(Pickaxe.Give, player, true)
 		end
 	end
 	Players.PlayerAdded:Connect(hook)

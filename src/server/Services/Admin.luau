@@ -108,7 +108,7 @@ local function runPersonal(player: Player, command: string, args: { string }): b
 		data.Creatures[uid].Equipped = true
 		data.Bestiary[Config.StarterCreature] = true
 		local Pickaxe = require(script.Parent.Pickaxe) :: any
-		pcall(Pickaxe.Give, player)
+		pcall(Pickaxe.Give, player, true)
 		notify:FireClient(player, "[TEST] Progress wiped - fresh start!", Color3.fromRGB(140, 255, 200))
 	elseif command == "seasonend" then
 		local Seasons = require(script.Parent.Seasons) :: any
