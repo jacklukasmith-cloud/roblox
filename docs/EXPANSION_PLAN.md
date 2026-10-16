@@ -1,0 +1,281 @@
+# Mythic Tamers: Expansion Plan
+
+Plans for the next big chunk of the game. Nothing here is built yet. Sizes are rough:
+**S** = an evening, **M** = a few sessions, **L** = a big update.
+
+What's in it:
+1. [Player bases](#1-player-bases-the-sanctuary)
+2. [The Gloomwood (gloomy forest)](#2-the-gloomwood)
+3. [Crafting: potions, teleport crystals, vehicles](#3-crafting-at-your-base)
+4. [A bigger hub](#4-a-bigger-hub)
+5. [Better leaderboards](#5-better-leaderboards)
+6. [Reasons to invite friends](#6-reasons-to-invite-friends)
+7. [More zones and a longer game](#7-more-zones-and-a-longer-game)
+8. [Build order](#8-build-order)
+9. [Questions to decide](#9-questions-to-decide)
+
+How it all fits together:
+
+```
+            HUB (bigger, with a portal ring)
+           /        |           \
+   Realms 1-8   Gloomwood      Your Sanctuary (base)
+  (break crystals,  (find rare   (store crystals, craft potions,
+   hatch pets)    Gloom Crystals)  teleport crystals, hoverboards, cars)
+        \_____________|______________/
+     Essence + crystals + pets  ->  crafted items  ->  faster farming / exploring
+```
+
+---
+
+## 1. Player bases (the Sanctuary)
+
+Every player gets their own **Sanctuary**: a floating island they own, reached from a portal in the hub.
+
+**How it works (recommended):** each server has a ring of floating base plots away from the main map (like a
+tycoon game's plots). When you join, you're given a free plot and your saved base is built on it. When you leave,
+it's removed. Everyone in the server can visit everyone else's base. This is simpler and cheaper than private
+servers, and visiting is part of the fun.
+
+**What's in a base:**
+| Station | What it does |
+|---|---|
+| **Crystal Vault** | Stores the Gloom Crystals you send home from the forest. Upgrade it for more space. |
+| **Alchemy Cauldron** | Brews potions (see crafting). |
+| **Crystal Forge** | Makes teleport crystals. |
+| **Hangar** | Builds hoverboards and cars. Your vehicles are kept here. |
+| **Pet Habitat** | Your favourite pets wander around your base so visitors can see them. |
+| **Decorations** | Statues, lights and plants bought with Essence or crafted. Pure show-off. |
+
+**Base level (1 to 10):** upgrading costs Essence plus crystals. Each level unlocks a new station, more vault
+space or new recipes. This is a long-term goal that doesn't reset on Rebirth.
+
+**Getting there:** a Sanctuary portal in the hub, a "🏠 Base" button once you've unlocked it, and later a crafted
+Home Teleport Crystal.
+
+Size: **L**. It needs a new BaseService, base data in the save, plot placement, stations and a base panel.
+
+---
+
+## 2. The Gloomwood
+
+A dark, foggy forest reached through a gate in the hub. It's a different kind of play from the realms:
+**explore and search** instead of standing at a crystal.
+
+**Unlock:** you need Frostpeak (realm 3) unlocked, so new players aren't overwhelmed and it gives mid-game players
+something new.
+
+**The feel:** thick fog, a dark purple-green sky, twisted trees, glowing mushrooms, fireflies, creaky sounds. It's
+built from parts and textures, not Terrain. Your pets carry little lanterns.
+
+**Gloom Crystals** grow hidden around the forest: behind trees, in hollows, in caves and on ledges. Each glows
+faintly and hums when you're close. You mine them with **your pickaxe**, which gives the pickaxe a big new job.
+| Crystal | Rarity | Where |
+|---|---|---|
+| Moonshard | Common | Everywhere |
+| Emberheart | Uncommon | Near the burnt clearing |
+| Frostglass | Uncommon | By the frozen pond |
+| Stormquartz | Rare | On high ledges (jump or hoverboard to reach) |
+| Voidstone | Epic | Deep caves, in darker areas |
+| Prismheart | Legendary | Rare spawn, with a server-wide "a Prismheart is glowing somewhere..." message |
+
+**Risk and reward (what makes it exciting):**
+- **Satchel:** you can only carry so many crystals (for example 20). You have to **send them home** to keep them.
+- **Courier Lanterns** are dotted around the forest. Stand at one to send your satchel to your base vault safely.
+- **Gloom meter:** it slowly fills while you're deep in the forest and fills faster in the dark areas. Standing
+  by a lantern lowers it. If it fills up, you're pushed out of the forest and **drop half of your unsent
+  crystals**. So you choose between pushing deeper for rare crystals and heading back to bank them.
+- **Shadow Wisps** float around and try to drain your satchel. Your pets fight them, so pet Power and Speed matter
+  here too.
+- **Gloom Ward potions** (crafted) slow the meter down.
+
+**Later:** this is the natural home for the **very rare wild pets** idea. A wild creature could appear deep in
+the Gloomwood now and then and has to be found and tamed.
+
+Size: **L** for the area plus systems. The art can start simple and be improved with Higgsfield models.
+
+---
+
+## 3. Crafting at your base
+
+Recipes use **Gloom Crystals + Essence** (and sometimes a pet). Crafting takes time, so you set up a brew, go
+farming, and come back. Ideas:
+
+**Potions (Alchemy Cauldron)**
+| Potion | Effect | Example recipe |
+|---|---|---|
+| Luck Potion | +50% Rare+ hatch chance, 10 min | 5 Moonshard + Essence |
+| Essence Potion | x2 Essence, 10 min | 3 Moonshard + 2 Emberheart |
+| Swift Potion | +30% walk speed, 10 min | 4 Frostglass |
+| Gloom Ward | Gloom meter fills 50% slower, 1 forest trip | 3 Moonshard + 1 Voidstone |
+| Shiny Elixir | x3 Shiny chance, 5 min | 2 Stormquartz + 1 Voidstone |
+
+**Teleport crystals (Crystal Forge)** are single-use crystals that teleport you instantly:
+- Hub, any unlocked realm, your base, a **friend's base**, or the **Deep Camp** (a safe camp in the middle of the
+  Gloomwood).
+
+**Vehicles (Hangar)** are built once and kept forever. You summon one with a button.
+| Vehicle | Speed | Seats | Notes |
+|---|---|---|---|
+| Moss Board (hoverboard) | Fast | 1 | Starter vehicle |
+| Crystal Hoverboard | Very fast | 1 | Glows in its crystal's colour; tricks on jumps |
+| Mushroom Kart (car) | Fast | 2 | Bring a friend |
+| Gloom Wagon | Medium | 4 | Party car |
+| Prism Glider | Glides | 1 | Late-game; floats down from ledges |
+
+Vehicles turn off inside realms while you're attacking crystals, so they don't make farming trivial. They're
+for getting around the bigger hub, the forest and visiting bases.
+
+**Monetization ideas (optional):**
+- Robux skins for vehicles (looks only).
+- A "Master Alchemist" game pass: 2 cauldron slots and 25% faster crafting.
+- A small Developer Product to finish a craft instantly.
+
+Size: **M** for the crafting system plus potions and teleport crystals. **M** for vehicles (VehicleSeat or a
+custom hover controller).
+
+---
+
+## 4. A bigger hub
+
+The hub becomes a proper town square, about **2x the area** of now, split into districts so it doesn't feel
+crowded:
+
+```
+                   [ Realm gates 1-8 ]
+                          |
+   [ House statues ] -- [ Plaza ] -- [ Market Row: Shop, Merchant, Blacksmith ]
+                          |
+     [ Leaderboard Hall ] | [ Portal Ring: Gloomwood gate, Sanctuary portal ]
+                          |
+                     [ Spawn + Egg Garden ]
+```
+
+- **Plaza:** spawn, a fountain, the season board and the Mana Surge obelisk.
+- **Market Row:** the shop, the merchant, the Blacksmith and later an Alchemist NPC.
+- **Leaderboard Hall:** the new boards (see below), with top-3 player statues.
+- **Portal Ring:** the Gloomwood gate and the Sanctuary portal.
+- **Egg Garden:** the egg pedestals, with more space around them.
+- **Hoverboard paths** loop around the hub so vehicles have somewhere fun to go.
+
+This builds on the `SPREAD` setting already in WorldBuilder, plus a new hub layout. Size: **M**.
+
+---
+
+## 5. Better leaderboards
+
+Now there are two global boards (Trophies and Essence) plus the House and Surge boards. Plan:
+
+- **More categories:**
+  - Trophies
+  - Total Essence
+  - Rebirths
+  - Index (species found)
+  - Rarest pet owned
+  - Crystals broken this week
+  - Gloom Crystals found
+  - Base level
+- **Weekly and all-time** for each one, so new players can actually get on a board every week. The weekly boards
+  reset on the same timer as Seasons.
+- **Player avatar pictures** next to the names, and **top-3 statues** in the Leaderboard Hall that copy the
+  real players' avatars.
+- **A 🏆 Leaderboards panel** in the UI with tabs. It shows **your own rank** ("You: #1,204") even if you're not in
+  the top 50.
+- **Friends tab:** shows only you and your Roblox friends, so there's always a board you can win.
+
+Size: **M**. It's mostly more OrderedDataStores, a panel, and avatar statues from
+`Players:GetHumanoidDescriptionFromUserId`.
+
+---
+
+## 6. Reasons to invite friends
+
+The things that work best in Roblox games are bonuses for **playing together**, not just for sending invites.
+(Roblox's rules don't allow rewards just for sending an invite, but rewards for friends actually joining and
+playing together are fine.)
+
+1. **Friend Boost:** +10% Essence for each Roblox friend in the same server, up to +30%. It's shown on the HUD
+   ("👥 +20% friend boost").
+2. **Invite button:** opens Roblox's own invite screen (`SocialService:PromptGameInvite`).
+3. **"Joined with a friend" reward:** when a friend joins **for the first time** from your invite, you **both**
+   get a Friendship Egg with a chance at an exclusive **Twin Spirit** pet that can only be hatched this way.
+4. **Co-op bonuses:**
+   - Friends breaking the same Mana Chest or boss get +25% rewards each.
+   - Bosses get a "team up" banner when friends fight together.
+5. **Things that are better with friends:**
+   - Visit each other's bases.
+   - Ride in each other's karts and wagons (2 and 4 seats).
+   - Teleport to a friend's base with a teleport crystal.
+6. **Friend quests:** daily quests like "Break 50 crystals with a friend" that pay extra.
+7. **Trading** (already on the roadmap) is the biggest reason people bring friends in pet games.
+
+Size: Friend Boost and the invite button are **S**. The invite reward and co-op bonuses are **M**.
+
+---
+
+## 7. More zones and a longer game
+
+**Why it might feel too easy:**
+- You own every game pass. VIP plus 2x Essence is already **3x Essence**, plus Auto Collect and 3 extra slots.
+- There are only 4 realms. Sky Sanctum unlocks at 1.5M Essence, which a boosted player reaches quickly.
+- To check properly, test without your passes. Plan item: add a **`!nopasses`** admin command that pretends you
+  own nothing (only for you and only in testing), plus `!reset confirm`, so you can play it like a new player.
+
+**New realms (5 to 8):** each one costs about **25x** more than the last and has crystals about **25x** stronger.
+Each has its own egg with 5 creatures, a boss, a pickaxe tier that suits it and ground textures.
+| # | Realm | Theme | Unlock | Extra requirement |
+|---|---|---|---|---|
+| 5 | Coral Abyss | Underwater reef, bubbles, glowing coral | ~40M | 1 Rebirth |
+| 6 | Sunscorch Dunes | Desert ruins, sandstorms | ~1B | 3 Rebirths |
+| 7 | Clockwork Citadel | Brass gears and steam | ~25B | 5 Rebirths and 40 species in the Index |
+| 8 | Astral Void | Space, floating islands, stars | ~600B | 8 Rebirths and a base level of 5 |
+
+**Other ways to make the game last longer:**
+- Gates need **more than Essence**: Rebirths, Index count or base level. You can't just buy your way through.
+- A **Mastery** goal for each realm: break 10,000 crystals there for a permanent +10% in that realm and a badge.
+- A **Rebirth shop**: Rebirth Tokens buy permanent upgrades (more satchel space, faster crafting, an extra pet slot).
+- **Prestige titles** after 10, 25 and 50 rebirths.
+- **Ultra-rare pets** (1 in a million) that people chase for weeks.
+
+Size: each new realm is **M**. They need an egg, 5 creatures and their models, a boss, textures and tuning.
+The Rebirth and Index requirements are **S**.
+
+---
+
+## 8. Build order
+
+Each step works by itself and makes the next one easier.
+
+| Step | What | Why first | Size |
+|---|---|---|---|
+| 1 | `!nopasses` test command plus a difficulty check | So we can tell how easy the game really is before adding more | S |
+| 2 | Friend Boost and the invite button | Quick, and helps the game grow straight away | S |
+| 3 | Leaderboard panel, weekly boards and your rank | Quick win, gives everyone something to chase | M |
+| 4 | Bigger hub with districts | Makes room for the portals, boards and vehicles below | M |
+| 5 | Sanctuary base: plots, travel, vault, Pet Habitat | Everything after this needs a base | L |
+| 6 | Gloomwood: area, Gloom Crystals, satchel, lanterns, Gloom meter | The main new adventure | L |
+| 7 | Crafting: potions and teleport crystals | Gives forest crystals a use | M |
+| 8 | Vehicles: hoverboards, then karts | Fun to show off, and good with friends | M |
+| 9 | Realms 5 and 6, plus Rebirth requirements | Fixes "I finished it" for top players | M each |
+| 10 | Joined-with-a-friend reward, co-op bonuses, friend quests | Builds on bases and vehicles | M |
+| 11 | Wild pets in the Gloomwood, realms 7 and 8 | Later content updates | M to L |
+
+**What I'll need from you along the way:**
+- Approval of names and themes.
+- Higgsfield models for stations, vehicles, Gloom Crystals and the new creatures. I can generate these.
+- New game pass and product IDs if we add the crafting pass.
+- Testing in Studio after each step.
+
+---
+
+## 9. Questions to decide
+
+1. **Bases:** floating plots in each server (recommended), or a separate private place you teleport to?
+2. **Gloomwood danger:** should the Gloom meter make you **drop** crystals (exciting, but can feel bad), or just
+   push you out with everything safe (gentler)?
+3. **Crafting timers:** real-time timers that run while you're offline (keeps people coming back), or instant
+   crafting?
+4. **Vehicles in realms:** allowed everywhere, or only in the hub, forest and bases (recommended, so farming
+   stays the same)?
+5. **New realm themes:** do Coral Abyss, Sunscorch Dunes, Clockwork Citadel and Astral Void sound good, or do you
+   have others in mind?

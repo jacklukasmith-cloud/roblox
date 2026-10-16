@@ -73,6 +73,9 @@ Design rules: **sell speed and convenience, never Trophies or wins**. Show all o
 receipts are recorded in the save file, so purchases can't be granted twice.
 
 ## Roadmap ideas (next updates)
+The big next update (bases, the Gloomwood, crafting, a bigger hub, leaderboards, friends and more realms) is
+planned in [EXPANSION_PLAN.md](EXPANSION_PLAN.md).
+
 1. **Trading** with a confirm screen, a 5-second lock and a trade log. This is what drives Adopt Me's and PS99's economies.
 2. **Quest NPCs** (Bee Swarm style): daily and weekly quests that reward potions and eggs.
 3. ~~Creature fusion~~ (done)
