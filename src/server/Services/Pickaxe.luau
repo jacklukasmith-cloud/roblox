@@ -448,7 +448,9 @@ local function buildAnvil(): BasePart?
 		CanQuery = false,
 		Parent = model,
 	})
-	local padSign = helpers.Billboard(ring, UDim2.fromOffset(200, 34), Vector3.new(0, 3, 0), 60)
+	-- the sign's offset is in the ring's own space, and the ring is a cylinder turned on its side
+	-- (its X axis points up), so "4 studs up" is +X here, not +Y
+	local padSign = helpers.Billboard(ring, UDim2.fromOffset(200, 34), Vector3.new(4, 0, 0), 60)
 	helpers.Label(padSign, { Text = "⛏ Step in to shop", TextColor3 = Color3.fromRGB(255, 200, 120) })
 	model.Parent = hub
 	return top
