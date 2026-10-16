@@ -22,6 +22,8 @@ local EVENTS = {
 	"PetAbility", -- server -> client: creature id, ability kind, target model (ability effects)
 	"MissionComplete", -- server -> client: mission text, reward text, next mission text
 	"ItemGained", -- server -> client: item id, count (something went into your Bag)
+	"TradeInvite", -- server -> client: from user id, from name
+	"TradeUpdate", -- server -> client: trade view (nil = closed), message, colour
 }
 
 local FUNCTIONS = {
@@ -42,6 +44,13 @@ local FUNCTIONS = {
 	"TogglePickaxe",
 	"UpgradePickaxe",
 	"UseItem",
+	"RedeemCode",
+	"TradeRequest",
+	"TradeRespond",
+	"TradeSetPet",
+	"TradeSetItem",
+	"TradeReady",
+	"TradeCancel",
 }
 
 local Remotes = {}

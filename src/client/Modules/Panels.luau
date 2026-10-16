@@ -23,8 +23,10 @@ local DailyPanel = require(script.Parent.DailyPanel)
 local SeasonPanel = require(script.Parent.SeasonPanel)
 local BlacksmithPanel = require(script.Parent.BlacksmithPanel)
 local BagPanel = require(script.Parent.BagPanel)
+local TradePanel = require(script.Parent.TradePanel)
 local Layout = require(script.Parent.Layout)
 local State = require(script.Parent.State)
+local Sound = require(script.Parent.Sound)
 
 local Panels = {}
 
@@ -116,6 +118,7 @@ local MENU = {
 	{ Panel = "Bag", Label = "Bag", Icon = "🎒", Color = Color3.fromRGB(110, 210, 150) },
 	{ Panel = "Shop", Label = "Shop", Icon = "🛒", Color = Color3.fromRGB(255, 200, 60) },
 	{ Panel = "Merchant", Label = "Merchant", Icon = "🧙", Color = Color3.fromRGB(255, 145, 70) },
+	{ Panel = "Trade", Label = "Trade", Icon = "🤝", Color = Color3.fromRGB(110, 190, 255) },
 	{ Panel = "Rebirth", Label = "Rebirth", Icon = "🌀", Color = Color3.fromRGB(255, 110, 215) },
 	{ Panel = "Bestiary", Label = "Index", Icon = "📖", Color = Color3.fromRGB(90, 215, 120) },
 	{ Panel = "Settings", Label = "Settings", Icon = "⚙️", Color = Color3.fromRGB(150, 150, 190) },
@@ -230,7 +233,7 @@ local function buildMenu(root: Frame)
 		table.insert(
 			hints,
 			Ui.text({
-				Text = tostring(i),
+				Text = if i == 10 then "0" else tostring(i), -- key 0 opens the 10th
 				Size = UDim2.fromScale(1, 1),
 				ZIndex = 4,
 				TextColor3 = T.SubText,
@@ -347,6 +350,7 @@ local function bindInput()
 		Enum.KeyCode.Seven,
 		Enum.KeyCode.Eight,
 		Enum.KeyCode.Nine,
+		Enum.KeyCode.Zero,
 	}
 	UserInputService.InputBegan:Connect(function(input, processed)
 		if processed or UserInputService:GetFocusedTextBox() then
@@ -1425,7 +1429,7 @@ end
 
 -- Settings panel -------------------------------------------------------------------------
 local function buildSettings(screen: Frame)
-	local _, content = Ui.panel(screen, "Settings", "Settings", UDim2.fromOffset(460, 420), "⚙️")
+	local _, content = Ui.panel(screen, "Settings", "Settings", UDim2.fromOffset(460, 480), "⚙️")
 	Ui.new("UIListLayout", { Padding = UDim.new(0, 10), SortOrder = Enum.SortOrder.LayoutOrder, Parent = content })
 	local potato
 	potato = Ui.button({
@@ -1485,6 +1489,58 @@ local function buildSettings(screen: Frame)
 		end
 		invoke("SetAutoCollect", not d.AutoCollectEnabled)
 	end)
+	-- Codes: type one in for free rewards
+	local codeRow = Ui.new("Frame", {
+		LayoutOrder = 5,
+		Size = UDim2.new(1, 0, 0, 44),
+		BackgroundTransparency = 1,
+		Parent = content,
+	})
+	local codeBox = Ui.new("TextBox", {
+		Size = UDim2.new(1, -130, 1, 0),
+		BackgroundColor3 = T.Card,
+		PlaceholderText = "🎟️ Enter a code",
+		PlaceholderColor3 = T.SubText,
+		Text = "",
+		ClearTextOnFocus = false,
+		Font = T.Font,
+		TextColor3 = T.Text,
+		TextScaled = true,
+		Parent = codeRow,
+	}, {
+		Ui.corner(10),
+		Ui.new("UIPadding", {
+			PaddingLeft = UDim.new(0, 12),
+			PaddingRight = UDim.new(0, 12),
+			PaddingTop = UDim.new(0, 10),
+			PaddingBottom = UDim.new(0, 10),
+		}),
+	})
+	local redeeming = false
+	local function redeem()
+		if redeeming then
+			return
+		end
+		redeeming = true
+		if invoke("RedeemCode", codeBox.Text) then
+			codeBox.Text = ""
+			Sound.Play("Fanfare", 1.2)
+		end
+		redeeming = false
+	end
+	Ui.button({
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.fromScale(1, 0),
+		Size = UDim2.new(0, 120, 1, 0),
+		Text = "Redeem",
+		Variant = "Gold",
+		Parent = codeRow,
+	}, redeem)
+	codeBox.FocusLost:Connect(function(enterPressed)
+		if enterPressed then
+			redeem()
+		end
+	end)
 	State.Changed:Connect(function(key)
 		local d = State.Data
 		if key == "Data" and d then
@@ -1509,6 +1565,7 @@ function Panels.Build(screen: Frame)
 	SeasonPanel.Build(screen)
 	BlacksmithPanel.Build(screen)
 	BagPanel.Build(screen)
+	TradePanel.Build(screen, creatureIcon)
 
 	-- The merchant stall in the hub opens the panel
 	task.spawn(function()

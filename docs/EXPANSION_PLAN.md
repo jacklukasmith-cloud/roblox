@@ -309,11 +309,11 @@ and potions, Bee Swarm Simulator's treats and Grow a Garden's restocking shop.
 | **Gold and Rainbow machines** | Pet Simulator | Turn 5 pets into a Golden one at a machine. Different from fusion: it uses up common pets. |
 | **Huge pets** | Pet Simulator 99 | Ultra-rare, extra-big versions of creatures (1 in 100,000+). They're what people chase. |
 | **Key and lock chests** | Pet Simulator 99 | Crystal Keys (from bosses) open a locked chest in each realm with big loot. |
-| **Codes** | Most Roblox games | A "Codes" box in Settings. Codes give potions or gifts. Great for TikTok and YouTube. |
+| ~~**Codes**~~ (done) | Most Roblox games | A "Codes" box in Settings. Codes give potions or gifts. Great for TikTok and YouTube. |
 | **Spin wheel** | Pet Simulator / Bee Swarm | A free spin every few hours for a random item. |
 | **Fishing or mini-games** | Fisch | A timing mini-game at a pond in the hub that pays out items. |
 | **Event items** | Grow a Garden | Limited items during weekend events that never return. People log in for them. |
-| **Trading** | Adopt Me / PS99 | Trade creatures and items with a confirm screen. This is the biggest one for a lasting economy. |
+| ~~**Trading**~~ (done) | Adopt Me / PS99 | Trade creatures and items with a confirm screen. This is the biggest one for a lasting economy. |
 | **Item index** | Pet Simulator 99 | An Index page for items as well as creatures, with a reward for finding every item. |
 
 ## Missions for the new content

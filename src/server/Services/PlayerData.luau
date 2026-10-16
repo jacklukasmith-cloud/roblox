@@ -49,6 +49,8 @@ export type Data = {
 		ItemsUsed: number,
 	},
 	Items: { [string]: number }, -- the Bag (Shared/Items): item id -> count
+	RedeemedCodes: { [string]: boolean }, -- codes already used (Services/Codes)
+	TradeLog: { any }, -- last 20 trades (Services/Trading)
 	Missions: { Index: number, Baseline: number? }, -- place in the mission chain (Shared/Missions)
 	Daily: { Streak: number, LastClaimDay: number },
 	Season: { Week: number, Points: number, RewardedWeek: number },
@@ -90,6 +92,8 @@ local function defaultData(): Data
 			ItemsUsed = 0,
 		},
 		Items = {},
+		RedeemedCodes = {},
+		TradeLog = {},
 		Missions = { Index = 1 },
 		Daily = { Streak = 0, LastClaimDay = -1 },
 		Season = { Week = -1, Points = 0, RewardedWeek = -1 },

@@ -144,6 +144,28 @@ Tap an item to see what it does, then press **Use** (or **Open** for gifts). Ite
 
 Drop chances are in `Config.ItemDrops`. Test with `!item LuckPotion 5` or `!item all`.
 
+## Codes
+
+Players type codes in **Settings** (🎟️ box, then Redeem) for free rewards. The list is in
+`src/server/Services/Codes.luau`, on the server only, so codes can't be read out of the game. Each player can use a
+code once, case doesn't matter, and a code can have an expiry date. To add one, add a line like
+`SUMMER = { Rewards = { Essence = 100, Items = { LuckPotion = 2 } } },`. Starting codes: **RELEASE**,
+**MYTHIC**, **TAMER**, **THANKYOU**.
+
+## Trading
+
+Use the **🤝 Trade** menu to trade creatures and Bag items with anyone in the same server. This is how it works,
+in the style of Adopt Me and Pet Simulator 99:
+1. Send a request. The other player gets a pop-up to accept (it lasts 30 s).
+2. Both sides add up to 12 creatures and 12 kinds of items. Tap your own tile to take it back.
+3. Both press **Ready**. A **5-second lock** counts down, and any change or Cancel stops it.
+4. The server checks everything is still owned and that storage has room. It then swaps both sides at
+   once, saves both players straight away and adds it to both trade logs (`TradeLog` in the save, the
+   last 20 trades). It also prints a line in the server log.
+
+Creatures keep their level and arrive unequipped. Accounts whose Roblox policy doesn't allow trading paid items
+can't trade.
+
 ## Daily rewards & quests
 
 The **🎁 Daily** button (top-right, key **7**) opens by itself when a reward is waiting; a red bubble on the

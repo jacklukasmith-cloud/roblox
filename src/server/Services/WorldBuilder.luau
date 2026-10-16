@@ -1846,10 +1846,15 @@ function WorldBuilder.Build(): BuiltWorld
 	for _, pos in { sp(-44, 0, -22), sp(44, 0, -22), sp(-44, 0, 20), sp(44, 0, 20) } do
 		placeMesh(hub, "FlowerPlanter", CFrame.new(pos), 5)
 	end
+	-- benches in front of the leaderboards, turned round to face them
 	for _, x in { -16, 16 } do
-		placeMesh(hub, "Bench", CFrame.new(sp(x, 0, -42)), 7)
+		placeMesh(hub, "Bench", CFrame.new(sp(x, 0, -42)) * CFrame.Angles(0, math.pi, 0), 7)
 	end
-	for _, pos in { sp(-42, 0, -55), sp(42, 0, -55), sp(-12, 0, 47), sp(12, 0, 47) } do
+	-- banners: the pair beside the leaderboards is turned round to face the hub
+	for _, pos in { sp(-42, 0, -55), sp(42, 0, -55) } do
+		placeMesh(hub, "HubBanner", CFrame.new(pos) * CFrame.Angles(0, math.pi, 0), 13, true)
+	end
+	for _, pos in { sp(-12, 0, 47), sp(12, 0, 47) } do
 		placeMesh(hub, "HubBanner", CFrame.new(pos), 13, true)
 	end
 
