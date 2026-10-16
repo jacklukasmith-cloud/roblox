@@ -24,6 +24,7 @@ local SeasonPanel = require(script.Parent.SeasonPanel)
 local BlacksmithPanel = require(script.Parent.BlacksmithPanel)
 local BagPanel = require(script.Parent.BagPanel)
 local TradePanel = require(script.Parent.TradePanel)
+local LeaderboardPanel = require(script.Parent.LeaderboardPanel)
 local Layout = require(script.Parent.Layout)
 local State = require(script.Parent.State)
 local Sound = require(script.Parent.Sound)
@@ -123,6 +124,7 @@ local MENU = {
 	{ Panel = "Bestiary", Label = "Index", Icon = "📖", Color = Color3.fromRGB(90, 215, 120) },
 	{ Panel = "Settings", Label = "Settings", Icon = "⚙️", Color = Color3.fromRGB(150, 150, 190) },
 	-- Corner = sits on its own in the top-right instead of in the left menu
+	{ Panel = "Leaderboards", Label = "Top", Icon = "🏆", Color = Color3.fromRGB(255, 215, 90), Corner = true },
 	{ Panel = "Season", Label = "Season", Icon = "🏅", Color = Color3.fromRGB(255, 120, 90), Corner = true },
 	{ Panel = "Daily", Label = "Daily", Icon = "🎁", Color = Color3.fromRGB(255, 196, 64), Corner = true },
 }
@@ -230,17 +232,19 @@ local function buildMenu(root: Frame)
 			ZIndex = 3,
 			Parent = tile,
 		}, { Ui.corner(5), Ui.stroke() })
-		table.insert(
-			hints,
-			Ui.text({
-				Text = if i == 10 then "0" else tostring(i), -- key 0 opens the 10th
-				Size = UDim2.fromScale(1, 1),
-				ZIndex = 4,
-				TextColor3 = T.SubText,
-				MaxTextSize = 12,
-				Parent = badge,
-			})
-		)
+		local hint = Ui.text({
+			Text = if i == 10 then "0" else tostring(i), -- key 0 opens the 10th
+			Size = UDim2.fromScale(1, 1),
+			ZIndex = 4,
+			TextColor3 = T.SubText,
+			MaxTextSize = 12,
+			Parent = badge,
+		})
+		if i <= 10 then
+			table.insert(hints, hint)
+		else
+			badge.Visible = false -- only keys 1-9 and 0
+		end
 		if entry.Panel == "Daily" then
 			-- red bubble with the number of rewards waiting to be claimed
 			local bubble = Ui.new("Frame", {
@@ -1573,6 +1577,7 @@ function Panels.Build(screen: Frame)
 	BlacksmithPanel.Build(screen)
 	BagPanel.Build(screen)
 	TradePanel.Build(screen, creatureIcon)
+	LeaderboardPanel.Build(screen)
 
 	-- The merchant stall in the hub opens the panel
 	task.spawn(function()

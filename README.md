@@ -145,6 +145,18 @@ Tap an item to see what it does, then press **Use** (or **Open** for gifts). Ite
 
 Drop chances are in `Config.ItemDrops`. Test with `!item LuckPotion 5` or `!item all`.
 
+## Leaderboards
+
+The **🏆 Top** button (top-right) opens the leaderboards window. It has 6 categories, listed in `src/shared/Boards.luau`:
+- all-time: **Trophies**, **Essence Earned**, **Rebirths** and **Species Found**;
+- weekly, resetting every Monday (so new players can get on them): **Crystals This Week** and **Eggs Hatched This Week**.
+
+Each board has a **🌍 Global** top 50 with avatar pictures and a **👥 Friends** tab (you and your Roblox friends), and it
+always shows **your own rank**. If you're not in the top 50, it shows how much more you need to get on.
+
+In the hub, the left board cycles through every category every 12 seconds. Statues of the **top 3 trophy holders**
+(their real avatars) stand on top of it. Scores are saved every 90 seconds, and only when they've changed.
+
 ## Friend Boost
 
 You get **+5% Essence for each Roblox friend in your server**, counting up to 3 friends (+15%). Change this in

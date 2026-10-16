@@ -333,6 +333,10 @@ bind("UseItem", function(player, id)
 	return Bag.Use(player, id)
 end)
 
+Remotes.Function("GetBoard").OnServerInvoke = function(player, boardId, scope)
+	return Leaderboards.GetBoard(player, boardId, scope)
+end
+
 bind("TradeRequest", Trading.Request)
 bind("TradeRespond", Trading.Respond)
 bind("TradeSetPet", Trading.SetPet)

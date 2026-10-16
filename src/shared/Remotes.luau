@@ -45,6 +45,7 @@ local FUNCTIONS = {
 	"UpgradePickaxe",
 	"UseItem",
 	"RedeemCode",
+	"GetBoard",
 	"TradeRequest",
 	"TradeRespond",
 	"TradeSetPet",

@@ -245,11 +245,11 @@ Config.Houses = {
 }
 
 -- Leaderboards --------------------------------------------------------------------
+-- Leaderboard categories are in Shared/Boards
 Config.Leaderboards = {
-	TrophiesStore = "MythicTamers_Trophies_v1",
-	EssenceStore = "MythicTamers_TotalEssence_v1",
-	RefreshInterval = 90,
-	Size = 10,
+	RefreshInterval = 90, -- seconds between saving scores and fetching the top lists
+	CycleSeconds = 12, -- the hub's Trophy board shows the next category this often
+	Size = 10, -- rows on the hub boards
 }
 
 -- Weekly seasons (rewards are in Shared/Season.luau) --------------------------------
