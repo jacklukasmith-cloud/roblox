@@ -92,10 +92,26 @@ function PickaxeButton.Build(root: Frame)
 		local tool = character and character:FindFirstChild("Pickaxe")
 		return tool ~= nil and tool:IsA("Tool")
 	end
+	local shownSide = "Pick"
 	local function refresh()
 		local held = holding()
 		button.BackgroundColor3 = if held then T.Gold else T.Glass
 		button.BackgroundTransparency = if held then 0.05 else 0.18
+		-- the server turns it round to the axe side near a boss
+		local character = player.Character
+		local tool = character and character:FindFirstChild("Pickaxe")
+		local side = if held and tool and tool:GetAttribute("Side") == "Axe" then "Axe" else "Pick"
+		button.Text = if side == "Axe" then "🪓" else "⛏"
+		if side ~= shownSide then
+			shownSide = side
+			if held then
+				Sound.Play("Click", if side == "Axe" then 0.7 else 1.4, 0.8)
+				Ui.toast(
+					if side == "Axe" then "🪓 Axe side! +50% damage to bosses" else "⛏ Back to the pick side",
+					T.Gold
+				)
+			end
+		end
 	end
 	local function toggle()
 		if busy then
@@ -259,9 +275,22 @@ function PickaxeButton.Build(root: Frame)
 	checkUpgrade()
 
 	-- keep the button in sync when the tool comes and goes (respawn, upgrades)
+	local watchedTools = setmetatable({}, { __mode = "k" }) :: { [Instance]: boolean }
+	local function watchTool(child: Instance)
+		if child:IsA("Tool") and not watchedTools[child] then
+			watchedTools[child] = true
+			child.AttributeChanged:Connect(refresh)
+		end
+	end
 	local function watch(character: Model)
-		character.ChildAdded:Connect(refresh)
+		character.ChildAdded:Connect(function(child)
+			watchTool(child)
+			refresh()
+		end)
 		character.ChildRemoved:Connect(refresh)
+		for _, child in character:GetChildren() do
+			watchTool(child)
+		end
 		refresh()
 	end
 	player.CharacterAdded:Connect(watch)

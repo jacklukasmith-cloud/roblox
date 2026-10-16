@@ -175,6 +175,54 @@ local function buildTool(tier: number, golden: boolean?): Tool
 end
 
 -- Swings the player's pickaxe (called from the tool's Activated, which runs on the server)
+-- Which way round the head faces: the pick side for crystals, the axe side for bosses. Turning
+-- the grip 180 degrees around the handle swaps which end of the head points forward.
+local function setSide(tool: Tool, axe: boolean)
+	local side = if axe then "Axe" else "Pick"
+	if tool:GetAttribute("Side") == side then
+		return
+	end
+	tool:SetAttribute("Side", side)
+	tool.GripRight = if axe then Vector3.new(0, -1, 0) else Vector3.new(0, 1, 0)
+	tool.GripForward = if axe then Vector3.new(1, 0, 0) else Vector3.new(-1, 0, 0)
+end
+
+-- Is a boss close enough that you're fighting it (or are your creatures attacking one)?
+local BOSS_RANGE = 25 -- studs beyond the boss's own size
+local function nearBoss(player: Player): boolean
+	local targetValue = player:FindFirstChild("PetTarget")
+	local target = targetValue and (targetValue :: ObjectValue).Value
+	if target and target:GetAttribute("Breakable") == "Boss" then
+		return true
+	end
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	local world = workspace:FindFirstChild("World")
+	local bosses = world and world:FindFirstChild("Bosses")
+	if not root or not bosses then
+		return false
+	end
+	for _, boss in bosses:GetChildren() do
+		if boss:IsA("Model") then
+			local box, size = boss:GetBoundingBox()
+			local flat = (box.Position - root.Position) * Vector3.new(1, 0, 1)
+			if flat.Magnitude <= math.max(size.X, size.Z) / 2 + BOSS_RANGE then
+				return true
+			end
+		end
+	end
+	return false
+end
+
+-- Turns the held pickaxe to the right side (called a few times a second)
+function Pickaxe.UpdateSide(player: Player)
+	local character = player.Character
+	local tool = character and character:FindFirstChild("Pickaxe")
+	if tool and tool:IsA("Tool") then
+		setSide(tool, nearBoss(player))
+	end
+end
+
 function Pickaxe.Swing(player: Player, tool: Tool?): boolean
 	local now = os.clock()
 	local golden = hasGolden(player)
@@ -216,14 +264,9 @@ function Pickaxe.Swing(player: Player, tool: Tool?): boolean
 		local near = Crystals.NearestDistance(player) < cfg.Reach + 12
 		pickaxeHit:FireClient(player, nil, false, streak.Count, near)
 	end
-	-- pick side for crystals, turn it round to the axe side for bosses
+	-- whatever you actually hit decides the side too (pick for crystals, axe for bosses)
 	if tool and hit then
-		local axe = hit:GetAttribute("Breakable") == "Boss"
-		if tool:GetAttribute("Side") ~= (if axe then "Axe" else "Pick") then
-			tool:SetAttribute("Side", if axe then "Axe" else "Pick")
-			tool.GripRight = if axe then Vector3.new(0, -1, 0) else Vector3.new(0, 1, 0)
-			tool.GripForward = if axe then Vector3.new(1, 0, 0) else Vector3.new(-1, 0, 0)
-		end
+		setSide(tool, hit:GetAttribute("Breakable") == "Boss")
 	end
 	return hit ~= nil
 end
@@ -436,6 +479,18 @@ function Pickaxe.Start()
 	Players.PlayerRemoving:Connect(function(player)
 		lastSwing[player] = nil
 		streaks[player] = nil
+	end)
+	-- turn to the axe side as soon as you're near a boss, back to the pick when you leave
+	task.spawn(function()
+		while true do
+			task.wait(0.25)
+			for _, player in Players:GetPlayers() do
+				local ok, err = pcall(Pickaxe.UpdateSide, player)
+				if not ok then
+					warn(`[Pickaxe] {err}`)
+				end
+			end
+		end
 	end)
 	Monetization.OnPassPurchased(function(player, key)
 		if key == "GoldenPickaxe" then

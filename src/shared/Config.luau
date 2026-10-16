@@ -327,7 +327,7 @@ Config.GamePasses = {
 	},
 	{
 		Key = "GoldenPickaxe",
-		Id = 0, -- create the game pass on the Creator Hub and paste its ID here
+		Id = 2036240892,
 		Name = "Golden Pickaxe",
 		Description = "+50% pickaxe damage, faster swings and a shining gold pickaxe",
 		PriceHint = 149, -- shown in the shop UI; set the real price on the Creator Hub
