@@ -19,6 +19,7 @@ local Monetization = require(script.Parent.Monetization)
 local WorldService = require(script.Parent.WorldService)
 local HouseWar = require(script.Parent.HouseWar)
 local Surge = require(script.Parent.Surge)
+local FriendBoost = require(script.Parent.FriendBoost)
 local DailyRewards = require(script.Parent.DailyRewards)
 local Seasons = require(script.Parent.Seasons)
 
@@ -141,6 +142,7 @@ function Economy.GetEssenceMultiplier(player: Player, data: PlayerData.Data): nu
 		m *= Config.Boosts.Essence
 	end
 	m *= WorldService.GetWeatherDef().Essence
+	m *= FriendBoost.Multiplier(player)
 	if Surge.IsActive() then
 		m *= Config.Surge.EssenceMultiplier
 	end
@@ -461,6 +463,7 @@ function Economy.BuildSnapshot(player: Player)
 		Pickaxe = (data :: any).Pickaxe or 1,
 		Missions = (data :: any).Missions,
 		Items = (data :: any).Items,
+		FriendBoost = FriendBoost.Count(player),
 	}
 end
 

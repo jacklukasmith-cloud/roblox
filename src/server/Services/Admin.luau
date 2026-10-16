@@ -15,6 +15,7 @@
 	  !bigpull Phoenix Rainbow   show the big-pull banner + fireworks (Legendary+ or Rainbow)
 	  !treasure [realm]          hide a Lost Treasure now
 	  !seasonend                 end the season now on this server and hand out rewards
+	  !nopasses                  play as if you owned no game passes (type again to undo)
 	  !item LuckPotion 5         put items in your Bag (see Shared/Items; "!item all" = 5 of each)
 	  !reset confirm             wipe ALL your progress (pets, Essence, pickaxe, realms...) back to a
 	                             new save. Robux purchases and game passes are kept.
@@ -111,6 +112,19 @@ local function runPersonal(player: Player, command: string, args: { string }): b
 		local Pickaxe = require(script.Parent.Pickaxe) :: any
 		pcall(Pickaxe.Give, player, true)
 		notify:FireClient(player, "[TEST] Progress wiped - fresh start!", Color3.fromRGB(140, 255, 200))
+	elseif command == "nopasses" then
+		-- play as a player with no game passes (type it again to get them back)
+		local Monetization = require(script.Parent.Monetization) :: any
+		local on = Monetization.ToggleIgnorePasses(player)
+		local Pickaxe = require(script.Parent.Pickaxe) :: any
+		pcall(Pickaxe.Give, player, true) -- Golden Pickaxe on/off
+		notify:FireClient(
+			player,
+			if on
+				then "[TEST] No passes: you now play like someone who owns none. Type !nopasses again to undo"
+				else "[TEST] Your game passes are back",
+			Color3.fromRGB(140, 255, 200)
+		)
 	elseif command == "item" then
 		-- "!item LuckPotion 5" (any capitalisation); "!item all" gives 5 of everything
 		local Items = require(ReplicatedStorage.Shared.Items) :: any

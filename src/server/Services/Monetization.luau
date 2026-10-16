@@ -33,17 +33,34 @@ end
 
 local notify = Remotes.Event("Notify")
 
+-- !nopasses (testing): play as if you owned no game passes, until you type it again or rejoin
+local ignoring: { [Player]: boolean } = {}
+
 function Monetization.Owns(player: Player, key: string): boolean
+	if ignoring[player] then
+		return false
+	end
 	local set = owned[player]
 	return set ~= nil and set[key] == true
 end
 
 function Monetization.GetOwned(player: Player): { [string]: boolean }
+	if ignoring[player] then
+		return {}
+	end
 	return table.clone(owned[player] or {})
 end
 
 local function applyPerks(player: Player)
 	player:SetAttribute("VIP", Monetization.Owns(player, "VIP"))
+end
+
+-- Turns "pretend I own no passes" on or off; returns whether it's now on
+function Monetization.ToggleIgnorePasses(player: Player): boolean
+	ignoring[player] = if ignoring[player] then nil else true
+	applyPerks(player)
+	PlayerData.MarkChanged(player)
+	return ignoring[player] == true
 end
 
 function Monetization.Refresh(player: Player)
@@ -87,6 +104,7 @@ end)
 
 Players.PlayerRemoving:Connect(function(player)
 	owned[player] = nil
+	ignoring[player] = nil
 end)
 
 local function grant(player: Player, product)

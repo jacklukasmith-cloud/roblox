@@ -13,6 +13,7 @@ local GuiService = game:GetService("GuiService")
 
 local Shared = ReplicatedStorage.Shared
 local Format = require(Shared.Format)
+local Config = require(Shared.Config)
 local Weather = require(Shared.Weather)
 local Houses = require(Shared.Houses)
 local Ui = require(script.Parent.Ui)
@@ -421,6 +422,28 @@ function Hud.Build(root: Frame)
 				end
 				chip.Text = `{name}  {Format.Time(endsAt - now)}`
 			end
+		end
+		-- Friend Boost chip (no timer: lasts while your friends are in the server)
+		local friends = d.FriendBoost or 0
+		if friends > 0 then
+			seen.__friends = true
+			local chip = boostChips.__friends
+			if not chip then
+				local frame = Ui.glass(
+					{ Size = UDim2.fromOffset(Layout.pick(110, 130), 24), Parent = boostRow },
+					{ Ui.round() }
+				)
+				chip = Ui.text({
+					Size = UDim2.new(1, -12, 1, -6),
+					Position = UDim2.fromOffset(6, 3),
+					Font = T.FontRegular,
+					TextColor3 = Color3.fromRGB(140, 215, 255),
+					MaxTextSize = 14,
+					Parent = frame,
+				})
+				boostChips.__friends = chip
+			end
+			chip.Text = `👥 Friends +{math.floor(friends * Config.FriendBoost.PerFriend * 100 + 0.5)}%`
 		end
 		for name, chip in boostChips do
 			if not seen[name] then

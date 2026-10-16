@@ -1429,7 +1429,7 @@ end
 
 -- Settings panel -------------------------------------------------------------------------
 local function buildSettings(screen: Frame)
-	local _, content = Ui.panel(screen, "Settings", "Settings", UDim2.fromOffset(460, 480), "⚙️")
+	local _, content = Ui.panel(screen, "Settings", "Settings", UDim2.fromOffset(460, 540), "⚙️")
 	Ui.new("UIListLayout", { Padding = UDim.new(0, 10), SortOrder = Enum.SortOrder.LayoutOrder, Parent = content })
 	local potato
 	potato = Ui.button({
@@ -1489,6 +1489,13 @@ local function buildSettings(screen: Frame)
 		end
 		invoke("SetAutoCollect", not d.AutoCollectEnabled)
 	end)
+	Ui.button({
+		LayoutOrder = 6,
+		Size = UDim2.new(1, 0, 0, 44),
+		Text = `👥 Invite friends: +{math.floor(Config.FriendBoost.PerFriend * 100 + 0.5)}% Essence for each friend here`,
+		Variant = "Gold",
+		Parent = content,
+	}, require(script.Parent.Invite).Prompt)
 	-- Codes: type one in for free rewards
 	local codeRow = Ui.new("Frame", {
 		LayoutOrder = 5,

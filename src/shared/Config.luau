@@ -427,6 +427,12 @@ Config.Boosts = {
 	XP = 2, -- creature XP
 }
 
+-- Friend Boost: extra Essence for each Roblox friend playing in the same server
+Config.FriendBoost = {
+	PerFriend = 0.05, -- +5% Essence per friend
+	MaxFriends = 3, -- counts up to this many (so up to +15%)
+}
+
 -- Item drops into the Bag (items are in Shared/Items). Inspired by Pet Simulator 99's breakables.
 Config.ItemDrops = {
 	CrystalChance = 1 / 80, -- per crystal you help break (bigger crystals roll more times)

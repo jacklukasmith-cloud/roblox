@@ -19,6 +19,8 @@ local Ui = require(Modules.Ui)
 local State = require(Modules.State)
 local Sound = require(Modules.Sound)
 local Layout = require(Modules.Layout)
+local Invite = require(Modules.Invite)
+local Config = require(Shared.Config)
 
 local T = Ui.Theme
 
@@ -75,14 +77,24 @@ function TradePanel.Build(screen: Frame, creatureIcon: IconFn)
 	-- Lobby: players and requests ----------------------------------------------------------
 	local lobby = Ui.new("Frame", { Size = UDim2.fromScale(1, 1), BackgroundTransparency = 1, Parent = content })
 	Ui.text({
-		Size = UDim2.new(1, 0, 0, 24),
+		Size = UDim2.new(1, -230, 0, 40),
 		Text = "Trade creatures and Bag items with players in this server",
 		Font = T.FontRegular,
 		TextColor3 = T.SubText,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextWrapped = true,
 		MaxTextSize = 16,
 		Parent = lobby,
 	})
-	local lobbyList = scroll(lobby, { Position = UDim2.fromOffset(0, 32), Size = UDim2.new(1, 0, 1, -32) })
+	Ui.button({
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.fromScale(1, 0),
+		Size = UDim2.fromOffset(220, 40),
+		Text = `👥 Invite friends (+{math.floor(Config.FriendBoost.PerFriend * 100 + 0.5)}% each)`,
+		Variant = "Gold",
+		Parent = lobby,
+	}, Invite.Prompt)
+	local lobbyList = scroll(lobby, { Position = UDim2.fromOffset(0, 48), Size = UDim2.new(1, 0, 1, -48) })
 	Ui.new("UIListLayout", { Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder, Parent = lobbyList })
 
 	local function row(order: number, text: string, color: Color3?): Frame

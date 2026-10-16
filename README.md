@@ -103,6 +103,7 @@ Testing commands (only affect you; everyone is an admin in Studio):
 | `!bigpull Phoenix Rainbow` | Preview the big-pull banner and fireworks (Legendary or better, or any Rainbow) |
 | `!treasure` | Hide a Lost Treasure now (add a realm number, e.g. `!treasure 2`) |
 | `!boss` | Spawn a boss raid now (add a realm number, e.g. `!boss 2`) |
+| `!nopasses` | Play as if you owned no game passes, to test the real difficulty (type it again to undo). In Studio you own every pass by default (`Config.StudioOwnsAllPasses`) |
 | `!item LuckPotion 5` | Put items in your Bag (`!item all` gives 5 of each) |
 | `!reset confirm` | Wipe all your progress back to a brand-new save (Robux purchases and game passes are kept) |
 | `!seasonend` | End the season now on this server and hand out the rewards (for testing) |
@@ -143,6 +144,12 @@ Tap an item to see what it does, then press **Use** (or **Open** for gifts). Ite
 - the Robux Luck Potion product (2 potions).
 
 Drop chances are in `Config.ItemDrops`. Test with `!item LuckPotion 5` or `!item all`.
+
+## Friend Boost
+
+You get **+5% Essence for each Roblox friend in your server**, counting up to 3 friends (+15%). Change this in
+`Config.FriendBoost`. A 👥 chip above the Essence bar shows it, and both players get a message when a friend joins.
+**Invite friends** buttons in the Trade menu and Settings open Roblox's invite screen.
 
 ## Codes
 
