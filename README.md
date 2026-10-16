@@ -103,18 +103,46 @@ Testing commands (only affect you; everyone is an admin in Studio):
 | `!bigpull Phoenix Rainbow` | Preview the big-pull banner and fireworks (Legendary or better, or any Rainbow) |
 | `!treasure` | Hide a Lost Treasure now (add a realm number, e.g. `!treasure 2`) |
 | `!boss` | Spawn a boss raid now (add a realm number, e.g. `!boss 2`) |
+| `!item LuckPotion 5` | Put items in your Bag (`!item all` gives 5 of each) |
 | `!reset confirm` | Wipe all your progress back to a brand-new save (Robux purchases and game passes are kept) |
 | `!seasonend` | End the season now on this server and hand out the rewards (for testing) |
 
 ## Missions
 
-A chain of 19 missions guides players from their first crystal to discovering all 25 species
+A chain of 20 missions guides players from their first crystal to discovering all 25 species
 (`src/shared/Missions.luau`). Each one pays Essence (the last ones pay Trophies and the "Master Tamer"
 title). The **mission card** sits under the left menu and shows the mission, progress and reward.
 For the first 7 missions a glowing line and arrow point to where the mission happens. After that, tap
 the card to turn the arrow on or off; this also shows a tip. To add, remove or reorder missions, edit
 `Missions.List`. Players already past a mission keep their place, and anything they've already done
 (like realms unlocked) completes straight away.
+
+## The Bag (items)
+
+Potions and other items go into your **🎒 Bag** (menu key 2), so you choose when to use them.
+Tap an item to see what it does, then press **Use** (or **Open** for gifts). Items are listed in
+`src/shared/Items.luau`:
+
+| Item | What it does |
+|---|---|
+| 🍀 Luck / ⚗️ Essence / ✨ Shiny / 💨 Speed / 💪 Power / 📈 XP Potion | A 10-minute boost |
+| 🌈 Rainbow Brew | Luck, Essence, Shiny and Power together for 15 minutes |
+| 🍪 Pet Treat / 🍯 Golden Treat | Instant XP for every equipped creature |
+| 💰 Essence Sack | Instant Essence |
+| 🥚 Mystic Egg | Hatches a guaranteed Rare or better |
+| 🎁 Mystery Gift | Opens into a random item |
+| 🗺️ Treasure Map | Hides a Lost Treasure in one of your realms |
+| 📯 Boss Horn | Calls a boss to the server right now |
+
+**Where items come from:**
+- crystals (a small chance, more for big ones);
+- every Mana Chest and Lost Treasure;
+- bosses (a Mystery Gift plus a rare item);
+- the Wandering Merchant;
+- daily rewards, missions and hatching milestones;
+- the Robux Luck Potion product (2 potions).
+
+Drop chances are in `Config.ItemDrops`. Test with `!item LuckPotion 5` or `!item all`.
 
 ## Daily rewards & quests
 

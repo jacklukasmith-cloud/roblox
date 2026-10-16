@@ -9,6 +9,7 @@
 local Eggs = require(script.Parent.Eggs)
 local Zones = require(script.Parent.Zones)
 
+-- Id is an item from Shared/Items: buying one puts it in your Bag
 export type MerchantItem = {
 	Id: string,
 	Name: string,
@@ -16,9 +17,6 @@ export type MerchantItem = {
 	PriceInEggs: number,
 	Chance: number,
 	MaxStock: number,
-	Kind: "Boost" | "MysticHatch",
-	Boost: string?,
-	Seconds: number?,
 }
 
 local Merchant = {}
@@ -34,9 +32,6 @@ Merchant.Items = {
 		PriceInEggs = 3,
 		Chance = 0.7,
 		MaxStock = 2,
-		Kind = "Boost",
-		Boost = "Luck",
-		Seconds = 600,
 	},
 	{
 		Id = "EssencePotion",
@@ -45,9 +40,38 @@ Merchant.Items = {
 		PriceInEggs = 3,
 		Chance = 0.7,
 		MaxStock = 2,
-		Kind = "Boost",
-		Boost = "Essence",
-		Seconds = 600,
+	},
+	{
+		Id = "SpeedPotion",
+		Name = "Speed Potion",
+		Description = "+30% walk speed for 10 min",
+		PriceInEggs = 2,
+		Chance = 0.6,
+		MaxStock = 3,
+	},
+	{
+		Id = "XPPotion",
+		Name = "XP Potion",
+		Description = "x2 creature XP for 10 min",
+		PriceInEggs = 3,
+		Chance = 0.5,
+		MaxStock = 2,
+	},
+	{
+		Id = "PetTreat",
+		Name = "Pet Treat",
+		Description = "+25 XP for every equipped creature",
+		PriceInEggs = 1,
+		Chance = 0.6,
+		MaxStock = 5,
+	},
+	{
+		Id = "PowerPotion",
+		Name = "Power Potion",
+		Description = "Creatures deal +50% damage for 10 min",
+		PriceInEggs = 5,
+		Chance = 0.35,
+		MaxStock = 1,
 	},
 	{
 		Id = "ShinyElixir",
@@ -56,9 +80,14 @@ Merchant.Items = {
 		PriceInEggs = 6,
 		Chance = 0.35,
 		MaxStock = 1,
-		Kind = "Boost",
-		Boost = "Shiny",
-		Seconds = 600,
+	},
+	{
+		Id = "MysteryGift",
+		Name = "Mystery Gift",
+		Description = "A random item. Could be anything!",
+		PriceInEggs = 4,
+		Chance = 0.4,
+		MaxStock = 2,
 	},
 	{
 		Id = "MysticEgg",
@@ -67,7 +96,14 @@ Merchant.Items = {
 		PriceInEggs = 10,
 		Chance = 0.2,
 		MaxStock = 1,
-		Kind = "MysticHatch",
+	},
+	{
+		Id = "TreasureMap",
+		Name = "Treasure Map",
+		Description = "Hides a Lost Treasure in one of your realms",
+		PriceInEggs = 8,
+		Chance = 0.1,
+		MaxStock = 1,
 	},
 } :: { MerchantItem }
 

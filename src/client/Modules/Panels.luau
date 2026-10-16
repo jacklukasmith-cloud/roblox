@@ -14,6 +14,7 @@ local Creatures = require(Shared.Creatures)
 local Eggs = require(Shared.Eggs)
 local PetStats = require(Shared.PetStats)
 local Merchant = require(Shared.Merchant)
+local Items = require(Shared.Items)
 local Format = require(Shared.Format)
 local Remotes = require(Shared.Remotes)
 local CreatureModels = require(Shared.CreatureModels)
@@ -21,6 +22,7 @@ local Ui = require(script.Parent.Ui)
 local DailyPanel = require(script.Parent.DailyPanel)
 local SeasonPanel = require(script.Parent.SeasonPanel)
 local BlacksmithPanel = require(script.Parent.BlacksmithPanel)
+local BagPanel = require(script.Parent.BagPanel)
 local Layout = require(script.Parent.Layout)
 local State = require(script.Parent.State)
 
@@ -111,6 +113,7 @@ end
 -- Menu ---------------------------------------------------------------------------------
 local MENU = {
 	{ Panel = "Creatures", Label = "Pets", Icon = "🐾", Color = Color3.fromRGB(90, 170, 255) },
+	{ Panel = "Bag", Label = "Bag", Icon = "🎒", Color = Color3.fromRGB(110, 210, 150) },
 	{ Panel = "Shop", Label = "Shop", Icon = "🛒", Color = Color3.fromRGB(255, 200, 60) },
 	{ Panel = "Merchant", Label = "Merchant", Icon = "🧙", Color = Color3.fromRGB(255, 145, 70) },
 	{ Panel = "Rebirth", Label = "Rebirth", Icon = "🌀", Color = Color3.fromRGB(255, 110, 215) },
@@ -299,10 +302,11 @@ local function buildMenu(root: Frame)
 	})
 	local function arrange()
 		local c = Layout.Compact
-		-- Phones: 3x2 block; everything else: 2x3. Touch devices keep it in the top-left (clear of the
+		-- Phones: 2 rows; everything else: 2 columns. Touch devices keep it in the top-left (clear of the
 		-- thumbstick); PC/console keep it left-centre (clear of the chat window).
 		local tileSize = if c then 48 else 58
-		local cols = if c then 3 else 2
+		-- phones: 4 across once there are 7+ tiles, so the menu stays 2 rows (clear of the thumbstick)
+		local cols = if c then (if gridCount > 6 then 4 else 3) else 2
 		grid.CellSize = UDim2.fromOffset(tileSize, tileSize)
 		local rows = math.ceil(gridCount / cols)
 		local size = UDim2.fromOffset(cols * tileSize + (cols - 1) * 8, rows * tileSize + (rows - 1) * 8)
@@ -342,6 +346,7 @@ local function bindInput()
 		Enum.KeyCode.Six,
 		Enum.KeyCode.Seven,
 		Enum.KeyCode.Eight,
+		Enum.KeyCode.Nine,
 	}
 	UserInputService.InputBegan:Connect(function(input, processed)
 		if processed or UserInputService:GetFocusedTextBox() then
@@ -1189,7 +1194,7 @@ local function buildMerchant(screen: Frame)
 					Parent = list,
 				}, { Ui.corner(10), Ui.stroke(Color3.fromRGB(255, 170, 90), 1.5) })
 				Ui.text({
-					Text = `{item.Name}  (x{left} left)`,
+					Text = `{(Items.Get(item.Id) or {}).Icon or ""} {item.Name}  (x{left} left)`,
 					Position = UDim2.fromOffset(10, 6),
 					Size = UDim2.new(1, -160, 0, 28),
 					TextXAlignment = Enum.TextXAlignment.Left,
@@ -1503,6 +1508,7 @@ function Panels.Build(screen: Frame)
 	DailyPanel.Build(screen)
 	SeasonPanel.Build(screen)
 	BlacksmithPanel.Build(screen)
+	BagPanel.Build(screen)
 
 	-- The merchant stall in the hub opens the panel
 	task.spawn(function()

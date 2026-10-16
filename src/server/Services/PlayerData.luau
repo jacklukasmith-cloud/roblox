@@ -46,7 +46,9 @@ export type Data = {
 		Fusions: number,
 		BossesDefeated: number,
 		TreasuresFound: number,
+		ItemsUsed: number,
 	},
+	Items: { [string]: number }, -- the Bag (Shared/Items): item id -> count
 	Missions: { Index: number, Baseline: number? }, -- place in the mission chain (Shared/Missions)
 	Daily: { Streak: number, LastClaimDay: number },
 	Season: { Week: number, Points: number, RewardedWeek: number },
@@ -85,7 +87,9 @@ local function defaultData(): Data
 			Fusions = 0,
 			BossesDefeated = 0,
 			TreasuresFound = 0,
+			ItemsUsed = 0,
 		},
+		Items = {},
 		Missions = { Index = 1 },
 		Daily = { Streak = 0, LastClaimDay = -1 },
 		Season = { Week = -1, Points = 0, RewardedWeek = -1 },

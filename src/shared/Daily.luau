@@ -12,8 +12,10 @@
 local Daily = {}
 
 export type Reward = {
-	Kind: string, -- "Essence" (worth N crystals of your best zone) | "Trophies" | "Boost" | "MysticEgg"
+	Kind: string, -- "Essence" (worth N crystals of your best zone) | "Trophies" | "Item" (Amount of
+	-- Item into the Bag) | "Boost" | "MysticEgg"
 	Amount: number?,
+	Item: string?,
 	Boost: string?,
 	Seconds: number?,
 	Text: string, -- short label for the UI
@@ -23,13 +25,19 @@ export type Reward = {
 -- Day 1..7 of the login streak. A reward can be a list of several.
 Daily.StreakRewards = {
 	{ { Kind = "Essence", Amount = 40, Text = "Essence", Icon = "💎" } },
-	{ { Kind = "Boost", Boost = "Luck", Seconds = 600, Text = "Luck Potion", Icon = "🍀" } },
-	{ { Kind = "Essence", Amount = 100, Text = "Essence", Icon = "💎" } },
-	{ { Kind = "Boost", Boost = "Essence", Seconds = 900, Text = "Essence Potion", Icon = "⚗️" } },
-	{ { Kind = "Trophies", Amount = 5, Text = "5 Trophies", Icon = "🏆" } },
-	{ { Kind = "Boost", Boost = "Shiny", Seconds = 600, Text = "Shiny Elixir", Icon = "✨" } },
+	{ { Kind = "Item", Item = "LuckPotion", Text = "Luck Potion", Icon = "🍀" } },
 	{
-		{ Kind = "MysticEgg", Text = "Mystic Egg", Icon = "🥚" },
+		{ Kind = "Essence", Amount = 100, Text = "Essence", Icon = "💎" },
+		{ Kind = "Item", Item = "PetTreat", Amount = 3, Text = "3 Pet Treats", Icon = "🍪" },
+	},
+	{ { Kind = "Item", Item = "EssencePotion", Text = "Essence Potion", Icon = "⚗️" } },
+	{ { Kind = "Trophies", Amount = 5, Text = "5 Trophies", Icon = "🏆" } },
+	{
+		{ Kind = "Item", Item = "ShinyElixir", Text = "Shiny Elixir", Icon = "✨" },
+		{ Kind = "Item", Item = "MysteryGift", Text = "Mystery Gift", Icon = "🎁" },
+	},
+	{
+		{ Kind = "Item", Item = "MysticEgg", Text = "Mystic Egg", Icon = "🥚" },
 		{ Kind = "Essence", Amount = 300, Text = "Essence", Icon = "💎" },
 	},
 } :: { { Reward } }
@@ -57,8 +65,7 @@ Daily.Quests = {
 
 -- Reward per quest, and for finishing all of today's quests
 Daily.QuestReward = { Kind = "Essence", Amount = 60, Text = "Essence", Icon = "💎" } :: Reward
-Daily.BonusReward =
-	{ Kind = "Boost", Boost = "Luck", Seconds = 900, Text = "Luck Potion (15 min)", Icon = "🍀" } :: Reward
+Daily.BonusReward = { Kind = "Item", Item = "MysteryGift", Text = "Mystery Gift", Icon = "🎁" } :: Reward
 Daily.QuestsPerDay = 3
 
 function Daily.Today(now: number?): number

@@ -80,13 +80,13 @@ Config.GroundTextures = {
 Config.PetXP = { Crystal = 1, Chest = 6, Boss = 25 }
 
 -- Hatching milestones: every At total hatches gives a guaranteed Rare+ creature (Mystic) plus extras.
--- Boost = a boost name from Config.Boosts for Seconds; Title shows up with your Season titles.
+-- Items = { [item id] = count } go into the Bag; Title shows up with your Season titles.
 Config.HatchMilestones = {
 	{ At = 100, Mystic = true, Trophies = 5 },
-	{ At = 250, Mystic = true, Boost = "Luck", Seconds = 600 },
-	{ At = 500, Mystic = true, Trophies = 15, Boost = "Shiny", Seconds = 600 },
+	{ At = 250, Mystic = true, Items = { LuckPotion = 1, MysteryGift = 1 } },
+	{ At = 500, Mystic = true, Trophies = 15, Items = { ShinyElixir = 1, MysteryGift = 2 } },
 	{ At = 1000, Mystic = true, Trophies = 25, Title = "Egg Master" },
-	{ At = 2500, Mystic = true, Trophies = 50, Boost = "Luck", Seconds = 1800 },
+	{ At = 2500, Mystic = true, Trophies = 50, Items = { LuckPotion = 3, RainbowBrew = 1 } },
 	{ At = 5000, Mystic = true, Trophies = 100, Title = "Hatch Legend" },
 }
 Config.MilestoneFullStorageTrophies = 10 -- given instead of the creature if storage is full
@@ -366,10 +366,10 @@ Config.DevProducts = {
 		Key = "LuckPotion",
 		Id = 3718616652,
 		Name = "Luck Potion",
-		Description = "x2 Rare+ odds for 15 minutes (stacks time)",
+		Description = "2 Luck Potions for your Bag (x2 Rare+ odds, 10 min each)",
 		PriceHint = 79, -- shown in the shop UI; set the real price on the Creator Hub
 		Icon = "", -- optional "rbxassetid://..." after uploading the icon
-		Grant = { Kind = "Boost", Boost = "Luck", Seconds = 900 },
+		Grant = { Kind = "Item", Item = "LuckPotion", Count = 2 },
 	},
 	{
 		Key = "MerchantRestock",
@@ -422,6 +422,53 @@ Config.Boosts = {
 	Luck = 2,
 	Essence = 2,
 	Shiny = 3,
+	Speed = 1.3, -- walk speed
+	Power = 1.5, -- creature damage
+	XP = 2, -- creature XP
+}
+
+-- Item drops into the Bag (items are in Shared/Items). Inspired by Pet Simulator 99's breakables.
+Config.ItemDrops = {
+	CrystalChance = 1 / 80, -- per crystal you help break (bigger crystals roll more times)
+	Crystal = {
+		{ Item = "PetTreat", Weight = 40 },
+		{ Item = "EssenceBag", Weight = 22 },
+		{ Item = "SpeedPotion", Weight = 12 },
+		{ Item = "EssencePotion", Weight = 8 },
+		{ Item = "LuckPotion", Weight = 8 },
+		{ Item = "XPPotion", Weight = 6 },
+		{ Item = "MysteryGift", Weight = 3 },
+		{ Item = "PowerPotion", Weight = 1 },
+	},
+	-- every Mana Chest you help open gives one of these
+	Chest = {
+		{ Item = "PetTreat", Weight = 30, Count = 2 },
+		{ Item = "EssenceBag", Weight = 20 },
+		{ Item = "LuckPotion", Weight = 14 },
+		{ Item = "EssencePotion", Weight = 14 },
+		{ Item = "XPPotion", Weight = 10 },
+		{ Item = "MysteryGift", Weight = 8 },
+		{ Item = "PowerPotion", Weight = 3 },
+		{ Item = "TreasureMap", Weight = 1 },
+	},
+	-- every boss fighter gets a Mystery Gift plus one of these
+	Boss = {
+		{ Item = "PowerPotion", Weight = 25 },
+		{ Item = "GoldenTreat", Weight = 25 },
+		{ Item = "ShinyElixir", Weight = 20 },
+		{ Item = "TreasureMap", Weight = 15 },
+		{ Item = "MysticEgg", Weight = 10 },
+		{ Item = "RainbowBrew", Weight = 3 },
+		{ Item = "BossHorn", Weight = 2 },
+	},
+	-- whoever opens a Lost Treasure gets one of these
+	Treasure = {
+		{ Item = "MysteryGift", Weight = 40, Count = 2 },
+		{ Item = "GoldenTreat", Weight = 25 },
+		{ Item = "ShinyElixir", Weight = 20 },
+		{ Item = "MysticEgg", Weight = 10 },
+		{ Item = "BossHorn", Weight = 5 },
+	},
 }
 
 return Config

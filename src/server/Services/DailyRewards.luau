@@ -41,6 +41,10 @@ local function grant(player: Player, data: any, reward: Daily.Reward): string
 	elseif reward.Kind == "Boost" then
 		Economy.AddBoost(player, reward.Boost :: string, reward.Seconds :: number)
 		return reward.Text
+	elseif reward.Kind == "Item" then
+		local Bag = require(script.Parent.Bag) :: any
+		Bag.Give(player, reward.Item :: string, reward.Amount or 1, true)
+		return `{reward.Text} (in your Bag)`
 	elseif reward.Kind == "MysticEgg" then
 		local Hatching = require(script.Parent.Hatching) :: any
 		if Hatching.MysticHatch(player) then

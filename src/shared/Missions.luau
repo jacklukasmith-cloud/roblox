@@ -7,10 +7,12 @@
 	           Missions.Baseline in the save, so earlier progress doesn't count)
 	  "Reach": get the stat up to N (counts what you already have)
 	Target: where the guide arrow points (Crystal, Egg, Gate, Blacksmith, Boss, or nil for none)
-	Reward: { Essence = n } / { Trophies = n } / { Title = "..." } (any mix)
+	Reward: { Essence = n } / { Trophies = n } / { Title = "..." } / { Items = { [item id] = count } }
+	        (any mix; items go into the Bag)
 ]]
 
 local Creatures = require(script.Parent.Creatures)
+local Items = require(script.Parent.Items)
 
 export type Mission = {
 	Id: string,
@@ -20,7 +22,7 @@ export type Mission = {
 	Goal: number,
 	Target: string?,
 	Hint: string?, -- extra help shown under the mission
-	Reward: { Essence: number?, Trophies: number?, Title: string? },
+	Reward: { Essence: number?, Trophies: number?, Title: string?, Items: { [string]: number }? },
 }
 
 local Missions = {}
@@ -64,7 +66,16 @@ Missions.List = {
 		Goal = 3,
 		Target = "Egg",
 		Hint = "New creatures join your team automatically",
-		Reward = { Essence = 80 },
+		Reward = { Essence = 80, Items = { LuckPotion = 1 } },
+	},
+	{
+		Id = "UseItem",
+		Text = "Use a potion from your Bag",
+		Stat = "ItemsUsed",
+		Kind = "Count",
+		Goal = 1,
+		Hint = "Open the 🎒 Bag, tap the Luck Potion and press Use",
+		Reward = { Essence = 100, Items = { PetTreat = 3, MysteryGift = 1 } },
 	},
 	{
 		Id = "Break25",
@@ -102,7 +113,7 @@ Missions.List = {
 		Kind = "Count",
 		Goal = 5,
 		Target = "Egg",
-		Reward = { Essence = 1000 },
+		Reward = { Essence = 1000, Items = { EssencePotion = 1 } },
 	},
 	{
 		Id = "Index8",
@@ -159,7 +170,7 @@ Missions.List = {
 		Goal = 1,
 		Target = "Boss",
 		Hint = "Bosses appear every so often; the top of the screen counts down",
-		Reward = { Essence = 40000 },
+		Reward = { Essence = 40000, Items = { TreasureMap = 1 } },
 	},
 	{
 		Id = "Pickaxe4",
@@ -195,7 +206,7 @@ Missions.List = {
 		Kind = "Reach",
 		Goal = 1,
 		Hint = "Open Rebirth: you restart with +50% Essence forever and keep your creatures",
-		Reward = { Trophies = 10 },
+		Reward = { Trophies = 10, Items = { RainbowBrew = 1 } },
 	},
 	{
 		Id = "Index25",
@@ -260,6 +271,12 @@ function Missions.RewardText(
 	end
 	if reward.Trophies then
 		table.insert(parts, `🏆 {reward.Trophies}`)
+	end
+	for id, count in reward.Items or {} do
+		local item = Items.Get(id)
+		if item then
+			table.insert(parts, if count > 1 then `{count}x {item.Icon}` else item.Icon)
+		end
 	end
 	if reward.Title then
 		table.insert(parts, `"{reward.Title}" title`)

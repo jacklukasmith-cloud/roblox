@@ -20,6 +20,7 @@ local Format = require(ReplicatedStorage.Shared.Format)
 local Zones = require(ReplicatedStorage.Shared.Zones)
 local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local PlayerData = require(script.Parent.PlayerData)
+local Bag = require(script.Parent.Bag)
 local Economy = require(script.Parent.Economy)
 local Monetization = require(script.Parent.Monetization)
 local DailyRewards = require(script.Parent.DailyRewards)
@@ -263,6 +264,7 @@ local function breakCrystal(state: CrystalState)
 				elseif state.Kind == "Boss" then Config.PetXP.Boss
 				else Config.PetXP.Crystal * math.max(1, math.round(state.SizeReward))
 			Economy.GrantXP(player, xp)
+			Bag.CrystalDrop(player, state.Kind, state.SizeReward)
 			local data = PlayerData.Get(player)
 			if state.Kind == "Boss" and data and data.Stats then
 				data.Stats.BossesDefeated = (data.Stats.BossesDefeated or 0) + 1

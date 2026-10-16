@@ -21,6 +21,7 @@ local EVENTS = {
 	"PickaxeHit", -- server -> client: model hit (or nil), crit, streak, "too far" hint
 	"PetAbility", -- server -> client: creature id, ability kind, target model (ability effects)
 	"MissionComplete", -- server -> client: mission text, reward text, next mission text
+	"ItemGained", -- server -> client: item id, count (something went into your Bag)
 }
 
 local FUNCTIONS = {
@@ -40,6 +41,7 @@ local FUNCTIONS = {
 	"EquipTitle",
 	"TogglePickaxe",
 	"UpgradePickaxe",
+	"UseItem",
 }
 
 local Remotes = {}

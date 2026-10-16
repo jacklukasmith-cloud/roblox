@@ -59,7 +59,8 @@ function Economy.GetTeamDamage(data: PlayerData.Data): number
 			end
 		end
 	end
-	return total * (1 + rally)
+	local potion = if boostActive(data, "Power") then Config.Boosts.Power else 1
+	return total * (1 + rally) * potion
 end
 
 -- Average Speed of the equipped team (how quickly they fly over to a target)
@@ -80,6 +81,9 @@ function Economy.GrantXP(player: Player, amount: number)
 	local data = PlayerData.Get(player)
 	if not data or amount <= 0 then
 		return
+	end
+	if boostActive(data, "XP") then
+		amount *= Config.Boosts.XP
 	end
 	local ups = {}
 	for uid, entry in data.Creatures do
@@ -203,6 +207,11 @@ function Economy.GetProductEssence(player: Player, crystalRewards: number): numb
 	end
 	local zone = Zones.Get(data.ZonesUnlocked) or Zones.List[1]
 	return zone.CrystalReward * crystalRewards * Economy.GetRebirthMultiplier(data)
+end
+
+function Economy.HasBoost(player: Player, name: string): boolean
+	local data = PlayerData.Get(player)
+	return data ~= nil and boostActive(data, name)
 end
 
 function Economy.AddBoost(player: Player, name: string, seconds: number)
@@ -451,6 +460,7 @@ function Economy.BuildSnapshot(player: Player)
 		Season = Seasons.Snapshot(player, data),
 		Pickaxe = (data :: any).Pickaxe or 1,
 		Missions = (data :: any).Missions,
+		Items = (data :: any).Items,
 	}
 end
 

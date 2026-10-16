@@ -13,6 +13,7 @@ local Config = require(Shared.Config)
 local Zones = require(Shared.Zones)
 local Format = require(Shared.Format)
 local Remotes = require(Shared.Remotes)
+local Items = require(Shared.Items)
 
 local PlayerData = require(script.Parent.PlayerData)
 local Economy = require(script.Parent.Economy)
@@ -120,6 +121,10 @@ local function remove()
 	end
 end
 
+function Treasures.IsActive(): boolean
+	return current ~= nil
+end
+
 -- Rewards the first player to open it
 function Treasures.Claim(player: Player): boolean
 	local treasure = current
@@ -140,12 +145,15 @@ function Treasures.Claim(player: Player): boolean
 	data.Stats.TreasuresFound = (data.Stats.TreasuresFound or 0) + 1
 	local earned = Economy.AwardCrystal(player, treasure.Zone, 1, cfg.CrystalRewards)
 	Economy.GrantXP(player, cfg.XP)
+	local Bag = require(script.Parent.Bag) :: any
+	local prize = Items.Get(Bag.Drop(player, Config.ItemDrops.Treasure, true))
 	local extra = ""
 	if rng:NextNumber() < cfg.MysticChance and Hatching.MysticHatch(player, "Lost Treasure!") then
 		extra = " + a bonus creature"
 	end
 	PlayerData.MarkChanged(player)
-	notify:FireClient(player, `You found the Lost Treasure! +{Format.Number(earned)} Essence{extra}`, GOLD)
+	local prizeText = if prize then ` + {prize.Icon} {prize.Name}` else ""
+	notify:FireClient(player, `You found the Lost Treasure! +{Format.Number(earned)} Essence{prizeText}{extra}`, GOLD)
 	local zone = Zones.Get(treasure.Zone)
 	for _, other in Players:GetPlayers() do
 		if other ~= player then

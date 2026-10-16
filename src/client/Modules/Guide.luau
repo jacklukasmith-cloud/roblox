@@ -26,7 +26,7 @@ local Sound = require(Modules.Sound)
 local Layout = require(Modules.Layout)
 
 local T = Ui.Theme
-local AUTO_GUIDE_UNTIL = 7 -- the arrow shows by itself for missions 1-7, then only when asked
+local AUTO_GUIDE_UNTIL = 8 -- the arrow shows by itself up to the Blacksmith mission, then only when asked
 
 local Guide = {}
 

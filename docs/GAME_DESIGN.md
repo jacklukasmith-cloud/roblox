@@ -28,6 +28,9 @@ Breaking works like Pet Simulator:
 weather and the Shiny Elixir raise these odds.
 
 ## Progression systems
+- **Bag and items:** potions, treats, gifts, Mystic Eggs, Treasure Maps and Boss Horns are collected
+  into the 🎒 Bag and used when the player chooses. They drop from crystals, chests, bosses and treasures
+  and come from the merchant, daily rewards, missions and milestones. They're in `src/shared/Items.luau`.
 - **Missions:** 19 guided missions in order (break crystals, hatch, use the pickaxe, unlock realms,
   upgrade the pickaxe, level and fuse creatures, fight a boss, rebirth, complete the Index). Each pays
   a reward, and an arrow in the world points the way early on. They're in `src/shared/Missions.luau`.

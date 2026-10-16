@@ -106,6 +106,10 @@ local function grant(player: Player, product)
 	elseif g.Kind == "Boost" then
 		Economy.AddBoost(player, g.Boost, g.Seconds)
 		notify:FireClient(player, `{product.Name} activated!`, Color3.fromRGB(120, 255, 120))
+	elseif g.Kind == "Item" then
+		-- into the Bag (shows the "added to your Bag" pop-up)
+		local Bag = require(script.Parent.Bag) :: any
+		Bag.Give(player, g.Item, g.Count or 1)
 	elseif g.Kind == "Creature" then
 		local Creatures = require(ReplicatedStorage.Shared.Creatures)
 		local Eggs = require(ReplicatedStorage.Shared.Eggs)

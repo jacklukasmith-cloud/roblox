@@ -17,7 +17,7 @@ local Missions = {}
 
 local missionComplete = Remotes.Event("MissionComplete")
 
-local function grant(player: Player, data: any, reward: { Essence: number?, Trophies: number?, Title: string? })
+local function grant(player: Player, data: any, reward: { [string]: any })
 	if reward.Essence then
 		Economy.AddEssence(player, reward.Essence)
 	end
@@ -26,6 +26,12 @@ local function grant(player: Player, data: any, reward: { Essence: number?, Trop
 	end
 	if reward.Title and not table.find(data.Titles, reward.Title) then
 		table.insert(data.Titles, reward.Title)
+	end
+	if reward.Items then
+		local Bag = require(script.Parent.Bag) :: any
+		for id, count in reward.Items do
+			Bag.Give(player, id, count, true)
+		end
 	end
 end
 
@@ -70,6 +76,10 @@ function Missions.Check(player: Player)
 			total.Essence += mission.Reward.Essence or 0
 			total.Trophies += mission.Reward.Trophies or 0
 			total.Title = mission.Reward.Title or total.Title
+			for id, count in mission.Reward.Items or {} do
+				total.Items = total.Items or {}
+				total.Items[id] = (total.Items[id] or 0) + count
+			end
 		end
 		total.Essence = if total.Essence > 0 then total.Essence else nil
 		total.Trophies = if total.Trophies > 0 then total.Trophies else nil

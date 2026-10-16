@@ -141,9 +141,14 @@ function Hatching.CheckMilestones(player: Player)
 		data.Trophies += trophies
 		table.insert(parts, `+{trophies} Trophies`)
 	end
-	if milestone.Boost then
-		Economy.AddBoost(player, milestone.Boost, milestone.Seconds or 600)
-		table.insert(parts, `{milestone.Boost} boost for {Format.Time(milestone.Seconds or 600)}`)
+	if milestone.Items then
+		local Bag = require(script.Parent.Bag) :: any
+		local Items = require(ReplicatedStorage.Shared.Items) :: any
+		for id, count in milestone.Items do
+			Bag.Give(player, id, count, true)
+			local item = Items.Get(id)
+			table.insert(parts, `{count}x {item and item.Name or id}`)
+		end
 	end
 	if milestone.Title and not table.find(data.Titles, milestone.Title) then
 		table.insert(data.Titles, milestone.Title)
@@ -180,21 +185,12 @@ function Hatching.BuyMerchantItem(player: Player, itemId: string): (boolean, str
 	if data.Essence < price then
 		return false, `You need {Format.Number(price)} Essence`
 	end
-	if item.Kind == "MysticHatch" then
-		local total = PlayerData.CountCreatures(data)
-		if total >= Config.MaxInventory then
-			return false, "Your creature storage is full"
-		end
-	end
 	data.Essence -= price
 	data.Merchant.Bought[itemId] = bought + 1
 	DailyRewards.Track(player, "BuyMerchant", 1)
-	if item.Kind == "Boost" then
-		Economy.AddBoost(player, item.Boost :: string, item.Seconds :: number)
-		notify:FireClient(player, `{item.Name} activated!`, Color3.fromRGB(120, 255, 160))
-	else
-		Hatching.MysticHatch(player)
-	end
+	-- everything the merchant sells goes into your Bag to use when you like
+	local Bag = require(script.Parent.Bag) :: any
+	Bag.Give(player, itemId, 1)
 	PlayerData.MarkChanged(player)
 	return true
 end

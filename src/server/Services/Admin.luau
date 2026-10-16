@@ -15,6 +15,7 @@
 	  !bigpull Phoenix Rainbow   show the big-pull banner + fireworks (Legendary+ or Rainbow)
 	  !treasure [realm]          hide a Lost Treasure now
 	  !seasonend                 end the season now on this server and hand out rewards
+	  !item LuckPotion 5         put items in your Bag (see Shared/Items; "!item all" = 5 of each)
 	  !reset confirm             wipe ALL your progress (pets, Essence, pickaxe, realms...) back to a
 	                             new save. Robux purchases and game passes are kept.
 	  !hatchtest Phoenix Rainbow play the hatch animation for any creatures (up to 3, nothing is
@@ -110,6 +111,23 @@ local function runPersonal(player: Player, command: string, args: { string }): b
 		local Pickaxe = require(script.Parent.Pickaxe) :: any
 		pcall(Pickaxe.Give, player, true)
 		notify:FireClient(player, "[TEST] Progress wiped - fresh start!", Color3.fromRGB(140, 255, 200))
+	elseif command == "item" then
+		-- "!item LuckPotion 5" (any capitalisation); "!item all" gives 5 of everything
+		local Items = require(ReplicatedStorage.Shared.Items) :: any
+		local Bag = require(script.Parent.Bag) :: any
+		local count = math.clamp(tonumber(args[2]) or 1, 1, 999)
+		local wanted = string.lower(args[1] or "")
+		local given = 0
+		for _, item in Items.List do
+			if wanted == "all" or string.lower(item.Id) == wanted then
+				Bag.Give(player, item.Id, if wanted == "all" then 5 else count, wanted == "all")
+				given += 1
+			end
+		end
+		if given == 0 then
+			notify:FireClient(player, `[TEST] Unknown item "{args[1] or ""}"`, Color3.fromRGB(255, 120, 120))
+		end
+		return true
 	elseif command == "seasonend" then
 		local Seasons = require(script.Parent.Seasons) :: any
 		local count = Seasons.EndNowForTesting()

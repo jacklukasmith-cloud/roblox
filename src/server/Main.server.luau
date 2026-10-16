@@ -29,6 +29,7 @@ local Celebrations = require(Services.Celebrations)
 local Treasures = require(Services.Treasures)
 local Pickaxe = require(Services.Pickaxe)
 local Missions = require(Services.Missions)
+local Bag = require(Services.Bag)
 
 local notify = Remotes.Event("Notify")
 local dataChanged = Remotes.Event("DataChanged")
@@ -322,6 +323,13 @@ bind("UpgradePickaxe", function(player)
 	return Pickaxe.Upgrade(player)
 end)
 
+bind("UseItem", function(player, id)
+	if type(id) ~= "string" then
+		return false
+	end
+	return Bag.Use(player, id)
+end)
+
 bind("TogglePickaxe", function(player)
 	return Pickaxe.Toggle(player)
 end)
@@ -369,6 +377,7 @@ Celebrations.Start()
 Treasures.Start()
 Pickaxe.Start()
 Missions.Start()
+Bag.Start()
 Admin.Start()
 
 print("[Mythic Tamers] Server ready")
