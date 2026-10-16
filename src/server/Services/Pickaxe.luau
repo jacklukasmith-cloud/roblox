@@ -256,6 +256,8 @@ function Pickaxe.Swing(player: Player, tool: Tool?): boolean
 		* (1 + streak.Count * cfg.StreakStep)
 	local hit, crit = Crystals.Swing(player, power, cfg.Reach, cfg.AxeBossBonus)
 	if hit then
+		data.Stats.PickaxeHits = (data.Stats.PickaxeHits or 0) + 1
+		PlayerData.MarkChanged(player)
 		streak.Count = math.min(streak.Count + 1, cfg.StreakMax)
 		streak.LastHit = now
 		pickaxeHit:FireClient(player, hit, crit, streak.Count)

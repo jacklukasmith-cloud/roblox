@@ -263,6 +263,10 @@ local function breakCrystal(state: CrystalState)
 				elseif state.Kind == "Boss" then Config.PetXP.Boss
 				else Config.PetXP.Crystal * math.max(1, math.round(state.SizeReward))
 			Economy.GrantXP(player, xp)
+			local data = PlayerData.Get(player)
+			if state.Kind == "Boss" and data and data.Stats then
+				data.Stats.BossesDefeated = (data.Stats.BossesDefeated or 0) + 1
+			end
 		end
 	end
 	-- Creatures attacking this crystal go back to their owners

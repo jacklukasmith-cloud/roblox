@@ -20,6 +20,7 @@ local EVENTS = {
 	"PetLevelUp", -- server -> client: { {Uid, Id, Variant, Level} } your creatures that levelled up
 	"PickaxeHit", -- server -> client: model hit (or nil), crit, streak, "too far" hint
 	"PetAbility", -- server -> client: creature id, ability kind, target model (ability effects)
+	"MissionComplete", -- server -> client: mission text, reward text, next mission text
 }
 
 local FUNCTIONS = {

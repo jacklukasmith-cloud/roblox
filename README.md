@@ -106,6 +106,16 @@ Testing commands (only affect you; everyone is an admin in Studio):
 | `!reset confirm` | Wipe all your progress back to a brand-new save (Robux purchases and game passes are kept) |
 | `!seasonend` | End the season now on this server and hand out the rewards (for testing) |
 
+## Missions
+
+A chain of 19 missions guides players from their first crystal to discovering all 25 species
+(`src/shared/Missions.luau`). Each one pays Essence (the last ones pay Trophies and the "Master Tamer"
+title). The **mission card** sits under the left menu and shows the mission, progress and reward.
+For the first 7 missions a glowing line and arrow point to where the mission happens. After that, tap
+the card to turn the arrow on or off; this also shows a tip. To add, remove or reorder missions, edit
+`Missions.List`. Players already past a mission keep their place, and anything they've already done
+(like realms unlocked) completes straight away.
+
 ## Daily rewards & quests
 
 The **🎁 Daily** button (top-right, key **7**) opens by itself when a reward is waiting; a red bubble on the

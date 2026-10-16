@@ -28,6 +28,9 @@ Breaking works like Pet Simulator:
 weather and the Shiny Elixir raise these odds.
 
 ## Progression systems
+- **Missions:** 19 guided missions in order (break crystals, hatch, use the pickaxe, unlock realms,
+  upgrade the pickaxe, level and fuse creatures, fight a boss, rebirth, complete the Index). Each pays
+  a reward, and an arrow in the world points the way early on. They're in `src/shared/Missions.luau`.
 - **Rebirth:** costs 25K × 3^rebirths Essence and resets Essence and zones. Gives +50% Essence per rebirth, forever. Creatures are kept.
 - **Bestiary:** +2% Essence for each species discovered (25 species = +50%).
 - **Offline earnings:** while you're away, creatures gather Essence at 50% efficiency in your best zone. The cap is 8h (24h with the *Night Shift* pass).

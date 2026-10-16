@@ -88,6 +88,9 @@ end)
 start("Menus", function()
 	Panels.Build(root)
 end)
+start("Mission card", function()
+	Guide.BuildTracker(root)
+end)
 
 -- Networking ------------------------------------------------------------------------------
 Remotes.Event("DataChanged").OnClientEvent:Connect(function(snapshot)

@@ -1,22 +1,32 @@
 --[[
-	New-player guide, shown in the world instead of the HUD: a glowing line from you to the next
-	goal and a bouncing arrow with a hint above it.
-	  1. Break a crystal (any Meadow crystal)
-	  2. Hatch an egg (the Meadow Egg)
-	  3. Unlock Ember Rift (the gate, with Essence progress)
-	Disappears for good once Ember Rift is unlocked.
+	The mission guide (missions are in Shared/Missions):
+	  - in the world: a glowing line from you to where the current mission happens, with a bouncing
+	    arrow and a hint above it. Shown automatically for the first few missions; after that, tap
+	    the mission card to turn it on or off.
+	  - on screen: a small mission card under the left menu (mission, progress, reward).
+	  - a fanfare and a message when a mission is done.
 ]]
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local TweenService = game:GetService("TweenService")
+
 local Shared = ReplicatedStorage.Shared
 local Zones = require(Shared.Zones)
 local Format = require(Shared.Format)
+local Missions = require(Shared.Missions)
+local Remotes = require(Shared.Remotes)
 
 local Modules = script.Parent
 local State = require(Modules.State)
+local Ui = require(Modules.Ui)
+local Sound = require(Modules.Sound)
+local Layout = require(Modules.Layout)
+
+local T = Ui.Theme
+local AUTO_GUIDE_UNTIL = 7 -- the arrow shows by itself for missions 1-7, then only when asked
 
 local Guide = {}
 
@@ -26,22 +36,24 @@ local function world(): Instance?
 	return workspace:FindFirstChild("World")
 end
 
--- Closest unbroken crystal in the first realm
-local function nearestCrystal(from: Vector3): BasePart?
+-- Closest unbroken crystal in any realm you've unlocked
+local function nearestCrystal(from: Vector3, zonesUnlocked: number): BasePart?
 	local w = world()
 	local zones = w and w:FindFirstChild("Zones")
-	local meadow = zones and zones:FindFirstChild(Zones.List[1].Name)
-	local folder = meadow and meadow:FindFirstChild("Crystals")
-	if not folder then
+	if not zones then
 		return nil
 	end
 	local best, bestDist = nil, math.huge
-	for _, model in folder:GetChildren() do
-		local main = model:IsA("Model") and model.PrimaryPart
-		if main and model:GetAttribute("Breakable") == "Crystal" and main.Transparency < 1 then
-			local dist = (main.Position - from).Magnitude
-			if dist < bestDist then
-				best, bestDist = main, dist
+	for i = 1, math.min(zonesUnlocked, #Zones.List) do
+		local realm = zones:FindFirstChild(Zones.List[i].Name)
+		local folder = realm and realm:FindFirstChild("Crystals")
+		for _, model in if folder then folder:GetChildren() else {} do
+			local main = model:IsA("Model") and model.PrimaryPart
+			if main and model:GetAttribute("Breakable") == "Crystal" and main.Transparency < 1 then
+				local dist = (main.Position - from).Magnitude
+				if dist < bestDist then
+					best, bestDist = main, dist
+				end
 			end
 		end
 	end
@@ -75,24 +87,84 @@ local function gateTerminal(zoneIndex: number): BasePart?
 	return nil
 end
 
--- What to do next: (hint, target position) or nil when the guide is finished
+local function blacksmithPad(): BasePart?
+	local w = world()
+	local pad = w and w:FindFirstChild("BlacksmithPad", true)
+	return if pad and pad:IsA("BasePart") then pad else nil
+end
+
+local function activeBoss(): Model?
+	local w = world()
+	local bosses = w and w:FindFirstChild("Bosses")
+	for _, boss in if bosses then bosses:GetChildren() else {} do
+		if boss:IsA("Model") then
+			return boss
+		end
+	end
+	return nil
+end
+
+-- Where the current mission happens (nil = nowhere in particular / not around right now)
+local function targetFor(target: string?, data: any, from: Vector3): Vector3?
+	local unlocked = data.ZonesUnlocked or 1
+	if target == "Crystal" then
+		local crystal = nearestCrystal(from, unlocked)
+		return crystal and crystal.Position
+	elseif target == "Egg" then
+		local zone = Zones.List[math.min(unlocked, #Zones.List)]
+		local stand = eggStand(zone.EggId)
+		return stand and stand:GetPivot().Position
+	elseif target == "Gate" then
+		local gate = gateTerminal(unlocked + 1)
+		return gate and gate.Position
+	elseif target == "Blacksmith" then
+		local pad = blacksmithPad()
+		return pad and pad.Position
+	elseif target == "Boss" then
+		local boss = activeBoss()
+		return boss and boss:GetPivot().Position
+	end
+	return nil
+end
+
+-- One line describing the mission and how far along it is
+function Guide.MissionText(data: any): string?
+	local mission, progress, goal = Missions.Current(data)
+	if not mission then
+		return nil
+	end
+	if mission.Stat == "ZonesUnlocked" then
+		local zone = Zones.List[goal]
+		if zone then
+			return `{mission.Text}: {Format.Number(data.Essence or 0)} / {Format.Number(zone.UnlockCost)}`
+		end
+	end
+	-- a counter makes sense for "do N" and "discover N", not for a pickaxe tier
+	if goal > 1 and mission.Stat ~= "Pickaxe" and mission.Stat ~= "Rebirths" then
+		return `{mission.Text} ({progress}/{goal})`
+	end
+	return mission.Text
+end
+
+-- What to do next: (hint, target position) or nil when there's nothing to point at
 function Guide.Step(data: any, from: Vector3): (string?, Vector3?)
-	if not data or (data.ZonesUnlocked or 1) >= 2 then
+	if not data then
 		return nil, nil
 	end
-	local stats = data.Stats or {}
-	if (stats.CrystalsBroken or 0) < 1 then
-		local crystal = nearestCrystal(from)
-		return "Click a crystal!", crystal and crystal.Position
+	local mission = Missions.Current(data)
+	if not mission then
+		return nil, nil
 	end
-	if (stats.CreaturesHatched or 0) < 1 then
-		local stand = eggStand(Zones.List[1].EggId)
-		return "Hatch an egg here!", stand and stand:GetPivot().Position
+	return Guide.MissionText(data), targetFor(mission.Target, data, from)
+end
+
+-- Should the arrow show right now? (on by itself early on; the mission card toggles it)
+function Guide.Showing(data: any): boolean
+	if State.ShowWay ~= nil then
+		return State.ShowWay
 	end
-	local zone = Zones.List[2]
-	local gate = gateTerminal(2)
-	return `Unlock {zone.Name}: {Format.Number(data.Essence or 0)} / {Format.Number(zone.UnlockCost)}`,
-		gate and gate.Position
+	local index = data and data.Missions and data.Missions.Index or 1
+	return index <= AUTO_GUIDE_UNTIL
 end
 
 function Guide.Start()
@@ -157,11 +229,15 @@ function Guide.Start()
 			local character = player.Character
 			local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
 			local text, target = nil, nil
-			if root then
+			if root and Guide.Showing(State.Data) then
 				text, target = Guide.Step(State.Data, root.Position)
 			end
-			if State.Data and (State.Data.ZonesUnlocked or 1) >= 2 then
-				done = true -- finished for good
+			if State.Data and not Missions.Current(State.Data) then
+				done = true -- every mission finished
+			end
+			-- hide it once you're standing at the spot
+			if target and root and (target - root.Position).Magnitude < 9 then
+				target = nil
 			end
 			if text and target and root then
 				hint.Text = text
@@ -182,6 +258,131 @@ function Guide.Start()
 		end
 		bounce:Disconnect()
 		marker:Destroy()
+	end)
+end
+
+-- The mission card under the left menu. Tap it to show/hide the arrow.
+function Guide.BuildTracker(root: Frame)
+	local holder = root:FindFirstChild("MenuHolder") :: Frame?
+	local card = Ui.glass({
+		Name = "MissionCard",
+		Position = UDim2.new(0, 0, 1, 8),
+		Size = UDim2.fromOffset(230, 54),
+		BackgroundTransparency = 0.25,
+		Visible = false,
+		Parent = holder or root,
+	}, { Ui.corner(12) })
+	local scale = Ui.new("UIScale", { Parent = card })
+	local caption = Ui.text({
+		Position = UDim2.fromOffset(10, 4),
+		Size = UDim2.new(1, -40, 0, 16),
+		Text = "",
+		Font = T.FontHeavy,
+		TextColor3 = T.Gold,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		MaxTextSize = 13,
+		Parent = card,
+	})
+	local pin = Ui.text({
+		AnchorPoint = Vector2.new(1, 0),
+		Position = UDim2.new(1, -8, 0, 3),
+		Size = UDim2.fromOffset(22, 18),
+		Text = "📍",
+		MaxTextSize = 14,
+		Parent = card,
+	})
+	local label = Ui.text({
+		Position = UDim2.fromOffset(10, 20),
+		Size = UDim2.new(1, -20, 0, 20),
+		Text = "",
+		Font = T.Font,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		MaxTextSize = 15,
+		Parent = card,
+	})
+	local barBack = Ui.new("Frame", {
+		AnchorPoint = Vector2.new(0, 1),
+		Position = UDim2.new(0, 10, 1, -6),
+		Size = UDim2.new(1, -20, 0, 5),
+		BackgroundColor3 = T.GlassLight,
+		Parent = card,
+	}, { Ui.round() })
+	local barFill = Ui.new("Frame", {
+		Size = UDim2.fromScale(0, 1),
+		BackgroundColor3 = T.Gold,
+		Parent = barBack,
+	}, { Ui.round() })
+	local button = Ui.new("TextButton", {
+		Name = "Toggle",
+		Text = "",
+		BackgroundTransparency = 1,
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 3,
+		Parent = card,
+	})
+
+	local function refresh()
+		local data = State.Data
+		local mission, progress, goal = Missions.Current(data)
+		card.Visible = data ~= nil and mission ~= nil
+		if not data or not mission then
+			return
+		end
+		local index = data.Missions and data.Missions.Index or 1
+		caption.Text = `📜 MISSION {index}/{#Missions.List}  ·  {Missions.RewardText(mission.Reward, Format.Number)}`
+		label.Text = Guide.MissionText(data) or mission.Text
+		barFill.Size = UDim2.fromScale(if goal > 0 then progress / goal else 0, 1)
+		pin.TextTransparency = if Guide.Showing(data) and mission.Target then 0 else 0.7
+		card.Size = UDim2.fromOffset(if Layout.Compact then 200 else 230, 54)
+	end
+
+	button.Activated:Connect(function()
+		local data = State.Data
+		local mission = Missions.Current(data)
+		if not mission then
+			return
+		end
+		local on = not Guide.Showing(data)
+		State.Set("ShowWay", on)
+		Sound.Play("Click", 1.2)
+		if on and mission.Hint then
+			Ui.toast(`💡 {mission.Hint}`, T.Gold)
+		elseif on and not mission.Target then
+			Ui.toast(`💡 {mission.Text}`, T.Gold)
+		end
+		refresh()
+	end)
+
+	State.Changed:Connect(function(key)
+		if key == "Data" or key == "ShowWay" then
+			refresh()
+		end
+	end)
+	Layout.Changed:Connect(refresh)
+	refresh()
+
+	-- Mission done: fanfare, a pop on the card and what's next
+	Remotes.Event("MissionComplete").OnClientEvent:Connect(function(title, reward, nextText)
+		Sound.Play("Fanfare", 1.1)
+		Ui.toast(`✅ {title}!  {reward}`, T.Gold)
+		scale.Scale = 1.15
+		TweenService:Create(scale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+		if type(nextText) == "string" then
+			task.delay(1.6, function()
+				local data = State.Data
+				local mission = Missions.Current(data)
+				Ui.toast(`📜 Next: {nextText}`, T.Text)
+				if mission and mission.Hint and Guide.Showing(data) then
+					task.delay(1.6, function()
+						Ui.toast(`💡 {mission.Hint}`, T.SubText)
+					end)
+				end
+			end)
+		else
+			task.delay(1.6, function()
+				Ui.toast("🏆 You finished every mission. You're a Master Tamer!", T.Gold)
+			end)
+		end
 	end)
 end
 

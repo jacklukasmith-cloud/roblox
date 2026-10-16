@@ -137,6 +137,7 @@ function Treasures.Claim(player: Player): boolean
 		return false
 	end
 	remove()
+	data.Stats.TreasuresFound = (data.Stats.TreasuresFound or 0) + 1
 	local earned = Economy.AwardCrystal(player, treasure.Zone, 1, cfg.CrystalRewards)
 	Economy.GrantXP(player, cfg.XP)
 	local extra = ""

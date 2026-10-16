@@ -294,6 +294,15 @@ The Rebirth and Index requirements are **S**.
 
 ---
 
+## Missions for the new content
+
+The main game now has a mission chain (`src/shared/Missions.luau`). Each new part of the expansion
+should add its own missions to the end of that list, so the missions keep guiding players into new
+content. For example:
+- "Enter the Gloomwood", "Send 10 crystals home", "Find a Stormquartz", "Reach the Deep Camp"
+- "Visit your Sanctuary", "Brew your first potion", "Build a hoverboard"
+- "Visit a friend's base", "Unlock Coral Abyss"
+
 ## 8. Build order
 
 Each step works by itself and makes the next one easier.

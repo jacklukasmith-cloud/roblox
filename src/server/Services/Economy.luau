@@ -295,6 +295,7 @@ function Economy.Fuse(player: Player, creatureId: string, variant: string): (boo
 		data.Creatures[matches[i]] = nil
 	end
 	local uid = PlayerData.NewCreature(data, creatureId, nextVariant)
+	data.Stats.Fusions = (data.Stats.Fusions or 0) + 1
 	data.Creatures[uid].Equipped = wasEquipped
 	-- the fused creature keeps the best level of the copies used
 	if bestLevel > 1 then
@@ -449,6 +450,7 @@ function Economy.BuildSnapshot(player: Player)
 		Daily = DailyRewards.Snapshot(data),
 		Season = Seasons.Snapshot(player, data),
 		Pickaxe = (data :: any).Pickaxe or 1,
+		Missions = (data :: any).Missions,
 	}
 end
 
