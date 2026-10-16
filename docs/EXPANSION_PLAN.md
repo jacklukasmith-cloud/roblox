@@ -68,6 +68,56 @@ something new.
 **The feel:** thick fog, a dark purple-green sky, twisted trees, glowing mushrooms, fireflies, creaky sounds. It's
 built from parts and textures, not Terrain. Your pets carry little lanterns.
 
+**Size: very big, so the rare crystals are a real challenge.** The plan is about **1,200 x 1,200 studs**,
+around 60 times the area of one realm. Walking straight from the gate to the centre takes about 40 seconds, but
+the paths wind, the fog hides everything past ~60 studs and there's no straight route. A trip to the Heart and
+back is a proper expedition of 5-10 minutes. The forest is built in **rings** that get darker, harder and more
+rewarding the deeper you go:
+
+```
+ +--------------------------------------------------+
+ |  EDGE (gate side)  - light fog, wide paths        |
+ |   +------------------------------------------+   |
+ |   |  MIDWOOD - thicker fog, side trails,      |   |
+ |   |  burnt clearing, frozen pond, Deep Camp   |   |
+ |   |   +----------------------------------+   |   |
+ |   |   |  DEEPWOOD - dark, cliffs + caves, |   |   |
+ |   |   |  few lanterns, Gloom fills fast   |   |   |
+ |   |   |       +------------------+       |   |   |
+ |   |   |       |  THE HEART       |       |   |   |
+ |   |   |       |  (Prismheart)    |       |   |   |
+ |   |   |       +------------------+       |   |   |
+ |   |   +----------------------------------+   |   |
+ |   +------------------------------------------+   |
+ +--------------------------------------------------+
+```
+
+| Ring | Distance from the gate | Crystals | Lanterns | Gloom meter |
+|---|---|---|---|---|
+| Edge | 0-250 studs | Moonshard | Many | Barely moves |
+| Midwood | 250-550 | Moonshard, Emberheart, Frostglass | Every ~120 studs | Slow |
+| Deepwood | 550-850 | Stormquartz, Voidstone | Few and far apart | Fast |
+| The Heart | centre | Prismheart (one at a time, moves each time it's found) | None | Very fast |
+
+**What makes it a challenge (beyond the size):**
+- **Getting lost is part of it.** Fog, look-alike trees and winding trails. There are landmarks to steer by:
+  a giant dead tree, a broken watchtower, the frozen pond, a glowing stone circle.
+- **Rare crystals are hidden**, not lying on the path: behind waterfalls, on top of cliffs you have to climb or
+  parkour to, inside caves and in hollow trees.
+- **Crystals move.** Each spot regrows on a timer and rare ones respawn at a random hidden spot, so you can't
+  just memorise one route.
+- **Map Fragments** found in the forest slowly fill in a map in your UI. Players who explore more get better at
+  finding their way.
+- **The Deep Camp** (in Midwood) is a safe spot with a lantern and a teleport point once you've found it. It
+  works like a checkpoint so deep trips don't always start from the gate.
+- **Vehicles** work in the Edge and Midwood, but the Deepwood and the Heart are too thick with roots: you walk.
+- **The Heart** has a guardian (a Gloom Treant boss) that wakes up when you mine the Prismheart.
+
+**Keeping it running smoothly on phones:** a forest this big needs care.
+- Use Roblox's **StreamingEnabled**, so each player only loads the area around them.
+- Trees are a handful of reused models, not thousands of separate parts.
+- The fog hides the distance anyway, so far-off detail doesn't need to load.
+
 **Gloom Crystals** grow hidden around the forest: behind trees, in hollows, in caves and on ledges. Each glows
 faintly and hums when you're close. You mine them with **your pickaxe**, which gives the pickaxe a big new job.
 | Crystal | Rarity | Where |
@@ -92,7 +142,9 @@ faintly and hums when you're close. You mine them with **your pickaxe**, which g
 **Later:** this is the natural home for the **very rare wild pets** idea. A wild creature could appear deep in
 the Gloomwood now and then and has to be found and tamed.
 
-Size: **L** for the area plus systems. The art can start simple and be improved with Higgsfield models.
+Size: **L+** for the area plus systems, because of how big it is. It's best built in two steps: the Edge and
+Midwood first (with lanterns, satchel and the Gloom meter), then the Deepwood and the Heart. The art can start
+simple and be improved with Higgsfield models.
 
 ---
 
@@ -253,7 +305,8 @@ Each step works by itself and makes the next one easier.
 | 3 | Leaderboard panel, weekly boards and your rank | Quick win, gives everyone something to chase | M |
 | 4 | Bigger hub with districts | Makes room for the portals, boards and vehicles below | M |
 | 5 | Sanctuary base: plots, travel, vault, Pet Habitat | Everything after this needs a base | L |
-| 6 | Gloomwood: area, Gloom Crystals, satchel, lanterns, Gloom meter | The main new adventure | L |
+| 6a | Gloomwood part 1: Edge and Midwood, Gloom Crystals, satchel, lanterns, Gloom meter, Deep Camp | The main new adventure | L |
+| 6b | Gloomwood part 2: Deepwood (cliffs, caves), the Heart, Prismheart, Gloom Treant, Map Fragments | Where the hardest, rarest crystals are | L |
 | 7 | Crafting: potions and teleport crystals | Gives forest crystals a use | M |
 | 8 | Vehicles: hoverboards, then karts | Fun to show off, and good with friends | M |
 | 9 | Realms 5 and 6, plus Rebirth requirements | Fixes "I finished it" for top players | M each |
