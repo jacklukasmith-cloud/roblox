@@ -1792,30 +1792,6 @@ local function groundTexture(floor: BasePart, key: any)
 end
 
 -- Hub districts ----------------------------------------------------------------------------------
--- A floating sign on two posts, e.g. "Market Row"
-local function districtSign(parent: Instance, position: Vector3, text: string, color: Color3)
-	for _, side in { -1, 1 } do
-		column(parent, position + Vector3.new(side * 5, 0, 0), 9, 0.8, rgb(60, 45, 80), Enum.Material.Wood)
-	end
-	local board = part({
-		Name = "DistrictSign",
-		Size = Vector3.new(11, 2.6, 0.6),
-		Position = position + Vector3.new(0, 8.4, 0),
-		Color = rgb(45, 32, 70),
-		Material = Enum.Material.WoodPlanks,
-		Parent = parent,
-	})
-	part({
-		Size = Vector3.new(11.4, 0.25, 0.8),
-		Position = position + Vector3.new(0, 9.85, 0),
-		Color = color,
-		Material = Enum.Material.Neon,
-		Parent = parent,
-	})
-	local gui = billboard(board, UDim2.fromOffset(240, 46), Vector3.zero, 140)
-	label(gui, { Text = text, TextColor3 = color })
-end
-
 -- A big archway for a part of the game that's coming soon (the Gloomwood, your Sanctuary)
 local function portal(parent: Instance, position: Vector3, title: string, color: Color3)
 	local folder = Instance.new("Model")
@@ -1892,9 +1868,6 @@ local function buildDistricts(hub: Instance)
 	})
 
 	-- west wing: the Merchant and the Blacksmith (no sign)
-
-	-- House Quarter (east): the three House statues
-	districtSign(hub, sp(55, 0, -36), "🏛️ House Quarter", rgb(190, 160, 255))
 
 	-- Portal Plaza (back): the ways to the Gloomwood and your Sanctuary (coming soon) + a fountain
 	-- just floating text over the walkway (no posts or board)
