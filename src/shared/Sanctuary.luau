@@ -7,9 +7,27 @@
 local Sanctuary = {}
 
 Sanctuary.Center = Vector3.new(0, 260, -460) -- middle of the ring of islands
-Sanctuary.RingRadius = 270
-Sanctuary.Slots = 12 -- islands per server (one per player)
+Sanctuary.RingRadius = 200
+Sanctuary.Slots = 8 -- islands per server (one per player; set the place's Max Players to 8 to match)
 Sanctuary.MaxLevel = 10
+
+-- Upgrading is meant to be a long goal: each level costs 10x the one before
+Sanctuary.BaseCost = 2000 -- Essence for level 2
+Sanctuary.CostGrowth = 10
+Sanctuary.EssencePerLevel = 0.02 -- +2% Essence for every level above 1 (+18% at level 10)
+
+-- Essence to go from level to level + 1 (nil at max level)
+function Sanctuary.UpgradeCost(level: number): number?
+	if level >= Sanctuary.MaxLevel then
+		return nil
+	end
+	return Sanctuary.BaseCost * Sanctuary.CostGrowth ^ (math.max(level, 1) - 1)
+end
+
+-- Essence multiplier from the island's level
+function Sanctuary.EssenceBonus(level: number): number
+	return 1 + Sanctuary.EssencePerLevel * (math.clamp(level, 1, Sanctuary.MaxLevel) - 1)
+end
 
 -- Island size by level (studs, radius of the grass top)
 function Sanctuary.Radius(level: number): number

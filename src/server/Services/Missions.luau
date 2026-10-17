@@ -42,7 +42,7 @@ function Missions.Check(player: Player)
 		return
 	end
 	local state = data.Missions
-	local changed = false
+	local changed = MissionList.Sync(state)
 	local done: { any } = {}
 	for _ = 1, #MissionList.List do
 		local mission = MissionList.List[state.Index]
@@ -62,6 +62,7 @@ function Missions.Check(player: Player)
 		table.insert(done, mission)
 		state.Index += 1
 		state.Baseline = nil
+		state.Id = MissionList.List[state.Index] and MissionList.List[state.Index].Id
 		changed = true
 	end
 	if changed then

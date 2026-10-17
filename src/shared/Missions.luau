@@ -6,7 +6,11 @@
 	  "Count": do it N more times from when the mission started (the start value is stored as
 	           Missions.Baseline in the save, so earlier progress doesn't count)
 	  "Reach": get the stat up to N (counts what you already have)
-	Target: where the guide arrow points (Crystal, Egg, Gate, Blacksmith, Boss, or nil for none)
+	Target: where the guide arrow points (Crystal, Egg, Gate, Blacksmith, Boss, Sanctuary (the hub
+	        portal), Upgrade (your island's Upgrade Stone), or nil for none)
+
+	The save keeps the current mission's Id too, so missions can be added anywhere in the list
+	later without moving anyone to the wrong one (Missions.Sync).
 	Reward: { Essence = n } / { Trophies = n } / { Title = "..." } / { Items = { [item id] = count } }
 	        (any mix; items go into the Bag)
 ]]
@@ -78,6 +82,16 @@ Missions.List = {
 		Reward = { Essence = 100, Items = { PetTreat = 3, MysteryGift = 1 } },
 	},
 	{
+		Id = "VisitSanctuary",
+		Text = "Visit your Sanctuary",
+		Stat = "SanctuaryVisits",
+		Kind = "Count",
+		Goal = 1,
+		Target = "Sanctuary",
+		Hint = "Step into the Sanctuary portal in the hub, or press 🏠",
+		Reward = { Essence = 120 },
+	},
+	{
 		Id = "Break25",
 		Text = "Break 25 crystals",
 		Stat = "CrystalsBroken",
@@ -85,6 +99,15 @@ Missions.List = {
 		Goal = 25,
 		Target = "Crystal",
 		Reward = { Essence = 150 },
+	},
+	{
+		Id = "Code1",
+		Text = "Redeem a code",
+		Stat = "CodesRedeemed",
+		Kind = "Reach",
+		Goal = 1,
+		Hint = "Open ⚙️ Settings and type the code RELEASE",
+		Reward = { Essence = 200 },
 	},
 	{
 		Id = "Zone2",
@@ -107,6 +130,15 @@ Missions.List = {
 		Reward = { Essence = 600 },
 	},
 	{
+		Id = "Boards1",
+		Text = "Check the Leaderboards",
+		Stat = "BoardsViewed",
+		Kind = "Reach",
+		Goal = 1,
+		Hint = "Tap 🏆 Top in the corner to see the best players",
+		Reward = { Essence = 800 },
+	},
+	{
 		Id = "Hatch5",
 		Text = "Hatch 5 eggs",
 		Stat = "CreaturesHatched",
@@ -114,6 +146,16 @@ Missions.List = {
 		Goal = 5,
 		Target = "Egg",
 		Reward = { Essence = 1000, Items = { EssencePotion = 1 } },
+	},
+	{
+		Id = "Sanctuary2",
+		Text = "Upgrade your Sanctuary to level 2",
+		Stat = "SanctuaryLevel",
+		Kind = "Reach",
+		Goal = 2,
+		Target = "Upgrade",
+		Hint = "Go to your island and hold E at the glowing Upgrade Stone",
+		Reward = { Essence = 2500, Items = { PetTreat = 3 } },
 	},
 	{
 		Id = "Index8",
@@ -161,6 +203,16 @@ Missions.List = {
 		Goal = 1,
 		Hint = "Open Pets, tap a creature you have lots of copies of, then Fuse",
 		Reward = { Essence = 20000 },
+	},
+	{
+		Id = "Sanctuary3",
+		Text = "Upgrade your Sanctuary to level 3",
+		Stat = "SanctuaryLevel",
+		Kind = "Reach",
+		Goal = 3,
+		Target = "Upgrade",
+		Hint = "Every level makes your island bigger and gives +2% Essence",
+		Reward = { Essence = 30000 },
 	},
 	{
 		Id = "Boss1",
@@ -236,6 +288,8 @@ function Missions.Value(data: any, stat: string): number
 			end
 		end
 		return n
+	elseif stat == "SanctuaryLevel" then
+		return data.Sanctuary and data.Sanctuary.Level or 1
 	elseif stat == "BestLevel" then
 		local best = 1
 		for _, entry in data.Creatures or {} do
@@ -244,6 +298,65 @@ function Missions.Value(data: any, stat: string): number
 		return best
 	end
 	return tonumber(stats[stat]) or 0
+end
+
+-- The order before missions were saved by Id (saves from then only have Index)
+local LEGACY = {
+	"Break3",
+	"Hatch1",
+	"Pickaxe5",
+	"Hatch3",
+	"UseItem",
+	"Break25",
+	"Zone2",
+	"Pickaxe2",
+	"Hatch5",
+	"Index8",
+	"Level5",
+	"Break150",
+	"Zone3",
+	"Fuse1",
+	"Boss1",
+	"Pickaxe4",
+	"Index15",
+	"Zone4",
+	"Rebirth1",
+	"Index25",
+}
+
+local function indexOf(id: string): number?
+	for i, mission in Missions.List do
+		if mission.Id == id then
+			return i
+		end
+	end
+	return nil
+end
+
+-- Puts the save's place in the chain back on the right mission after the list changed (new
+-- missions added before it). Returns true if it changed anything.
+function Missions.Sync(state: any): boolean
+	local before, beforeId = state.Index, state.Id
+	if not state.Id then
+		if (state.Index or 1) > #LEGACY then
+			-- finished the old chain: carry on with anything added after it
+			state.Index = (indexOf(LEGACY[#LEGACY]) or #Missions.List) + 1
+		else
+			state.Id = LEGACY[state.Index or 1]
+		end
+	end
+	if state.Id then
+		local i = indexOf(state.Id)
+		if i then
+			state.Index = i
+		else
+			-- that mission was removed: start whatever is in its place now
+			state.Baseline = nil
+		end
+	end
+	local current = Missions.List[state.Index]
+	state.Id = current and current.Id
+	return state.Index ~= before or state.Id ~= beforeId
 end
 
 -- The current mission (nil = all done), how far along it is, and the goal

@@ -17,6 +17,7 @@ local Shared = ReplicatedStorage.Shared
 local Zones = require(Shared.Zones)
 local Format = require(Shared.Format)
 local Missions = require(Shared.Missions)
+local Sanctuary = require(Shared.Sanctuary)
 local Remotes = require(Shared.Remotes)
 
 local Modules = script.Parent
@@ -26,7 +27,7 @@ local Sound = require(Modules.Sound)
 local Layout = require(Modules.Layout)
 
 local T = Ui.Theme
-local AUTO_GUIDE_UNTIL = 8 -- the arrow shows by itself up to the Blacksmith mission, then only when asked
+local AUTO_GUIDE_UNTIL = "Pickaxe2" -- the arrow shows by itself up to the Blacksmith mission, then only when asked
 
 local Guide = {}
 
@@ -104,6 +105,29 @@ local function activeBoss(): Model?
 	return nil
 end
 
+-- The hub's Sanctuary portal
+local function sanctuaryPortal(): BasePart?
+	local w = world()
+	local hub = w and w:FindFirstChild("Hub")
+	for _, d in if hub then hub:GetDescendants() else {} do
+		if d:IsA("BasePart") and d:GetAttribute("PortalTo") == "Sanctuary" then
+			return d
+		end
+	end
+	return nil
+end
+
+local function upgradeStone(): BasePart?
+	local islands = workspace:FindFirstChild("Sanctuaries")
+	local mine = islands and islands:FindFirstChild(`Sanctuary_{Players.LocalPlayer.UserId}`)
+	local stone = mine and mine:FindFirstChild("UpgradeStone")
+	return if stone and stone:IsA("BasePart") then stone else nil
+end
+
+local function inTheSky(position: Vector3): boolean
+	return position.Y > Sanctuary.Center.Y - 60
+end
+
 -- Where the current mission happens (nil = nowhere in particular / not around right now)
 local function targetFor(target: string?, data: any, from: Vector3): Vector3?
 	local unlocked = data.ZonesUnlocked or 1
@@ -120,6 +144,17 @@ local function targetFor(target: string?, data: any, from: Vector3): Vector3?
 	elseif target == "Blacksmith" then
 		local pad = blacksmithPad()
 		return pad and pad.Position
+	elseif target == "Sanctuary" then
+		if inTheSky(from) then
+			return nil
+		end
+		local portal = sanctuaryPortal()
+		return portal and portal.Position
+	elseif target == "Upgrade" then
+		-- on an island: the Upgrade Stone; in the hub: the way up
+		local stone = if inTheSky(from) then upgradeStone() else nil
+		local portal = if stone then nil else sanctuaryPortal()
+		return if stone then stone.Position elseif portal then portal.Position else nil
 	elseif target == "Boss" then
 		local boss = activeBoss()
 		return boss and boss:GetPivot().Position
@@ -139,8 +174,8 @@ function Guide.MissionText(data: any): string?
 			return `{mission.Text}: {Format.Number(data.Essence or 0)} / {Format.Number(zone.UnlockCost)}`
 		end
 	end
-	-- a counter makes sense for "do N" and "discover N", not for a pickaxe tier
-	if goal > 1 and mission.Stat ~= "Pickaxe" and mission.Stat ~= "Rebirths" then
+	-- a counter makes sense for "do N" and "discover N", not for a pickaxe tier or island level
+	if goal > 1 and mission.Stat ~= "Pickaxe" and mission.Stat ~= "Rebirths" and mission.Stat ~= "SanctuaryLevel" then
 		return `{mission.Text} ({progress}/{goal})`
 	end
 	return mission.Text
@@ -164,7 +199,12 @@ function Guide.Showing(data: any): boolean
 		return State.ShowWay
 	end
 	local index = data and data.Missions and data.Missions.Index or 1
-	return index <= AUTO_GUIDE_UNTIL
+	for i, mission in Missions.List do
+		if mission.Id == AUTO_GUIDE_UNTIL then
+			return index <= i
+		end
+	end
+	return false
 end
 
 function Guide.Start()

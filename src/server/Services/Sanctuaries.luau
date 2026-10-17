@@ -3,7 +3,8 @@
 	when their data loads and removed when they leave.
 
 	Sanctuaries.Travel(player, "Home" | "Hub" | userId) moves you to your island, back to the hub, or
-	to someone else's island. The Sanctuary portal in the hub's Portal Plaza takes you home, the
+	to someone else's island. Sanctuaries.Upgrade(player) spends Essence on the next level (the
+	Upgrade Stone on your island): the island grows and you earn a little more Essence. The Sanctuary portal in the hub's Portal Plaza takes you home, the
 	glowing circle on each island takes you back, and anyone who falls off is put back on.
 ]]
 
@@ -13,6 +14,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage.Shared
 local Sanctuary = require(Shared.Sanctuary)
 local Remotes = require(Shared.Remotes)
+
+local Format = require(Shared.Format)
 
 local PlayerData = require(script.Parent.PlayerData)
 local WorldBuilder = require(script.Parent.WorldBuilder)
@@ -27,6 +30,7 @@ local owner: { [number]: Player } = {}
 local islands: { [Player]: Model } = {}
 local lastTravel: { [Player]: number } = {}
 local TRAVEL_COOLDOWN = 1.5
+local lastUpgrade: { [Player]: number } = {}
 
 local function folder(): Folder
 	local f = workspace:FindFirstChild("Sanctuaries")
@@ -193,6 +197,37 @@ local function build(player: Player, slot: number): Model
 	local back =
 		helpers.ShopPad(model, "HubPad", c + Vector3.new(0, 1.6, r - 8), rgb(140, 220, 255), "🌀 Back to the hub")
 	back:SetAttribute("Travel", "Hub")
+	-- the Upgrade Stone: hold E on your own island to level it up
+	local stone = part({
+		Name = "UpgradeStone",
+		Size = Vector3.new(3, 5, 3),
+		CFrame = CFrame.new(c + Vector3.new(0, 4, -10)) * CFrame.Angles(0, math.pi / 4, 0),
+		Color = rgb(150, 120, 255),
+		Material = Enum.Material.Neon,
+		Transparency = 0.1,
+		Parent = model,
+	})
+	local cost = Sanctuary.UpgradeCost(level)
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.Name = "UpgradePrompt"
+	prompt.ObjectText = "Upgrade Stone"
+	prompt.ActionText = if cost then `Upgrade (💎 {Format.Number(cost)})` else "Max level!"
+	prompt.Enabled = cost ~= nil
+	prompt.HoldDuration = 0.8
+	prompt.MaxActivationDistance = 12
+	prompt.RequiresLineOfSight = false
+	prompt.Parent = stone
+	local info = helpers.Billboard(stone, UDim2.fromOffset(240, 50), Vector3.new(0, 5, 0), 70)
+	helpers.Label(info, {
+		Text = if cost then `⬆️ Level {level + 1}: 💎 {Format.Number(cost)}` else "⭐ Max level",
+		Size = UDim2.fromScale(1, 0.6),
+	})
+	helpers.Label(info, {
+		Text = `+{math.floor((Sanctuary.EssenceBonus(level) - 1) * 100 + 0.5)}% Essence`,
+		Position = UDim2.fromScale(0, 0.6),
+		Size = UDim2.fromScale(1, 0.4),
+		TextColor3 = rgb(140, 230, 255),
+	})
 	-- where the stations will go (built in the next steps)
 	for _, station in Sanctuary.Stations do
 		local spot = c + Vector3.new(station.Spot.X * r, 1.75, station.Spot.Y * r)
@@ -247,10 +282,52 @@ function Sanctuaries.Remove(player: Player)
 		islands[player] = nil
 	end
 	lastTravel[player] = nil
+	lastUpgrade[player] = nil
 end
 
 function Sanctuaries.IslandOf(player: Player): Model?
 	return islands[player]
+end
+
+-- Spends Essence on the next island level. Returns ok, message.
+function Sanctuaries.Upgrade(player: Player): (boolean, string?)
+	local data = PlayerData.Get(player) :: any
+	if not data then
+		return false, nil
+	end
+	local now = os.clock()
+	if now - (lastUpgrade[player] or 0) < 1 then
+		return false, nil
+	end
+	lastUpgrade[player] = now
+	data.Sanctuary = data.Sanctuary or { Level = 1 }
+	local level = math.clamp(data.Sanctuary.Level or 1, 1, Sanctuary.MaxLevel)
+	local cost = Sanctuary.UpgradeCost(level)
+	if not cost then
+		return false, "Your Sanctuary is already max level!"
+	end
+	if data.Essence < cost then
+		return false, `You need 💎 {Format.Number(cost - data.Essence)} more Essence`
+	end
+	data.Essence -= cost
+	data.Sanctuary.Level = level + 1
+	PlayerData.MarkChanged(player)
+	-- rebuild it bigger: the new island goes up before the old one comes down
+	local slot = slotOf[player]
+	local old = islands[player]
+	if slot then
+		local ok, model = pcall(build, player, slot)
+		if ok then
+			islands[player] = model
+			if old then
+				old:Destroy()
+			end
+		else
+			warn("[Sanctuaries] " .. tostring(model))
+		end
+	end
+	local bonus = math.floor((Sanctuary.EssenceBonus(level + 1) - 1) * 100 + 0.5)
+	return true, `🏝️ Sanctuary level {level + 1}! Now +{bonus}% Essence`
 end
 
 local function teleport(player: Player, position: Vector3): boolean
@@ -300,7 +377,13 @@ function Sanctuaries.Travel(player: Player, destination: any): (boolean, string?
 		return false, nil
 	end
 	lastTravel[player] = now
-	return teleport(player, pad.Position), nil
+	local ok = teleport(player, pad.Position)
+	local data = PlayerData.Get(player) :: any
+	if ok and data then
+		data.Stats.SanctuaryVisits = (data.Stats.SanctuaryVisits or 0) + 1
+		PlayerData.MarkChanged(player)
+	end
+	return ok, nil
 end
 
 -- Which island (if any) a position is above
@@ -318,6 +401,23 @@ local function islandUnder(position: Vector3): Model?
 end
 
 function Sanctuaries.Start()
+	-- the Upgrade Stone (only works on your own island)
+	folder().DescendantAdded:Connect(function(d)
+		if d:IsA("ProximityPrompt") and d.Name == "UpgradePrompt" then
+			d.Triggered:Connect(function(player)
+				local model = d:FindFirstAncestorOfClass("Model")
+				if not model or model:GetAttribute("OwnerId") ~= player.UserId then
+					notify:FireClient(player, "Only the owner can upgrade this Sanctuary", rgb(255, 170, 120))
+					return
+				end
+				local ok, message = Sanctuaries.Upgrade(player)
+				if message then
+					notify:FireClient(player, message, if ok then rgb(255, 210, 120) else rgb(255, 120, 120))
+				end
+			end)
+		end
+	end)
+
 	PlayerData.Loaded:Connect(function(player)
 		Sanctuaries.Assign(player)
 	end)

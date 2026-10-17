@@ -10,6 +10,7 @@ local Config = require(Shared.Config)
 local Format = require(Shared.Format)
 local Remotes = require(Shared.Remotes)
 local Eggs = require(Shared.Eggs)
+local WhatsNew = require(Shared.WhatsNew)
 
 local Services = script.Parent.Services
 local PlayerData = require(Services.PlayerData)
@@ -335,10 +336,23 @@ bind("UseItem", function(player, id)
 end)
 
 Remotes.Function("GetBoard").OnServerInvoke = function(player, boardId, scope)
+	local data = PlayerData.Get(player) :: any
+	if data then
+		data.Stats.BoardsViewed = (data.Stats.BoardsViewed or 0) + 1
+		PlayerData.MarkChanged(player)
+	end
 	return Leaderboards.GetBoard(player, boardId, scope)
 end
 
 bind("Travel", Sanctuaries.Travel)
+bind("SeenWhatsNew", function(player)
+	local data = PlayerData.Get(player) :: any
+	if data.SeenUpdate ~= WhatsNew.Version then
+		data.SeenUpdate = WhatsNew.Version
+		PlayerData.MarkChanged(player)
+	end
+	return true
+end)
 bind("TradeRequest", Trading.Request)
 bind("TradeRespond", Trading.Respond)
 bind("TradeSetPet", Trading.SetPet)

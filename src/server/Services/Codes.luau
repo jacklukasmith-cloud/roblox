@@ -64,6 +64,7 @@ function Codes.Redeem(player: Player, text: any): (boolean, string?)
 		return false, "You've already used that code"
 	end
 	data.RedeemedCodes[key] = true
+	data.Stats.CodesRedeemed = (data.Stats.CodesRedeemed or 0) + 1
 	local parts = {}
 	local rewards = code.Rewards
 	if rewards.Essence then

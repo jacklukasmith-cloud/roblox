@@ -97,6 +97,9 @@ end)
 start("Home button", function()
 	require(Modules.HomeButton).Build(root)
 end)
+start("What's New", function()
+	require(Modules.WhatsNewPanel).Build(root)
+end)
 
 -- Networking ------------------------------------------------------------------------------
 Remotes.Event("DataChanged").OnClientEvent:Connect(function(snapshot)

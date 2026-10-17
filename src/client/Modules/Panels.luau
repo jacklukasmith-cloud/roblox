@@ -1500,6 +1500,15 @@ local function buildSettings(screen: Frame)
 		Variant = "Gold",
 		Parent = content,
 	}, require(script.Parent.Invite).Prompt)
+	Ui.button({
+		LayoutOrder = 7,
+		Size = UDim2.new(1, 0, 0, 44),
+		Text = "📰 What's New",
+		BackgroundColor3 = T.Card,
+		Parent = content,
+	}, function()
+		Ui.toggle("WhatsNew", true)
+	end)
 	-- Codes: type one in for free rewards
 	local codeRow = Ui.new("Frame", {
 		LayoutOrder = 5,

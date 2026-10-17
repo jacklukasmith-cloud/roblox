@@ -13,6 +13,7 @@ local PetStats = require(Shared.PetStats)
 local Zones = require(Shared.Zones)
 local Format = require(Shared.Format)
 local Remotes = require(Shared.Remotes)
+local Sanctuary = require(Shared.Sanctuary)
 
 local PlayerData = require(script.Parent.PlayerData)
 local Monetization = require(script.Parent.Monetization)
@@ -143,6 +144,7 @@ function Economy.GetEssenceMultiplier(player: Player, data: PlayerData.Data): nu
 	end
 	m *= WorldService.GetWeatherDef().Essence
 	m *= FriendBoost.Multiplier(player)
+	m *= Sanctuary.EssenceBonus((data :: any).Sanctuary and (data :: any).Sanctuary.Level or 1)
 	if Surge.IsActive() then
 		m *= Config.Surge.EssenceMultiplier
 	end
@@ -465,6 +467,7 @@ function Economy.BuildSnapshot(player: Player)
 		Items = (data :: any).Items,
 		FriendBoost = FriendBoost.Count(player),
 		Sanctuary = (data :: any).Sanctuary,
+		SeenUpdate = (data :: any).SeenUpdate,
 	}
 end
 

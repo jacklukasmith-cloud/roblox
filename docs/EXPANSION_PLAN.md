@@ -347,7 +347,8 @@ The main game now has a mission chain (`src/shared/Missions.luau`). Each new par
 should add its own missions to the end of that list, so the missions keep guiding players into new
 content. For example:
 - "Enter the Gloomwood", "Send 10 crystals home", "Find a Stormquartz", "Reach the Deep Camp"
-- "Visit your Sanctuary", "Brew your first potion", "Build a hoverboard"
+- ~~"Visit your Sanctuary"~~ (done, with "Redeem a code", "Check the Leaderboards" and island levels 2 and 3),
+  "Brew your first potion", "Build a hoverboard"
 - "Visit a friend's base", "Unlock Coral Abyss"
 
 ## 8. Build order
@@ -360,7 +361,7 @@ Each step works by itself and makes the next one easier.
 | 2 | ~~Friend Boost (+5% per friend) and the invite button~~ (done) | Quick, and helps the game grow straight away | S |
 | 3 | ~~Leaderboard panel, weekly boards and your rank~~ (done) | Quick win, gives everyone something to chase | M |
 | 4 | ~~Bigger hub with districts~~ (done: west wing for the Merchant and Blacksmith, House Quarter, Portal Plaza) | Makes room for the portals, boards and vehicles below | M |
-| 5 | Sanctuary base: plots, travel, vault, Pet Habitat | Everything after this needs a base | L |
+| 5 | Sanctuary base: ~~islands and travel~~ (done), ~~levels 1-10~~ (done), vault, Pet Habitat | Everything after this needs a base | L |
 | 6a | Gloomwood part 1: Edge and Midwood, Gloom Crystals, satchel, lanterns, Gloom meter, Deep Camp | The main new adventure | L |
 | 6b | Gloomwood part 2: Deepwood (cliffs, caves), the Heart, Prismheart, Gloom Treant, Map Fragments | Where the hardest, rarest crystals are | L |
 | 7 | Crafting: potions and teleport crystals | Gives forest crystals a use | M |
