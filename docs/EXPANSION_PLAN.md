@@ -334,7 +334,7 @@ Each step works by itself and makes the next one easier.
 | 1 | ~~`!nopasses` test command~~ (done) plus a difficulty check | So we can tell how easy the game really is before adding more | S |
 | 2 | ~~Friend Boost (+5% per friend) and the invite button~~ (done) | Quick, and helps the game grow straight away | S |
 | 3 | ~~Leaderboard panel, weekly boards and your rank~~ (done) | Quick win, gives everyone something to chase | M |
-| 4 | ~~Bigger hub with districts~~ (done: Market Row, House Quarter, Portal Plaza) | Makes room for the portals, boards and vehicles below | M |
+| 4 | ~~Bigger hub with districts~~ (done: west wing for the Merchant and Blacksmith, House Quarter, Portal Plaza) | Makes room for the portals, boards and vehicles below | M |
 | 5 | Sanctuary base: plots, travel, vault, Pet Habitat | Everything after this needs a base | L |
 | 6a | Gloomwood part 1: Edge and Midwood, Gloom Crystals, satchel, lanterns, Gloom meter, Deep Camp | The main new adventure | L |
 | 6b | Gloomwood part 2: Deepwood (cliffs, caves), the Heart, Prismheart, Gloom Treant, Map Fragments | Where the hardest, rarest crystals are | L |

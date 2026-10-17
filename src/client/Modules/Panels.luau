@@ -1578,18 +1578,6 @@ function Panels.Build(screen: Frame)
 	BagPanel.Build(screen)
 	TradePanel.Build(screen, creatureIcon)
 	LeaderboardPanel.Build(screen)
-
-	-- The merchant stall in the hub opens the panel
-	task.spawn(function()
-		local world = workspace:WaitForChild("World")
-		local stall = world:WaitForChild("Hub"):WaitForChild("Merchant")
-		local prompt = stall:WaitForChild("MerchantPrompt") :: ProximityPrompt
-		game:GetService("ProximityPromptService").PromptTriggered:Connect(function(triggered)
-			if triggered == prompt then
-				Ui.toggle("Merchant", true)
-			end
-		end)
-	end)
 end
 
 return Panels

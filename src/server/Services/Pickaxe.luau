@@ -423,37 +423,13 @@ local function buildAnvil(): BasePart?
 	local sign = helpers.Billboard(top, UDim2.fromOffset(240, 56), Vector3.new(0, 7.5, 0), 120)
 	helpers.Label(sign, { Text = "⛏ Blacksmith\nUpgrade your pickaxe", TextColor3 = Color3.fromRGB(255, 200, 120) })
 	-- the shop circle: walk into it and the Blacksmith window opens (client: BlacksmithPanel)
-	local padCenter = p + Vector3.new(8, 0, 0)
-	local ring = newPart({
-		Name = "BlacksmithPad",
-		Anchored = true,
-		Shape = Enum.PartType.Cylinder,
-		Size = Vector3.new(0.2, 9, 9),
-		CFrame = CFrame.new(padCenter + Vector3.new(0, 0.12, 0)) * CFrame.Angles(0, 0, math.pi / 2),
-		Color = Color3.fromRGB(255, 170, 80),
-		Material = Enum.Material.Neon,
-		Transparency = 0.25,
-		CanCollide = false,
-		CanQuery = false,
-		Parent = model,
-	})
-	newPart({
-		Name = "PadInner",
-		Anchored = true,
-		Shape = Enum.PartType.Cylinder,
-		Size = Vector3.new(0.22, 7.6, 7.6),
-		CFrame = CFrame.new(padCenter + Vector3.new(0, 0.13, 0)) * CFrame.Angles(0, 0, math.pi / 2),
-		Color = Color3.fromRGB(60, 40, 30),
-		Material = Enum.Material.SmoothPlastic,
-		Transparency = 0.15,
-		CanCollide = false,
-		CanQuery = false,
-		Parent = model,
-	})
-	-- the sign's offset is in the ring's own space, and the ring is a cylinder turned on its side
-	-- (its X axis points up), so "4 studs up" is +X here, not +Y
-	local padSign = helpers.Billboard(ring, UDim2.fromOffset(200, 34), Vector3.new(4, 0, 0), 60)
-	helpers.Label(padSign, { Text = "⛏ Step in to shop", TextColor3 = Color3.fromRGB(255, 200, 120) })
+	helpers.ShopPad(
+		model,
+		"BlacksmithPad",
+		p + Vector3.new(8, 0, 0),
+		Color3.fromRGB(255, 170, 80),
+		"⛏ Step in to shop"
+	)
 	model.Parent = hub
 	return top
 end

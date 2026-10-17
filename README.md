@@ -112,7 +112,7 @@ Testing commands (only affect you; everyone is an admin in Studio):
 
 The hub is about twice as big as before and split into districts:
 - **Centre:** the spawn, the plaza with the Mana Surge obelisk, the leaderboards and the Champion Egg.
-- **Market Row** (west wing): the Wandering Merchant, the Blacksmith's anvil and shop circle, and market stalls.
+- **West wing:** the Wandering Merchant and the Blacksmith. Each has a glowing **shop circle**: walk in and its window opens, walk out and it closes.
 - **House Quarter** (east wing): the three House statues.
 - **Portal Plaza** (behind the leaderboards): a fountain and two *coming soon* portals, for the Gloomwood and
   your Sanctuary.

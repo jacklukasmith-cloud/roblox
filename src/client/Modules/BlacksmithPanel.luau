@@ -1,6 +1,6 @@
 --[[
 	The Blacksmith shop: opens when you walk into the glowing circle next to the hub anvil and
-	closes when you step out. Lists every pickaxe tier (owned / yours / buy the next one / locked)
+	closes when you step out (Modules/ShopPads). Lists every pickaxe tier (owned / yours / buy the next one / locked)
 	and features the Golden Pickaxe game pass.
 ]]
 
@@ -21,7 +21,6 @@ local Sound = require(Modules.Sound)
 local T = Ui.Theme
 local cfg = Config.Pickaxe
 local GOLD = Color3.fromRGB(255, 205, 60)
-local PAD_RADIUS = 4.5
 
 local BlacksmithPanel = {}
 
@@ -196,29 +195,6 @@ function BlacksmithPanel.Build(screen: Frame)
 	State.Changed:Connect(function(key)
 		if key == "Data" and Ui.isOpen("Blacksmith") then
 			render()
-		end
-	end)
-
-	-- Walk into the circle to open, step out to close
-	local inside = false
-	task.spawn(function()
-		while true do
-			task.wait(0.2)
-			local character = player.Character
-			local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
-			local world = workspace:FindFirstChild("World")
-			local pad = world and world:FindFirstChild("BlacksmithPad", true) :: BasePart?
-			local now = false
-			if root and pad then
-				local offset = root.Position - pad.Position
-				now = Vector2.new(offset.X, offset.Z).Magnitude <= PAD_RADIUS and math.abs(offset.Y) < 8
-			end
-			if now and not inside then
-				Ui.toggle("Blacksmith", true)
-			elseif inside and not now and Ui.isOpen("Blacksmith") then
-				Ui.toggle("Blacksmith", false)
-			end
-			inside = now
 		end
 	end)
 end

@@ -91,6 +91,9 @@ end)
 start("Mission card", function()
 	Guide.BuildTracker(root)
 end)
+start("Shop circles", function()
+	require(Modules.ShopPads).Start()
+end)
 
 -- Networking ------------------------------------------------------------------------------
 Remotes.Event("DataChanged").OnClientEvent:Connect(function(snapshot)

@@ -1060,6 +1060,40 @@ local function makeHouse(parent: Instance, houseId: string, position: Vector3, y
 	return platform
 end
 
+-- A glowing circle on the ground: walk into it and a shop window opens (client: Modules/ShopPads).
+-- Used by the Blacksmith and the Wandering Merchant.
+local function shopPad(parent: Instance, name: string, center: Vector3, color: Color3, text: string): BasePart
+	local ring = part({
+		Name = name,
+		Shape = Enum.PartType.Cylinder,
+		Size = Vector3.new(0.2, 9, 9),
+		CFrame = CFrame.new(center + Vector3.new(0, 0.12, 0)) * CFrame.Angles(0, 0, math.pi / 2),
+		Color = color,
+		Material = Enum.Material.Neon,
+		Transparency = 0.25,
+		CanCollide = false,
+		CanQuery = false,
+		Parent = parent,
+	})
+	part({
+		Name = "PadInner",
+		Shape = Enum.PartType.Cylinder,
+		Size = Vector3.new(0.22, 7.6, 7.6),
+		CFrame = CFrame.new(center + Vector3.new(0, 0.13, 0)) * CFrame.Angles(0, 0, math.pi / 2),
+		Color = color:Lerp(Color3.new(0, 0, 0), 0.75),
+		Material = Enum.Material.SmoothPlastic,
+		Transparency = 0.15,
+		CanCollide = false,
+		CanQuery = false,
+		Parent = parent,
+	})
+	-- the sign's offset is in the ring's own space, and the ring is a cylinder turned on its side
+	-- (its X axis points up), so "4 studs up" is +X here, not +Y
+	local sign = billboard(ring, UDim2.fromOffset(200, 34), Vector3.new(4, 0, 0), 60)
+	label(sign, { Text = text, TextColor3 = color:Lerp(Color3.new(1, 1, 1), 0.3) })
+	return ring
+end
+
 local function makeMerchant(parent: Instance, position: Vector3)
 	local wood = rgb(130, 85, 50)
 	local counter = part({
@@ -1177,18 +1211,12 @@ local function makeMerchant(parent: Instance, position: Vector3)
 
 	local gui = billboard(counter, UDim2.fromOffset(240, 50), Vector3.new(0, 9, 0), 90)
 	label(gui, { Text = "Wandering Merchant", TextColor3 = rgb(255, 200, 120) })
-	local prompt = Instance.new("ProximityPrompt")
 	local stallMesh = placeMesh(parent, "MerchantStall", CFrame.new(position), 9, true, true)
 	if stallMesh then
 		stripParts(counter, { counter })
 	end
-	prompt.Name = "MerchantPrompt"
-	prompt.ActionText = "Browse"
-	prompt.ObjectText = "Wandering Merchant"
-	prompt.HoldDuration = 0
-	prompt.MaxActivationDistance = 12
-	prompt.RequiresLineOfSight = false
-	prompt.Parent = counter
+	-- the shop circle in front of the cart (towards the plaza), like the Blacksmith's
+	shopPad(parent, "MerchantPad", position + Vector3.new(10, 0, 0), rgb(255, 200, 110), "🧙 Step in to shop")
 end
 
 local function makeObelisk(parent: Instance, position: Vector3)
@@ -1787,42 +1815,6 @@ local function districtSign(parent: Instance, position: Vector3, text: string, c
 	label(gui, { Text = text, TextColor3 = color })
 end
 
--- A market stall: four posts and a striped awning
-local function stall(parent: Instance, position: Vector3, color: Color3)
-	part({
-		Size = Vector3.new(7, 2.6, 3),
-		Position = position + Vector3.new(0, 1.3, 0),
-		Color = rgb(120, 80, 50),
-		Material = Enum.Material.WoodPlanks,
-		Parent = parent,
-	})
-	for _, x in { -3.3, 3.3 } do
-		for _, z in { -1.3, 1.3 } do
-			column(parent, position + Vector3.new(x, 0, z), 6, 0.35, rgb(90, 60, 40), Enum.Material.Wood)
-		end
-	end
-	for i = 0, 4 do
-		part({
-			Size = Vector3.new(1.6, 0.25, 4.2),
-			CFrame = CFrame.new(position + Vector3.new(-3.2 + i * 1.6, 6.3, 0)) * CFrame.Angles(math.rad(8), 0, 0),
-			Color = if i % 2 == 0 then color else WHITE,
-			Material = Enum.Material.Fabric,
-			Parent = parent,
-		})
-	end
-	-- a few goods on the counter
-	for i, c in { rgb(255, 120, 120), rgb(120, 220, 255), rgb(255, 220, 90) } do
-		part({
-			Shape = Enum.PartType.Ball,
-			Size = Vector3.one * 0.9,
-			Position = position + Vector3.new(-2.2 + i * 1.1, 3.05, 0.3),
-			Color = c,
-			Material = Enum.Material.Glass,
-			Parent = parent,
-		})
-	end
-end
-
 -- A big archway for a part of the game that's coming soon (the Gloomwood, your Sanctuary)
 local function portal(parent: Instance, position: Vector3, title: string, color: Color3)
 	local folder = Instance.new("Model")
@@ -1900,11 +1892,7 @@ local function buildDistricts(hub: Instance)
 		})
 	end
 
-	-- Market Row (west): the Merchant, the Blacksmith and some stalls
-	districtSign(hub, sp(-55, 0, -36), "🛒 Market Row", rgb(255, 190, 110))
-	stall(hub, sp(-74, 0, -38), rgb(230, 80, 80))
-	stall(hub, sp(-74, 0, 2), rgb(80, 160, 230))
-	stall(hub, sp(-74, 0, 40), rgb(110, 200, 110))
+	-- west wing: the Merchant and the Blacksmith (no sign)
 
 	-- House Quarter (east): the three House statues
 	districtSign(hub, sp(55, 0, -36), "🏛️ House Quarter", rgb(190, 160, 255))
@@ -2169,6 +2157,7 @@ WorldBuilder.Helpers = {
 	HealthBar = healthBar,
 	Burst = burstEmitter,
 	Billboard = billboard,
+	ShopPad = shopPad,
 	Label = label,
 	Light = light,
 	ZoneStart = zoneStartZ,
