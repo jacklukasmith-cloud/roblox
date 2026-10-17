@@ -121,6 +121,13 @@ function BossBar.Build(root: Frame)
 	local current: any = nil
 	local function render()
 		local s = current
+		-- nothing about bosses while you're in the Gloomwood (bosses are in the realms, and the
+		-- forest has its own satchel / Gloom pill in this spot)
+		if player:GetAttribute("InGloomwood") == true then
+			bar.Visible = false
+			pill.Visible = false
+			return
+		end
 		if not s or not s.Active then
 			bar.Visible = false
 			local left = if s and s.NextAt then s.NextAt - State.Now() else -1
@@ -169,6 +176,7 @@ function BossBar.Build(root: Frame)
 	Layout.Changed:Connect(arrange)
 	arrange()
 
+	player:GetAttributeChangedSignal("InGloomwood"):Connect(render)
 	Remotes.Event("BossUpdate").OnClientEvent:Connect(function(state)
 		current = state
 		render()

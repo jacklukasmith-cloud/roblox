@@ -17,6 +17,7 @@ local Remotes = require(ReplicatedStorage.Shared.Remotes)
 local Modules = script.Parent
 local Ui = require(Modules.Ui)
 local State = require(Modules.State)
+local Layout = require(Modules.Layout)
 local Sound = require(Modules.Sound)
 
 local T = Ui.Theme
@@ -139,43 +140,52 @@ end
 
 function GloomwoodClient.Build(root: Frame)
 	local player = Players.LocalPlayer
+	-- one slim pill at the top (where the boss bar would be; it's hidden in the forest):
+	-- 🎒 satchel count on the left, a thin Gloom bar on the right
 	local card = Ui.new("Frame", {
 		Name = "GloomCard",
 		AnchorPoint = Vector2.new(0.5, 0),
-		Position = UDim2.new(0.5, 0, 0, 150),
-		Size = UDim2.fromOffset(280, 58),
+		Size = UDim2.fromOffset(210, 28),
 		BackgroundColor3 = T.Panel,
-		BackgroundTransparency = 0.15,
+		BackgroundTransparency = 0.2,
 		Visible = false,
 		Parent = root,
-	}, { Ui.corner(12), Ui.stroke(PURPLE, 1.2) })
+	}, { Ui.round(), Ui.stroke(PURPLE, 1) })
 	local satchel = Ui.text({
-		Position = UDim2.fromOffset(12, 4),
-		Size = UDim2.new(1, -24, 0, 24),
+		Position = UDim2.fromOffset(10, 0),
+		Size = UDim2.new(0, 72, 1, 0),
 		Text = "",
 		Font = T.FontHeavy,
 		TextXAlignment = Enum.TextXAlignment.Left,
-		MaxTextSize = 17,
+		MaxTextSize = 14,
 		Parent = card,
 	})
 	local barBack = Ui.new("Frame", {
-		Position = UDim2.fromOffset(12, 32),
-		Size = UDim2.new(1, -24, 0, 16),
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(1, -10, 0.5, 0),
+		Size = UDim2.new(1, -100, 0, 10),
 		BackgroundColor3 = rgb(25, 20, 35),
 		Parent = card,
-	}, { Ui.corner(8) })
+	}, { Ui.round() })
 	local fill = Ui.new("Frame", {
 		Size = UDim2.fromScale(0, 1),
 		BackgroundColor3 = PURPLE,
 		Parent = barBack,
-	}, { Ui.corner(8) })
-	local gloomText = Ui.text({
-		Size = UDim2.fromScale(1, 1),
-		Text = "🌑 Gloom",
-		Font = T.FontHeavy,
-		MaxTextSize = 12,
+	}, { Ui.round() })
+	Ui.text({
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(0, -4, 0.5, 0),
+		Size = UDim2.fromOffset(16, 16),
+		Text = "🌑",
+		MaxTextSize = 13,
 		Parent = barBack,
 	})
+	local function arrange()
+		-- just under the top-centre Mana Surge banner (which sits in the top bar on phones)
+		card.Position = UDim2.new(0.5, 0, 0, if Layout.Compact then 30 else 60)
+	end
+	Layout.Changed:Connect(arrange)
+	arrange()
 
 	-- how deep you are, eased so a jump (the Deep Camp shortcut) fades in rather than snapping
 	local depth: number? = nil
@@ -199,12 +209,11 @@ function GloomwoodClient.Build(root: Frame)
 		if inside then
 			local data = State.Data
 			local count = Gloomwood.SatchelCount(data and data.Gloom and data.Gloom.Satchel)
-			satchel.Text = `🎒 Satchel {count}/{Gloomwood.SatchelSize}`
+			satchel.Text = `🎒 {count}/{Gloomwood.SatchelSize}`
 			satchel.TextColor3 = if count >= Gloomwood.SatchelSize then rgb(255, 150, 110) else T.Text
 			local frac = math.clamp(gloom / Gloomwood.Gloom.Max, 0, 1)
 			TweenService:Create(fill, TweenInfo.new(0.25), { Size = UDim2.fromScale(frac, 1) }):Play()
 			fill.BackgroundColor3 = if gloom >= Gloomwood.Gloom.Warn then rgb(255, 90, 150) else PURPLE
-			gloomText.Text = `🌑 Gloom {math.floor(frac * 100)}%`
 		end
 	end
 
