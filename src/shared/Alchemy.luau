@@ -32,7 +32,7 @@ Alchemy.Recipes = {
 	{
 		Id = "GloomWard",
 		Item = "GloomWard",
-		Ingredients = { Moonshard = 3, Emberheart = 1, Frostglass = 1 },
+		Ingredients = { Moonshard = 3, Voidstone = 1 },
 		Essence = 25,
 		Minutes = 6,
 	},
@@ -53,9 +53,23 @@ Alchemy.Recipes = {
 	{
 		Id = "ShinyElixir",
 		Item = "ShinyElixir",
-		Ingredients = { Emberheart = 3, Frostglass = 3 },
+		Ingredients = { Stormquartz = 2, Voidstone = 1 },
 		Essence = 50,
 		Minutes = 10,
+	},
+	{
+		Id = "XPPotion",
+		Item = "XPPotion",
+		Ingredients = { Stormquartz = 3, Frostglass = 2 },
+		Essence = 40,
+		Minutes = 8,
+	},
+	{
+		Id = "RainbowBrew",
+		Item = "RainbowBrew",
+		Ingredients = { Prismheart = 1, Stormquartz = 3, Voidstone = 3 },
+		Essence = 200,
+		Minutes = 20,
 	},
 }
 

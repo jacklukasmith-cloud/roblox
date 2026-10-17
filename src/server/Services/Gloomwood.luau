@@ -23,6 +23,7 @@ local Remotes = require(Shared.Remotes)
 
 local PlayerData = require(script.Parent.PlayerData)
 local Economy = require(script.Parent.Economy)
+local WorldBuilder = require(script.Parent.WorldBuilder)
 local GloomwoodBuilder = require(script.Parent.GloomwoodBuilder)
 local GloomBeasts = require(script.Parent.GloomBeasts)
 
@@ -56,6 +57,7 @@ local warned: { [Player]: boolean } = {}
 local lastTeleport: { [Player]: number } = {}
 local lastPadMessage: { [Player]: number } = {}
 local lastFullMessage: { [Player]: number } = {}
+local startedAt = 0
 
 Service.Rng = Random.new()
 Service.Clock = os.clock
@@ -68,6 +70,7 @@ local function gloomData(data: any): any
 	if g.CampFound == nil then
 		g.CampFound = false
 	end
+	g.Map = g.Map or {}
 	return g
 end
 
@@ -124,6 +127,18 @@ local function buildCrystal(def: any, position: Vector3): Model
 	main.Transparency = 1
 	main.CanCollide = false
 	main.Parent = model
+	local big = if def.Rarity == "Legendary" then 1.8 elseif def.Rarity == "Epic" or def.Rarity == "Rare" then 1.3 else 1
+	-- an imported 3D model (e.g. "PrismheartCrystal") replaces the built-in shards
+	local mesh = WorldBuilder.Helpers.PlaceMesh(model, def.Id .. "Crystal", CFrame.new(position), 4 * big, true, false)
+	if mesh then
+		local light = Instance.new("PointLight")
+		light.Color = def.Color
+		light.Range = 10 * big
+		light.Brightness = 1.2
+		light.Parent = main
+		model.PrimaryPart = main
+		return model
+	end
 	local rng = Service.Rng
 	for i = 1, 4 do
 		local shard = Instance.new("Part")
@@ -133,8 +148,8 @@ local function buildCrystal(def: any, position: Vector3): Model
 		shard.Material = Enum.Material.Neon
 		shard.Color = def.Color
 		shard.Transparency = 0.1
-		local h = 1.6 + i * 0.5
-		shard.Size = Vector3.new(0.7, h, 0.7)
+		local h = (1.6 + i * 0.5) * big
+		shard.Size = Vector3.new(0.7 * big, h, 0.7 * big)
 		local a = i / 4 * math.pi * 2 + rng:NextNumber(-0.3, 0.3)
 		shard.CFrame = CFrame.new(position + Vector3.new(math.sin(a) * 0.5, h / 2, math.cos(a) * 0.5))
 			* CFrame.Angles(math.sin(a) * 0.35, rng:NextNumber(0, 6), math.cos(a) * 0.35)
@@ -167,6 +182,12 @@ local function spawnCrystal(def: any): Model?
 	local index = free[Service.Rng:NextInteger(1, #free)]
 	taken[def.Id][index] = true
 	local model = buildCrystal(def, spots[index])
+	if def.Announce then
+		-- the whole server hears about a Prismheart (if the server's been up for a moment)
+		if Service.Clock() - startedAt > 5 then
+			notify:FireAllClients(`✨ A {def.Name} is glowing somewhere in the Heart of the Gloomwood...`, def.Color)
+		end
+	end
 	crystals[model] = {
 		Id = def.Id,
 		Spot = index,
@@ -192,6 +213,13 @@ function Service.AddToSatchel(player: Player, id: string): boolean
 	end
 	g.Satchel[id] = (g.Satchel[id] or 0) + 1
 	data.Stats.GloomMined = (data.Stats.GloomMined or 0) + 1
+	local def = Gloomwood.Get(id)
+	if def and (def.Rarity == "Rare" or def.Rarity == "Epic" or def.Rarity == "Legendary") then
+		data.Stats.GloomRare = (data.Stats.GloomRare or 0) + 1
+	end
+	if id == "Prismheart" then
+		data.Stats.Prismhearts = (data.Stats.Prismhearts or 0) + 1
+	end
 	PlayerData.MarkChanged(player)
 	return true
 end
@@ -201,9 +229,11 @@ local function mined(model: Model, state: CrystalState)
 	crystals[model] = nil
 	GloomBeasts.CrystalGone(model)
 	local now = Service.Clock()
+	local names = {}
 	for player, at in state.Hitters do
 		if player.Parent and now - at <= HELP_WINDOW then
 			if Service.AddToSatchel(player, state.Id) then
+				table.insert(names, player.DisplayName)
 				notify:FireClient(player, `+1 {def.Name}`, def.Color)
 			else
 				notify:FireClient(
@@ -213,6 +243,9 @@ local function mined(model: Model, state: CrystalState)
 				)
 			end
 		end
+	end
+	if def.Announce and #names > 0 then
+		notify:FireAllClients(`✨ {table.concat(names, ", ")} mined the {def.Name}!`, def.Color)
 	end
 	-- let the last hit's sparks play, then it's gone
 	task.delay(0.15, function()
@@ -454,7 +487,7 @@ function Service.Update(player: Player, dt: number)
 	else
 		-- a Gloom Ward (brewed in the Cauldron) slows it down
 		local ward = if (data.Boosts.GloomWard or 0) > os.time() then Config.Boosts.GloomWard else 1
-		level += (if ring == "Edge" then cfg.Edge else cfg.Midwood) * dt * ward
+		level += (cfg[ring] or cfg.Midwood) * dt * ward
 	end
 	gloom[player] = level
 	player:SetAttribute("Gloom", math.floor(level))
@@ -477,6 +510,21 @@ function Service.Update(player: Player, dt: number)
 			"⛺ You found the Deep Camp! You can come straight here from the gate now",
 			rgb(255, 200, 120)
 		)
+	end
+	-- map fragments: walk into one to find it
+	g.Map = g.Map or {}
+	for i, spot in layout.Fragments do
+		if not g.Map[i] and near(pos, spot, 5) then
+			g.Map[i] = true
+			data.Stats.MapFragments = (data.Stats.MapFragments or 0) + 1
+			PlayerData.MarkChanged(player)
+			local found = data.Stats.MapFragments
+			notify:FireClient(
+				player,
+				`🗺️ Map Fragment found ({found}/{#Gloomwood.Fragments})! Your forest map shows more now`,
+				rgb(255, 230, 170)
+			)
+		end
 	end
 	-- the circles at the gate and the camp
 	if campPad and near(pos, campPad.Position, PAD_RADIUS) then
@@ -512,6 +560,7 @@ function Service.Start()
 	local world = workspace:FindFirstChild("World") or workspace
 	local built = GloomwoodBuilder.Build(workspace)
 	layout = built
+	startedAt = Service.Clock()
 	campPad = built.Folder:FindFirstChild("CampPad", true) :: BasePart?
 	gatePad = built.Folder:FindFirstChild("GatePad", true) :: BasePart?
 	local folder = Instance.new("Folder")

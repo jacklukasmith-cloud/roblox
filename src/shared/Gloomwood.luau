@@ -6,7 +6,9 @@
 	The forest is a big disc of rings (distance from its centre):
 	  Edge     RingEdge..Radius      light fog, many lanterns, Moonshards
 	  Midwood  RingMid..RingEdge     thicker fog, the burnt clearing, frozen pond and Deep Camp
-	  Deepwood (and the Heart)       behind a thorn wall for now: coming in the next part
+	  Deepwood RingHeart..RingMid    very dark, cliffs and caves, few lanterns, the Gloom fills fast
+	  The Heart ..RingHeart           the stone circle where the Prismheart grows, guarded by the Gloom Treant
+	Map Fragments hidden around the forest fill in your map (the 🗺️ button on the forest pill).
 ]]
 
 local Gloomwood = {}
@@ -14,7 +16,10 @@ local Gloomwood = {}
 Gloomwood.Center = Vector3.new(-6000, 0, -6000) -- far from the hub (and the islands) so it can't be seen from there
 Gloomwood.Radius = 600
 Gloomwood.RingEdge = 420 -- Edge is outside this, Midwood inside
-Gloomwood.RingMid = 220 -- the Deepwood wall
+Gloomwood.RingMid = 220 -- the Deepwood wall (with openings at Gloomwood.WallGaps)
+Gloomwood.RingHeart = 70 -- the Heart
+Gloomwood.WallGaps = { -0.35, 1.7, 3.0, 4.6 } -- angles of the openings in the thorn wall
+Gloomwood.GapWidth = 0.14 -- radians (about 30 studs)
 Gloomwood.UnlockZone = 3 -- Frostpeak must be unlocked
 
 Gloomwood.SatchelSize = 20 -- crystals you can carry before sending them home
@@ -23,6 +28,8 @@ Gloomwood.Gloom = {
 	Max = 100,
 	Edge = 0.12, -- per second (about 14 minutes to fill)
 	Midwood = 0.35, -- about 5 minutes
+	Deepwood = 0.7, -- about 2.5 minutes
+	Heart = 1.4, -- about 70 seconds
 	Lantern = -4, -- standing by a lantern
 	Outside = -10,
 	Warn = 75, -- "the gloom is getting thick" warning
@@ -78,7 +85,56 @@ Gloomwood.Crystals = {
 		Regrow = 90,
 		Near = "FrozenPond",
 	},
+	{
+		Id = "Stormquartz",
+		Name = "Stormquartz",
+		Rarity = "Rare",
+		Color = Color3.fromRGB(255, 240, 120),
+		Hits = 12,
+		Sell = 40,
+		Spots = 12, -- on top of the Deepwood cliffs (GloomwoodBuilder puts the spots there)
+		Active = 4,
+		Regrow = 150,
+		Where = "Ledge",
+	},
+	{
+		Id = "Voidstone",
+		Name = "Voidstone",
+		Rarity = "Epic",
+		Color = Color3.fromRGB(150, 80, 255),
+		Hits = 16,
+		Sell = 120,
+		Spots = 10, -- inside the Deepwood caves
+		Active = 3,
+		Regrow = 240,
+		Where = "Cave",
+	},
+	{
+		Id = "Prismheart",
+		Name = "Prismheart",
+		Rarity = "Legendary",
+		Color = Color3.fromRGB(255, 255, 255),
+		Hits = 30,
+		Sell = 1000,
+		Spots = 6, -- in the Heart; one grows at a time and the whole server hears about it
+		Active = 1,
+		Regrow = 600,
+		Where = "Heart",
+		Announce = true,
+	},
 }
+-- Where the Map Fragments hide (angle, distance): finding one marks that part of the map
+Gloomwood.Fragments = {
+	{ Angle = 0.9, Distance = 300, Reveals = "DeepCamp" },
+	{ Angle = 2.2, Distance = 345, Reveals = "BurntClearing" },
+	{ Angle = -2.0, Distance = 365, Reveals = "FrozenPond" },
+	{ Angle = math.pi, Distance = 500, Reveals = "DeadTree" },
+	{ Angle = -1.0, Distance = 520, Reveals = "Watchtower" },
+	{ Angle = 1.7, Distance = 150, Reveals = "Cliffs" },
+	{ Angle = 4.6, Distance = 140, Reveals = "Caves" },
+	{ Angle = 0.5, Distance = 40, Reveals = "Heart" },
+}
+Gloomwood.MapLanternsAt = 4 -- find this many fragments and the map shows every lantern
 
 -- Forest animals. "Hostile" ones roam their ring and chase anyone who comes close (but never go
 -- near a lantern: lanterns are safe). "Guardian" ones sleep next to a crystal (Chance = how many
@@ -193,6 +249,43 @@ Gloomwood.Beasts = {
 		XP = 8,
 	},
 	{
+		Id = "ShadowWisp",
+		Name = "Shadow Wisp",
+		Icon = "👻",
+		Kind = "Hostile",
+		Ring = "Deepwood",
+		Count = 7,
+		HP = 3,
+		Speed = 14,
+		Aggro = 30,
+		Leash = 60,
+		Reach = 4,
+		Gloom = 2,
+		Steal = 1, -- every touch drains a crystal from your satchel
+		Cooldown = 1.2,
+		XP = 10,
+		Drop = "Moonshard",
+		Respawn = 50,
+	},
+	{
+		Id = "GloomTreant",
+		Name = "Gloom Treant",
+		Icon = "🌳",
+		Kind = "Guardian",
+		Guards = { "Prismheart" },
+		Chance = 1,
+		HP = 60, -- a boss: bring your pets
+		Speed = 10,
+		Leash = 90,
+		Reach = 9,
+		Gloom = 20,
+		Steal = 0,
+		Cooldown = 2.5,
+		XP = 150,
+		Drop = "Voidstone",
+		Announce = true,
+	},
+	{
 		Id = "FrostStag",
 		Name = "Frost Stag",
 		Icon = "🦌",
@@ -252,8 +345,35 @@ function Gloomwood.RingAt(position: Vector3): string?
 		return "Edge"
 	elseif d >= Gloomwood.RingMid then
 		return "Midwood"
+	elseif d >= Gloomwood.RingHeart then
+		return "Deepwood"
 	end
-	return "Deepwood"
+	return "Heart"
+end
+
+-- Is this angle in one of the thorn wall's openings?
+function Gloomwood.InGap(angle: number): boolean
+	for _, gap in Gloomwood.WallGaps do
+		local diff = math.abs((angle - gap + math.pi) % (math.pi * 2) - math.pi)
+		if diff <= Gloomwood.GapWidth then
+			return true
+		end
+	end
+	return false
+end
+
+-- The nearest opening in the wall to a position
+function Gloomwood.NearestGap(position: Vector3): Vector3
+	local flat = (position - Gloomwood.Center) * Vector3.new(1, 0, 1)
+	local angle = math.atan2(flat.X, flat.Z)
+	local best, bestDiff = Gloomwood.WallGaps[1], math.huge
+	for _, gap in Gloomwood.WallGaps do
+		local diff = math.abs((angle - gap + math.pi) % (math.pi * 2) - math.pi)
+		if diff < bestDiff then
+			best, bestDiff = gap, diff
+		end
+	end
+	return Gloomwood.At(best, Gloomwood.RingMid, 3)
 end
 
 -- How deep into the forest a position is: 0 at the outer edge, 1 at the very centre (the Heart).

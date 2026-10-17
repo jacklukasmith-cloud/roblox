@@ -22,6 +22,9 @@ export type Layout = {
 	Lanterns: { Vector3 },
 	Spots: { [string]: { Vector3 } },
 	Trails: { { Vector3 } },
+	Fragments: { Vector3 },
+	Ledges: { Vector3 }, -- cliff tops (for Stormquartz)
+	Caves: { Vector3 }, -- cave insides (for Voidstone)
 }
 
 local rgb = Color3.fromRGB
@@ -134,7 +137,7 @@ local function tree(parent: Instance, rng: Random, pos: Vector3)
 		Parent = parent,
 	})
 	-- leaves get darker the deeper into the forest the tree is
-	local shade = Gloomwood.Depth(pos) / (1 - Gloomwood.RingMid / Gloomwood.Radius)
+	local shade = math.min(1, Gloomwood.Depth(pos) / (1 - Gloomwood.RingMid / Gloomwood.Radius))
 	local leaf = rgb(40, 70, 55):Lerp(rgb(60, 45, 85), rng:NextNumber() ^ 2):Lerp(rgb(12, 12, 20), shade * 0.55)
 	for i = 1, 2 do
 		local size = rng:NextNumber(11, 16) - i * 2
@@ -439,12 +442,15 @@ local function watchtower(parent: Instance)
 	sign(parent, c + Vector3.new(0, 30, 0), "🗼 The Broken Watchtower", rgb(220, 200, 160), 160)
 end
 
--- The thorn wall in front of the Deepwood (opens in the next update)
+-- The thorn wall round the Deepwood, with openings (Gloomwood.WallGaps) you can walk through
 local function deepwoodWall(parent: Instance, signAngle: number)
 	local r = Gloomwood.RingMid
 	local steps = 72
 	for i = 0, steps - 1 do
 		local a = i / steps * math.pi * 2
+		if Gloomwood.InGap(a) then
+			continue
+		end
 		local pos = Gloomwood.At(a, r)
 		local len = 2 * math.pi * r / steps + 1
 		local face = CFrame.lookAt(pos, Gloomwood.Center)
@@ -467,7 +473,205 @@ local function deepwoodWall(parent: Instance, signAngle: number)
 			Parent = parent,
 		})
 	end
-	sign(parent, Gloomwood.At(signAngle, r + 8, 18), "🌑 The Deepwood: coming soon", rgb(200, 150, 255), 120)
+	-- a warning sign and two torches at every opening
+	local helpers = WorldBuilder.Helpers
+	for _, gap in Gloomwood.WallGaps do
+		sign(parent, Gloomwood.At(gap, r + 6, 16), "🌑 The Deepwood: the Gloom fills fast!", rgb(200, 150, 255), 120)
+		for _, side in { -1, 1 } do
+			local pos = Gloomwood.At(gap + side * (Gloomwood.GapWidth + 0.02), r, 0)
+			part({
+				Name = "GapPost",
+				Size = Vector3.new(1.2, 9, 1.2),
+				Position = pos + Vector3.new(0, 4.5, 0),
+				Color = rgb(45, 35, 50),
+				Material = Enum.Material.Wood,
+				Parent = parent,
+			})
+			local flame = part({
+				Name = "GapTorch",
+				Size = Vector3.new(1.4, 1.4, 1.4),
+				Position = pos + Vector3.new(0, 9.6, 0),
+				Color = rgb(200, 120, 255),
+				Material = Enum.Material.Neon,
+				CanCollide = false,
+				Parent = parent,
+			})
+			helpers.Light(flame, rgb(190, 120, 255), 18, 1.5)
+		end
+	end
+	local _ = signAngle
+end
+
+-- A raised rock ledge with a ramp up one side (Stormquartz grows on top). Returns the top centre.
+local function cliff(parent: Instance, rng: Random, pos: Vector3, facing: number): Vector3
+	local w, h, d = rng:NextNumber(22, 30), rng:NextNumber(10, 14), rng:NextNumber(18, 24)
+	local cf = CFrame.new(pos) * CFrame.Angles(0, facing, 0)
+	part({
+		Name = "Cliff",
+		Size = Vector3.new(w, h, d),
+		CFrame = cf * CFrame.new(0, h / 2, 0),
+		Color = rgb(55, 50, 65),
+		Material = Enum.Material.Rock,
+		Parent = parent,
+	})
+	-- a couple of boulders on the sides to make it look craggy
+	for _, side in { -1, 1 } do
+		part({
+			Name = "Boulder",
+			Shape = Enum.PartType.Ball,
+			Size = Vector3.one * rng:NextNumber(5, 8),
+			CFrame = cf * CFrame.new(side * (w / 2 + 1), 2.5, rng:NextNumber(-d / 3, d / 3)),
+			Color = rgb(60, 55, 70),
+			Material = Enum.Material.Rock,
+			Parent = parent,
+		})
+	end
+	-- the ramp: a wedge leaning against the front
+	local rampLen = h * 2.2
+	part({
+		ClassName = "WedgePart",
+		Name = "CliffRamp",
+		Size = Vector3.new(8, h, rampLen),
+		CFrame = cf * CFrame.new(0, h / 2, d / 2 + rampLen / 2),
+		Color = rgb(70, 62, 78),
+		Material = Enum.Material.Slate,
+		Parent = parent,
+	})
+	return (cf * CFrame.new(0, h, 0)).Position
+end
+
+-- A dark cave: a rock mound you can walk into from the front (Voidstone grows inside). Returns the inside.
+local function cave(parent: Instance, rng: Random, pos: Vector3, facing: number): Vector3
+	local w, h, d = 22, 12, 24
+	local cf = CFrame.new(pos) * CFrame.Angles(0, facing, 0)
+	local rock = rgb(40, 36, 50)
+	for _, side in { -1, 1 } do
+		part({
+			Name = "CaveWall",
+			Size = Vector3.new(4, h, d),
+			CFrame = cf * CFrame.new(side * (w / 2 - 2), h / 2, 0),
+			Color = rock,
+			Material = Enum.Material.Rock,
+			Parent = parent,
+		})
+	end
+	part({
+		Name = "CaveBack",
+		Size = Vector3.new(w, h, 4),
+		CFrame = cf * CFrame.new(0, h / 2, -d / 2 + 2),
+		Color = rock,
+		Material = Enum.Material.Rock,
+		Parent = parent,
+	})
+	part({
+		Name = "CaveRoof",
+		Size = Vector3.new(w + 4, 4, d + 2),
+		CFrame = cf * CFrame.new(0, h + 2, -1),
+		Color = rock,
+		Material = Enum.Material.Rock,
+		Parent = parent,
+	})
+	-- a rounded top so it reads as a mound
+	part({
+		Name = "CaveMound",
+		Shape = Enum.PartType.Ball,
+		Size = Vector3.new(w + 6, 10, d + 4),
+		CFrame = cf * CFrame.new(0, h + 3, -1),
+		Color = rock,
+		Material = Enum.Material.Rock,
+		Parent = parent,
+	})
+	-- a floor patch and a few glowing mushrooms by the mouth
+	part({
+		Name = "CaveFloor",
+		Size = Vector3.new(w - 4, 0.3, d - 2),
+		CFrame = cf * CFrame.new(0, 0.1, 0),
+		Color = rgb(22, 18, 28),
+		Material = Enum.Material.Slate,
+		CanCollide = false,
+		Parent = parent,
+	})
+	for _ = 1, 3 do
+		mushroom(
+			parent,
+			rng,
+			(cf * CFrame.new(rng:NextNumber(-w / 2, w / 2), 0, d / 2 + rng:NextNumber(1, 4))).Position
+		)
+	end
+	return (cf * CFrame.new(0, 0, -3)).Position
+end
+
+-- The Heart: a ring of dead trunks, a stone circle and the pedestal the Prismheart grows on
+local function heart(parent: Instance, rng: Random)
+	local helpers = WorldBuilder.Helpers
+	local c = Gloomwood.Center
+	disc(parent, c + Vector3.new(0, 0.1, 0), Gloomwood.RingHeart * 2, 0.2, rgb(28, 20, 40), Enum.Material.Slate).CanCollide =
+		false
+	disc(parent, c + Vector3.new(0, 0.25, 0), 24, 0.3, rgb(60, 45, 90), Enum.Material.Marble).CanCollide = false
+	for i = 0, 11 do
+		local a = i / 12 * math.pi * 2
+		local h = rng:NextNumber(26, 36)
+		part({
+			Name = "DeadTrunk",
+			Size = Vector3.new(3, h, 3),
+			CFrame = CFrame.new(Gloomwood.At(a, Gloomwood.RingHeart - 6, h / 2))
+				* CFrame.Angles(rng:NextNumber(-0.1, 0.1), a, rng:NextNumber(-0.1, 0.1)),
+			Color = rgb(40, 32, 40),
+			Material = Enum.Material.Wood,
+			Parent = parent,
+		})
+	end
+	for i = 0, 7 do
+		local a = i / 8 * math.pi * 2 + 0.2
+		local stone = part({
+			Name = "StandingStone",
+			Size = Vector3.new(3, 9, 2),
+			CFrame = CFrame.lookAt(Gloomwood.At(a, 34, 4.5), c + Vector3.new(0, 4.5, 0)),
+			Color = rgb(70, 65, 90),
+			Material = Enum.Material.Slate,
+			Parent = parent,
+		})
+		part({
+			Name = "StoneRune",
+			Size = Vector3.new(1, 3, 0.2),
+			CFrame = stone.CFrame * CFrame.new(0, 1, -1.1),
+			Color = rgb(190, 120, 255),
+			Material = Enum.Material.Neon,
+			CanCollide = false,
+			Parent = parent,
+		})
+	end
+	local pedestal = part({
+		Name = "HeartPedestal",
+		Size = Vector3.new(6, 1.5, 6),
+		Position = c + Vector3.new(0, 0.75, 0),
+		Color = rgb(90, 80, 120),
+		Material = Enum.Material.Marble,
+		Parent = parent,
+	})
+	helpers.Light(pedestal, rgb(200, 160, 255), 30, 1.5)
+	sign(parent, c + Vector3.new(0, 20, 0), "💜 The Heart of the Gloomwood", rgb(220, 170, 255), 160)
+end
+
+-- A glowing rolled-up map: walk into it to find it
+local function fragment(parent: Instance, index: number, pos: Vector3)
+	local helpers = WorldBuilder.Helpers
+	local scroll = part({
+		Name = "MapFragment",
+		Shape = Enum.PartType.Cylinder,
+		Size = Vector3.new(2.4, 0.9, 0.9),
+		CFrame = CFrame.new(pos + Vector3.new(0, 2.2, 0)) * CFrame.Angles(0, 0.6, 0.3),
+		Color = rgb(255, 230, 170),
+		Material = Enum.Material.Neon,
+		CanCollide = false,
+		Parent = parent,
+	})
+	scroll:SetAttribute("Index", index)
+	helpers.Light(scroll, rgb(255, 220, 150), 12, 1)
+	helpers.Label(helpers.Billboard(scroll, UDim2.fromOffset(160, 28), Vector3.new(0, 2, 0), 40), {
+		Text = "🗺️ Map Fragment",
+		TextColor3 = rgb(255, 230, 170),
+	})
 end
 
 -- Invisible wall round the outside so nobody walks off the edge
@@ -490,6 +694,18 @@ end
 
 local CLEARINGS = { Gate = 45, DeepCamp = 32, BurntClearing = 44, FrozenPond = 46, DeadTree = 16, Watchtower = 14 }
 
+-- On a cliff, a cave or a fragment?
+local function inDeepwoodProp(p: Vector3, layout: any): boolean
+	for _, list in { layout.Ledges, layout.Caves } do
+		for _, spot in list do
+			if ((p - spot) * Vector3.new(1, 0, 1)).Magnitude < 24 then
+				return true
+			end
+		end
+	end
+	return false
+end
+
 local function inClearing(p: Vector3, extra: number): boolean
 	for name, radius in CLEARINGS do
 		if ((p - Gloomwood.Place(name)) * Vector3.new(1, 0, 1)).Magnitude < radius + extra then
@@ -510,6 +726,9 @@ function GloomwoodBuilder.Build(parent: Instance): Layout
 		Lanterns = {},
 		Spots = {},
 		Trails = {},
+		Fragments = {},
+		Ledges = {},
+		Caves = {},
 	} :: any
 
 	-- ground: Edge, a darker Midwood, and a black floor behind the Deepwood wall
@@ -539,6 +758,17 @@ function GloomwoodBuilder.Build(parent: Instance): Layout
 		wander(rng, -0.35, 325, -0.35, Gloomwood.RingMid + 10, 5),
 		wander(rng, 2.6, 520, 2.4, 325, 8),
 		wander(rng, -2.6, 520, -2.3, 325, 8),
+		-- the Deepwood: a loop inside the wall, spurs in from the openings, and two ways into the Heart
+		loop(rng, 150, 40),
+		wander(rng, Gloomwood.WallGaps[1], Gloomwood.RingMid, Gloomwood.WallGaps[1], 150, 3),
+		wander(rng, Gloomwood.WallGaps[2], Gloomwood.RingMid, Gloomwood.WallGaps[2], 150, 3),
+		wander(rng, Gloomwood.WallGaps[3], Gloomwood.RingMid, Gloomwood.WallGaps[3], 150, 3),
+		wander(rng, Gloomwood.WallGaps[4], Gloomwood.RingMid, Gloomwood.WallGaps[4], 150, 3),
+		wander(rng, 1.7, 325, Gloomwood.WallGaps[2], Gloomwood.RingMid + 10, 5),
+		wander(rng, 3.0, 325, Gloomwood.WallGaps[3], Gloomwood.RingMid + 10, 5),
+		wander(rng, 4.6, 325, Gloomwood.WallGaps[4], Gloomwood.RingMid + 10, 5),
+		wander(rng, 0.5, 150, 0.5, Gloomwood.RingHeart - 20, 4),
+		wander(rng, 3.6, 150, 3.6, Gloomwood.RingHeart - 20, 4),
 	}
 	layout.Trails = trails
 	local trailFolder = folderIn(model, "Trails")
@@ -556,6 +786,26 @@ function GloomwoodBuilder.Build(parent: Instance): Layout
 	watchtower(landmarks)
 	deepwoodWall(landmarks, -0.35)
 	outerWall(landmarks)
+	heart(landmarks, rng)
+	-- cliffs and caves in the Deepwood, off the trail
+	local deep = folderIn(model, "Deepwood")
+	for i = 0, 5 do
+		local a = i / 6 * math.pi * 2 + 0.4
+		local pos = Gloomwood.At(a, 185)
+		-- face the ramp towards the trail loop (inwards)
+		table.insert(layout.Ledges, cliff(deep, rng, pos, a + math.pi))
+	end
+	for i = 0, 4 do
+		local a = i / 5 * math.pi * 2 + 1.1
+		local pos = Gloomwood.At(a, 112)
+		-- the mouth faces outwards, towards the trail loop
+		table.insert(layout.Caves, cave(deep, rng, pos, a))
+	end
+	for i, f in Gloomwood.Fragments do
+		local pos = Gloomwood.At(f.Angle, f.Distance)
+		fragment(deep, i, pos)
+		table.insert(layout.Fragments, pos)
+	end
 
 	-- Courier Lanterns along the trails: close together in the Edge, further apart in the Midwood
 	local lanternFolder = folderIn(model, "Lanterns")
@@ -565,7 +815,10 @@ function GloomwoodBuilder.Build(parent: Instance): Layout
 			local a, b = trail[i], trail[i + 1]
 			sinceLast += (b - a).Magnitude
 			local ring = Gloomwood.RingAt(b)
-			local gap = if ring == "Edge" then 110 else 160
+			local gap = if ring == "Edge" then 110 elseif ring == "Midwood" then 160 else 300
+			if ring == "Heart" then
+				continue -- no lanterns in the Heart
+			end
 			if sinceLast >= gap and not inClearing(b, 0) then
 				sinceLast = 0
 				local side = ((b - a) * Vector3.new(1, 0, 1)).Unit:Cross(Vector3.yAxis)
@@ -583,11 +836,13 @@ function GloomwoodBuilder.Build(parent: Instance): Layout
 		for z = -half, half, TREE_SPACING do
 			local pos = c + Vector3.new(x + rng:NextNumber(-11, 11), 0, z + rng:NextNumber(-11, 11))
 			local d = ((pos - c) * Vector3.new(1, 0, 1)).Magnitude
+			local inDeep = d > Gloomwood.RingHeart + 12 and d < Gloomwood.RingMid - 12
 			if
-				d > Gloomwood.RingMid + 8
+				(d > Gloomwood.RingMid + 8 or (inDeep and rng:NextNumber() < 0.5))
 				and d < Gloomwood.Radius - 2
 				and trailDistance(pos, trails) > TRAIL_WIDTH / 2 + 4
 				and not inClearing(pos, 0)
+				and not inDeepwoodProp(pos, layout)
 			then
 				tree(trees, rng, pos)
 				table.insert(treeSpots, pos)
@@ -625,7 +880,24 @@ function GloomwoodBuilder.Build(parent: Instance): Layout
 	for _, crystal in Gloomwood.Crystals do
 		local spots = {}
 		local tries = 0
-		while #spots < crystal.Spots and tries < crystal.Spots * 60 do
+		-- the Deepwood crystals have set homes: cliff tops, cave insides, the Heart
+		if crystal.Where == "Ledge" then
+			for _, top in layout.Ledges do
+				table.insert(spots, top + Vector3.new(rng:NextNumber(-6, 6), 0, rng:NextNumber(-4, 4)))
+				table.insert(spots, top + Vector3.new(rng:NextNumber(-6, 6), 0, rng:NextNumber(-4, 4)))
+			end
+		elseif crystal.Where == "Cave" then
+			for _, inside in layout.Caves do
+				table.insert(spots, inside + Vector3.new(rng:NextNumber(-5, 5), 0, rng:NextNumber(-3, 3)))
+				table.insert(spots, inside + Vector3.new(rng:NextNumber(-5, 5), 0, rng:NextNumber(-3, 3)))
+			end
+		elseif crystal.Where == "Heart" then
+			for i = 1, crystal.Spots do
+				local a = i / crystal.Spots * math.pi * 2
+				table.insert(spots, Gloomwood.At(a, 18, 0))
+			end
+		end
+		while #spots < crystal.Spots and tries < crystal.Spots * 60 and not crystal.Where do
 			tries += 1
 			local pos
 			if crystal.Near then

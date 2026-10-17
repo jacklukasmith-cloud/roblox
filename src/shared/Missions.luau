@@ -8,7 +8,7 @@
 	  "Reach": get the stat up to N (counts what you already have)
 	Target: where the guide arrow points (Crystal, Egg, Gate, Blacksmith, Boss, Sanctuary (the hub
 	        portal), Upgrade / Habitat / Cauldron (your island's Upgrade Stone / Pet Habitat / Cauldron), Gloomwood (the hub gate),
-	        Lantern / DeepCamp (in the forest), or nil for none)
+	        Lantern / DeepCamp / Fragment / Deepwood / Heart (in the forest), or nil for none)
 
 	The save keeps the current mission's Id too, so missions can be added anywhere in the list
 	later without moving anyone to the wrong one (Missions.Sync).
@@ -245,6 +245,36 @@ Missions.List = {
 		Target = "Cauldron",
 		Hint = "Step into the green circle by the Cauldron on your island. Recipes use crystals from your Vault",
 		Reward = { Essence = 35000 },
+	},
+	{
+		Id = "Fragments3",
+		Text = "Find 3 Map Fragments in the Gloomwood",
+		Stat = "MapFragments",
+		Kind = "Reach",
+		Goal = 3,
+		Target = "Fragment",
+		Hint = "Glowing scrolls hide near the landmarks. Each one fills in your 🗺️ forest map",
+		Reward = { Essence = 40000, Items = { OwlEyePotion = 1 } },
+	},
+	{
+		Id = "Deepwood1",
+		Text = "Mine a rare crystal in the Deepwood",
+		Stat = "GloomRare",
+		Kind = "Reach",
+		Goal = 1,
+		Target = "Deepwood",
+		Hint = "Through an opening in the thorn wall: Stormquartz on the cliff tops, Voidstone in the caves. Bring a Gloom Ward!",
+		Reward = { Essence = 60000, Items = { GloomWard = 1 } },
+	},
+	{
+		Id = "Prismheart1",
+		Text = "Mine the Prismheart",
+		Stat = "Prismhearts",
+		Kind = "Reach",
+		Goal = 1,
+		Target = "Heart",
+		Hint = "It grows in the Heart of the Gloomwood, guarded by the Gloom Treant. Bring friends and strong pets",
+		Reward = { Trophies = 15, Items = { RainbowBrew = 1 } },
 	},
 	{
 		Id = "Fuse1",

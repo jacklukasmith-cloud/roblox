@@ -185,12 +185,41 @@ local function targetFor(target: string?, data: any, from: Vector3): Vector3?
 			else nil
 		local portal = if spot then nil else sanctuaryPortal()
 		return if spot then spot.Position elseif portal then portal.Position else nil
-	elseif target == "Gloomwood" or target == "Lantern" or target == "DeepCamp" then
-		if not Gloomwood.RingAt(from) then
+	elseif
+		target == "Gloomwood"
+		or target == "Lantern"
+		or target == "DeepCamp"
+		or target == "Fragment"
+		or target == "Deepwood"
+		or target == "Heart"
+	then
+		local ring = Gloomwood.RingAt(from)
+		if not ring then
 			local portal = hubPortal("Gloomwood")
 			return portal and portal.Position
 		elseif target == "DeepCamp" then
 			return Gloomwood.Place("DeepCamp")
+		elseif target == "Heart" then
+			return Gloomwood.Center + Vector3.new(0, 3, 0)
+		elseif target == "Deepwood" then
+			-- the nearest opening in the wall, then the cliffs once you're through
+			if ring == "Edge" or ring == "Midwood" then
+				return Gloomwood.NearestGap(from)
+			end
+			return Gloomwood.At(0.4, 185, 12)
+		elseif target == "Fragment" then
+			local found = data.Gloom and data.Gloom.Map or {}
+			local best, bestDist = nil, math.huge
+			for i, f in Gloomwood.Fragments do
+				if not found[i] then
+					local pos = Gloomwood.At(f.Angle, f.Distance, 2)
+					local dist = (pos - from).Magnitude
+					if dist < bestDist then
+						best, bestDist = pos, dist
+					end
+				end
+			end
+			return best
 		elseif target == "Lantern" then
 			-- once you're carrying crystals: the nearest lantern to send them home
 			local satchel = data.Gloom and data.Gloom.Satchel

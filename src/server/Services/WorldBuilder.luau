@@ -188,6 +188,13 @@ WorldBuilder.MeshNames = {
 	"StarLantern",
 	-- Sanctuary stations (Services/Sanctuaries)
 	"AlchemyCauldron",
+	-- Gloom Crystals (Services/Gloomwood): "<crystal id>Crystal"
+	"MoonshardCrystal",
+	"EmberheartCrystal",
+	"FrostglassCrystal",
+	"StormquartzCrystal",
+	"VoidstoneCrystal",
+	"PrismheartCrystal",
 }
 local CRYSTAL_MESH = { "MeadowCrystal", "EmberCrystal", "FrostCrystal", "SkyCrystal" }
 

@@ -145,7 +145,7 @@ function GloomwoodClient.Build(root: Frame)
 	local card = Ui.new("Frame", {
 		Name = "GloomCard",
 		AnchorPoint = Vector2.new(0.5, 0),
-		Size = UDim2.fromOffset(210, 28),
+		Size = UDim2.fromOffset(246, 28),
 		BackgroundColor3 = T.Panel,
 		BackgroundTransparency = 0.2,
 		Visible = false,
@@ -162,8 +162,8 @@ function GloomwoodClient.Build(root: Frame)
 	})
 	local barBack = Ui.new("Frame", {
 		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -10, 0.5, 0),
-		Size = UDim2.new(1, -100, 0, 10),
+		Position = UDim2.new(1, -40, 0.5, 0),
+		Size = UDim2.new(1, -136, 0, 10),
 		BackgroundColor3 = rgb(25, 20, 35),
 		Parent = card,
 	}, { Ui.round() })
@@ -180,6 +180,17 @@ function GloomwoodClient.Build(root: Frame)
 		MaxTextSize = 13,
 		Parent = barBack,
 	})
+	-- the forest map
+	Ui.button({
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(1, -3, 0.5, 0),
+		Size = UDim2.fromOffset(30, 22),
+		Text = "🗺️",
+		Variant = "Secondary",
+		Parent = card,
+	}, function()
+		Ui.toggle("GloomMap")
+	end)
 	local function arrange()
 		-- just under the top-centre Mana Surge banner (which sits in the top bar on phones)
 		card.Position = UDim2.new(0.5, 0, 0, if Layout.Compact then 30 else 60)

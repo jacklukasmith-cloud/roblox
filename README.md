@@ -130,7 +130,8 @@ Every player in the server (up to 8) gets a big **floating sky island**. The isl
 anyone's island; a name plate at the end of each bridge says whose it is. The plaza has a circle back to the hub.
 The islands and the Gloomwood are built far away from the hub, so they can't be seen from it. Each island has your
 name, waterfalls, glowing crystals, trees and the station spots (Pet Habitat, Alchemy Cauldron, Hangar, Crystal
-Vault), all laid out so the path from your bridge to your home spot stays clear.
+Vault), all laid out so the path from your bridge to your home spot stays clear. The 3D models still to make for
+all of this are listed in [docs/HIGGSFIELD_TODO.md](docs/HIGGSFIELD_TODO.md).
 - **Getting there:**
   - walk into the **Sanctuary portal** in Portal Plaza;
   - press the **🏠** button next to the pickaxe button (or **H**);
@@ -146,7 +147,9 @@ Vault), all laid out so the path from your bridge to your home spot stays clear.
   Code: `src/server/Services/Habitat.luau`, `src/client/Modules/HabitatPanel.luau`, `IslandPets.luau`.
 - **Alchemy Cauldron:** step into the green circle by the big pot on your island. Brew potions from the Gloom Crystals
   in your Vault plus a little Essence (`src/shared/Alchemy.luau`): Luck, Speed, Owl Eye, **Gloom Ward** (the Gloom
-  meter fills half as fast for 10 minutes), Essence, Power and Shiny. Brews take real time (3-10 minutes) and keep
+  meter fills half as fast for 10 minutes), Essence, Power, Shiny, XP and the
+  **Rainbow Brew** (needs a Prismheart; the rarer potions need Stormquartz and Voidstone from the Deepwood). Brews
+  take real time (3-20 minutes) and keep
   brewing while you're away; the finished potion goes straight into your 🎒 Bag. The pot glows and bubbles while
   something's brewing. The **Master Alchemist** game pass gives a
   second slot and 25% faster brews. Code: `src/server/Services/Cauldron.luau`, `src/client/Modules/CauldronPanel.luau`.
@@ -154,7 +157,7 @@ Vault), all laid out so the path from your bridge to your home spot stays clear.
   position); the building code is in `src/server/Services/Sanctuaries.luau`. The **Crystal Vault** is explained in
   the Gloomwood section below. Next step: the Alchemy Cauldron and Hangar.
 
-## The Gloomwood (part 1)
+## The Gloomwood
 
 A huge, foggy forest behind the hub (`src/shared/Gloomwood.luau`). Step into the green gate in Portal Plaza once
 you've unlocked **Frostpeak**.
@@ -163,8 +166,16 @@ you've unlocked **Frostpeak**.
   and the Broken Watchtower). Fog is added on your screen while you're inside, and it gets **darker and thicker
   the deeper you go**: the light, fog and sky fade smoothly from the gate to the middle, and the grass and
   treetops get darker too.
-- **Rings:** the **Edge** (outside) and the darker **Midwood** are open. The **Deepwood** and the Heart in the
-  middle are behind a thorn wall until part 2.
+- **Rings:** the **Edge** (outside), the darker **Midwood**, then the **Deepwood** behind a thorn wall with four
+  openings (torches mark them), and the **Heart** in the very middle. The Gloom fills faster the deeper you go
+  (about 14 min in the Edge, 5 in the Midwood, 2.5 in the Deepwood, 70 seconds in the Heart).
+- **The Deepwood:** cliffs with ramps (**Stormquartz** grows on top), dark caves (**Voidstone** inside), only three
+  lanterns, and Shadow Wisps that drain your satchel. Bring a Gloom Ward.
+- **The Heart:** a stone circle where one **Prismheart** grows at a time. The whole server is told when one
+  appears and who mined it. It's guarded by the **Gloom Treant**, a boss (60 pickaxe swings; your pets help) that
+  wakes when someone mines the Prismheart. Beating it drops a Voidstone for everyone who helped.
+- **Map Fragments:** 8 glowing scrolls hidden near the landmarks. Walk into one to find it. The 🗺️ button on the
+  forest pill opens your **forest map**: each fragment reveals a landmark, and 4 fragments reveal every lantern.
 - **Gloom Crystals** grow in hidden spots off the trails. Mine them with your **pickaxe** (a better pickaxe takes
   fewer swings): **Moonshard** everywhere, **Emberheart** round the Burnt Clearing, **Frostglass** round the
   Frozen Pond. Everyone who helps mine one gets it. A mined crystal grows back somewhere else.
@@ -172,15 +183,15 @@ you've unlocked **Frostpeak**.
   your island's **Crystal Vault**.
 - **The Gloom meter** fills while you're in the forest (slowly in the Edge, faster in the Midwood) and drains by a
   lantern. If it fills up you're pushed back to the hub and **drop half** of the crystals you hadn't sent home.
-- **Animals** (`GloomBeasts.luau`, settings in `Gloomwood.Beasts`): seven kinds.
+- **Animals** (`GloomBeasts.luau`, settings in `Gloomwood.Beasts`): nine kinds.
   - **Hostile** (chase anyone who comes close; a bit slower than you, give up if you run far enough, and **never go
     near a lantern**, so lanterns are safe):
     🦇 **Dusk Bats** flutter round the Edge (weak and quick), 🐺 **Shadow Wolves** roam the Midwood (a bite can knock
     a crystal out of your satchel), 🦊 **Cinder Foxes** prowl round the Burnt Clearing (sneaky: they often snatch a
-    crystal).
+    crystal), 👻 **Shadow Wisps** float through the Deepwood and drain a crystal with every touch.
   - **Guardians** (sleep next to a crystal and only wake when someone starts mining it): 🐗 **Bramble Boars** and
     🕷️ **Thicket Spiders** by Moonshards, 🐻 **Moss Bears** by Emberheart and Frostglass, 🦌 **Frost Stags** by
-    Frostglass.
+    Frostglass, and the 🌳 **Gloom Treant** by the Prismheart.
   - Every hit adds Gloom and shoves you back. Fight back with your pickaxe (it hits an animal that's after you
     before a crystal) and your equipped pets join in. Beating one gives pet XP (wolves drop a Moonshard, foxes an
     Emberheart). Hostiles come back after a while; a beaten guardian leaves its crystal unguarded.
@@ -195,7 +206,7 @@ you've unlocked **Frostpeak**.
 
 ## Missions
 
-A chain of 30 missions guides players from their first crystal to discovering all 25 species
+A chain of 33 missions guides players from their first crystal to discovering all 25 species
 (`src/shared/Missions.luau`). Some of them send new players to try the newer things: visit your Sanctuary,
 redeem a code, check the Leaderboards, upgrade your island, fill your Pet Habitat and explore the Gloomwood. Each one pays Essence (the last ones pay Trophies and the "Master Tamer"
 title). The **mission card** sits under the left menu and shows the mission, progress and reward.

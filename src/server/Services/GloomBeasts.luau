@@ -296,6 +296,89 @@ local PLANS = {
 		end
 		return Vector3.new(2.2, 2, 4), 2.4, coat
 	end,
+	ShadowWisp = function(model: Model, root: BasePart)
+		-- a ghostly flame: a glowing core with wisps trailing behind, no legs (it floats)
+		local glow = rgb(170, 120, 255)
+		part(model, root, {
+			Shape = Enum.PartType.Ball,
+			Size = Vector3.one * 1.4,
+			Color = rgb(230, 210, 255),
+			Material = Enum.Material.Neon,
+		}, CFrame.new(0, 0.1, 0))
+		for i = 1, 3 do
+			part(model, root, {
+				Shape = Enum.PartType.Ball,
+				Size = Vector3.one * (1.1 - i * 0.25),
+				Color = glow,
+				Material = Enum.Material.Neon,
+				Transparency = 0.2 + i * 0.15,
+			}, CFrame.new(0, 0.3 + i * 0.5, 0.4 + i * 0.5))
+		end
+		for _, x in { -0.3, 0.3 } do
+			part(
+				model,
+				root,
+				{ Size = Vector3.new(0.25, 0.3, 0.1), Color = rgb(20, 10, 40), Material = Enum.Material.Neon },
+				CFrame.new(x, 0.2, -0.65)
+			)
+		end
+		return Vector3.new(1.6, 1.8, 2.2), 4, glow
+	end,
+	GloomTreant = function(model: Model, root: BasePart)
+		local bark, leaf = rgb(45, 35, 40), rgb(60, 35, 90)
+		-- the trunk is the body; a glowing hollow in the chest, arms, and a crown of dark leaves
+		part(
+			model,
+			root,
+			{ Size = Vector3.new(2.6, 2.2, 1), Color = rgb(190, 120, 255), Material = Enum.Material.Neon },
+			CFrame.new(0, 1, -2.6)
+		)
+		for _, x in { -1, 1 } do
+			part(
+				model,
+				root,
+				{ Size = Vector3.new(0.9, 0.5, 0.2), Color = rgb(255, 220, 120), Material = Enum.Material.Neon },
+				CFrame.new(x * 1.3, 4.2, -2.7)
+			)
+			-- long branch arms
+			part(
+				model,
+				root,
+				{ Size = Vector3.new(1.6, 7, 1.6), Color = bark, Material = Enum.Material.Wood },
+				CFrame.new(x * 3.6, 0.5, -0.5) * CFrame.Angles(0, 0, x * 0.25)
+			)
+			part(
+				model,
+				root,
+				{ Size = Vector3.new(1, 3, 1), Color = bark, Material = Enum.Material.Wood },
+				CFrame.new(x * 4.6, -3.5, -1.5) * CFrame.Angles(0.5, 0, x * 0.3)
+			)
+		end
+		for i = 0, 4 do
+			local a = i / 5 * math.pi * 2
+			part(model, root, {
+				Shape = Enum.PartType.Ball,
+				Size = Vector3.one * 5,
+				Color = leaf,
+				Material = Enum.Material.Grass,
+			}, CFrame.new(math.sin(a) * 2.5, 7.5 + (i % 2), math.cos(a) * 2.5))
+		end
+		part(
+			model,
+			root,
+			{ Shape = Enum.PartType.Ball, Size = Vector3.one * 6, Color = leaf, Material = Enum.Material.Grass },
+			CFrame.new(0, 9.5, 0)
+		)
+		for _, x in { -1.6, 1.6 } do
+			part(
+				model,
+				root,
+				{ Size = Vector3.new(1.8, 4.5, 2), Color = bark, Material = Enum.Material.Wood },
+				CFrame.new(x, -5.2, 0)
+			)
+		end
+		return Vector3.new(5, 10, 5), 2.6, bark
+	end,
 	MossBear = function(model: Model, root: BasePart)
 		local fur, moss = rgb(80, 60, 45), rgb(70, 130, 60)
 		part(model, root, { Size = Vector3.new(2.6, 2.4, 2.4), Color = fur }, CFrame.new(0, 1.4, -3.8))
@@ -456,8 +539,14 @@ end
 
 local function hostileSpot(def: any): Vector3?
 	local rng = GloomBeasts.Rng
-	local inner = if def.Ring == "Edge" then Gloomwood.RingEdge + 15 else Gloomwood.RingMid + 20
-	local outer = if def.Ring == "Edge" then Gloomwood.Radius - 20 else Gloomwood.RingEdge - 15
+	local inner = if def.Ring == "Edge"
+		then Gloomwood.RingEdge + 15
+		elseif def.Ring == "Deepwood" then Gloomwood.RingHeart + 15
+		else Gloomwood.RingMid + 20
+	local outer = if def.Ring == "Edge"
+		then Gloomwood.Radius - 20
+		elseif def.Ring == "Deepwood" then Gloomwood.RingMid - 15
+		else Gloomwood.RingEdge - 15
 	-- animals that live by a landmark stay a bit further from lanterns there
 	local keepAway = if def.Near then 25 else 40
 	for _ = 1, 60 do
@@ -468,8 +557,10 @@ local function hostileSpot(def: any): Vector3?
 		else
 			pos = Gloomwood.At(rng:NextNumber(0, math.pi * 2), rng:NextNumber(inner, outer))
 		end
-		local safe = Gloomwood.RingAt(pos) ~= nil
-			and Gloomwood.RingAt(pos) ~= "Deepwood"
+		local ring = Gloomwood.RingAt(pos)
+		local safe = ring ~= nil
+			and ring ~= "Heart"
+			and (ring == def.Ring or def.Near ~= nil)
 			and flat(pos - Gloomwood.Place("DeepCamp")).Magnitude > 50
 			and flat(pos - Gloomwood.Place("Gate")).Magnitude > 70
 		for _, lamp in GloomBeasts.Hooks.Lanterns() do
@@ -556,6 +647,12 @@ local function chase(beast: Beast, player: Player)
 			`{beast.Def.Icon} A {beast.Def.Name} woke up! Run, or fight it off`,
 			rgb(255, 150, 120)
 		)
+		if beast.Def.Announce then
+			notify:FireAllClients(
+				`{beast.Def.Icon} The {beast.Def.Name} has woken in the Heart of the Gloomwood! Help {player.DisplayName}`,
+				rgb(200, 150, 255)
+			)
+		end
 	end
 end
 
@@ -629,6 +726,18 @@ local function defeat(beast: Beast)
 			end
 			notify:FireClient(player, `{def.Icon} You beat a {def.Name}! +{def.XP} pet XP{extra}`, rgb(150, 255, 170))
 		end
+	end
+	if def.Announce then
+		local names = {}
+		for player in beast.Damage do
+			if player.Parent then
+				table.insert(names, player.DisplayName)
+			end
+		end
+		notify:FireAllClients(
+			`{def.Icon} The {def.Name} was defeated by {table.concat(names, ", ")}!`,
+			rgb(150, 255, 170)
+		)
 	end
 	remove(beast)
 	if def.Kind == "Hostile" then

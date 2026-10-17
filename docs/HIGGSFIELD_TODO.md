@@ -1,0 +1,92 @@
+# Art to make with Higgsfield
+
+Everything in the game has a built-in block version, so none of this blocks playing. Each 3D model
+is picked up automatically once it's imported into Studio with the right name (see
+[WORLD_MESHES.md](WORLD_MESHES.md)). Icons are set in `src/shared/Config.luau` (`Icon = "rbxassetid://..."`)
+or on the Creator Hub.
+
+Done items move to the bottom.
+
+## 3D models (name = the model name the game looks for)
+
+### Sanctuary islands
+| Model name | What | Replaces |
+|---|---|---|
+| `UpgradeStone` | Tall glowing purple rune stone | the block stone on every island |
+| `CrystalVault` | Ornate chest with crystals growing out of the lid | the block chest |
+| `HabitatFence` | A short wooden garden fence section (curved) | the fence posts round the Pet Habitat |
+| `SkyBridgeLamp` | Small hanging lantern for the bridge posts | the glowing cubes |
+| `PlazaCrystal` | Huge floating crystal cluster for the Sky Plaza | the neon pillars in the middle |
+| `IslandTree` | Round pastel tree (2-3 colour variants: green, pink) | the ball-on-trunk trees |
+| `Hangar` | Open workshop shed with a hoverboard rack (when the Hangar is built) | - |
+
+### Gloomwood
+| Model name | What | Replaces |
+|---|---|---|
+| `GloomTree` | Twisted dark tree with purple-green leaves (2 variants) | the block trees (hundreds of them) |
+| `DeadTree` | Bare twisted trunk (for the Deepwood and the Heart) | block trunks |
+| `CourierLantern` | Wooden post with a hanging warm lantern | the post + glowing cube |
+| `GloomMushroom` | Glowing mushroom cluster (teal and purple variants) | the stem + cap parts |
+| `ThornWall` | A section of thorny bramble wall | the dark planks round the Deepwood |
+| `DeepwoodGate` | Twisted bramble archway with torches (for the wall openings) | the two posts |
+| `GloomCliff` | Craggy rock ledge with a ramp | the block cliffs |
+| `GloomCave` | Rock mound with a dark opening | the box caves |
+| `StandingStone` | Rune-carved standing stone | the blocks in the Heart's stone circle |
+| `HeartPedestal` | Carved stone pedestal | the block pedestal |
+| `GloomwoodGate` | Big stone archway covered in moss (the exit gate) | the pillars |
+| `DeepCampTent` | Small canvas tent | the wedge tents |
+| `Campfire` | Stone-ringed campfire | the block + fire |
+| `BrokenWatchtower` | Collapsed wooden watchtower | the block tower |
+| `GiantDeadTree` | Enormous dead tree landmark | the cylinder trunk |
+| `MapFragment` | Rolled-up glowing parchment | the neon cylinder |
+
+### Gloom Crystals
+| Model name | What |
+|---|---|
+| `MoonshardCrystal` | Pale blue-white crystal cluster |
+| `EmberheartCrystal` | Orange-red crystal with embers |
+| `FrostglassCrystal` | Clear icy blue crystal |
+| `StormquartzCrystal` | Yellow crystal with lightning veins |
+| `VoidstoneCrystal` | Dark purple crystal with a black core |
+| `PrismheartCrystal` | Big rainbow prism crystal (legendary) |
+
+### Gloomwood animals (these need rigging to walk; the block versions walk already)
+| Model name | What |
+|---|---|
+| `ShadowWolf` | Dark wolf with glowing purple eyes |
+| `DuskBat` | Small purple bat |
+| `CinderFox` | Orange fox with an ember-tipped tail |
+| `BrambleBoar` | Brown boar with green bramble spikes along its back |
+| `ThicketSpider` | Dark green spider with glowing green eyes |
+| `MossBear` | Big brown bear with moss growing on its back |
+| `FrostStag` | Pale stag with glowing ice antlers |
+| `ShadowWisp` | Floating ghostly flame |
+| `GloomTreant` | Huge walking tree boss with a glowing hollow chest |
+
+## Icons and UI images
+
+### Game pass icons
+| Pass | Done? |
+|---|---|
+| Master Alchemist | done ([ICONS.md](ICONS.md)) |
+| Hangar / vehicle skins (when vehicles exist) | - |
+
+### Item icons (the Bag uses emoji for now; proper icons would look much better)
+Luck Potion, Essence Potion, Shiny Elixir, Speed Potion, Owl Eye Potion, Gloom Ward, Power Potion, XP Potion,
+Rainbow Brew, Pet Treat, Golden Treat, Essence Bag, Mystic Egg, Mystery Gift, Treasure Map, Boss Horn.
+
+### Crystal icons (for the Vault, Cauldron and satchel)
+Moonshard, Emberheart, Frostglass, Stormquartz, Voidstone, Prismheart.
+
+### Other
+| Image | Where |
+|---|---|
+| Gloomwood map background (a parchment-style top-down map of the forest rings) | the 🗺️ forest map window |
+| Sanctuary / Gloomwood update thumbnails | the experience page |
+| "The Sanctuary Update" banner | What's New pop-up header |
+
+## Done
+| Name | What |
+|---|---|
+| `AlchemyCauldron` | The Cauldron on every island ([WORLD_MESHES.md](WORLD_MESHES.md)) |
+| Master Alchemist icon | Game pass icon ([ICONS.md](ICONS.md)) |
