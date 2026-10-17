@@ -362,6 +362,60 @@ local function build(player: Player, slot: number): Model
 			end
 			continue
 		end
+		if station.Id == "Cauldron" then
+			-- a big bubbling pot: step into its circle to brew potions
+			helpers.ShopPad(
+				model,
+				"CauldronPad",
+				spot + Vector3.new(0, 0.1, 0),
+				rgb(150, 255, 170),
+				"⚗️ Alchemy Cauldron"
+			)
+			local back = at(station.Spot.X * r, 0, station.Spot.Y * r - 7)
+			local brewing = false
+			local data = PlayerData.Get(player) :: any
+			if data and data.Cauldron and data.Cauldron.Brews then
+				brewing = #data.Cauldron.Brews > 0
+			end
+			local base = Vector3.new(back.X, c.Y + 1.7, back.Z)
+			local mesh = helpers.PlaceMesh(model, "AlchemyCauldron", CFrame.new(base), 7, true, true)
+			if not mesh then
+				-- built-in pot: legs, a round black pot and a rim
+				for i = 0, 2 do
+					local a = i / 3 * math.pi * 2
+					part({
+						Name = "PotLeg",
+						Size = Vector3.new(0.6, 1.4, 0.6),
+						Position = base + Vector3.new(math.sin(a) * 1.8, 0.7, math.cos(a) * 1.8),
+						Color = rgb(40, 40, 45),
+						Material = Enum.Material.Metal,
+						Parent = model,
+					})
+				end
+				part({
+					Name = "Pot",
+					Shape = Enum.PartType.Ball,
+					Size = Vector3.new(5.5, 4.5, 5.5),
+					Position = base + Vector3.new(0, 3.2, 0),
+					Color = rgb(35, 35, 42),
+					Material = Enum.Material.Metal,
+					Parent = model,
+				})
+				slab(model, base + Vector3.new(0, 5.2, 0), 5, 0.5, rgb(60, 60, 70), Enum.Material.Metal).Name = "PotRim"
+			end
+			-- the brew itself (glows and bubbles while something's brewing)
+			local liquid = slab(model, base + Vector3.new(0, 5.35, 0), 4.2, 0.3, rgb(60, 70, 60), Enum.Material.Neon)
+			liquid.Name = "CauldronLiquid"
+			liquid.CanCollide = false
+			local fire = Instance.new("Fire")
+			fire.Size = 4
+			fire.Heat = 3
+			fire.Color = rgb(120, 255, 140)
+			fire.SecondaryColor = rgb(80, 200, 255)
+			fire.Parent = liquid
+			Sanctuaries.ShowBrewing(model, brewing)
+			continue
+		end
 		if station.Id == "Vault" then
 			-- a crystal-topped chest: step into its circle to see and sell your Gloom Crystals
 			helpers.ShopPad(model, "VaultPad", spot + Vector3.new(0, 0.1, 0), rgb(150, 200, 255), "💎 Crystal Vault")
@@ -511,6 +565,21 @@ end
 
 function Sanctuaries.IslandOf(player: Player): Model?
 	return islands[player]
+end
+
+-- The cauldron's brew glows green and bubbles while a potion is brewing (Services/Cauldron)
+function Sanctuaries.ShowBrewing(island: Model, brewing: boolean)
+	local liquid = island:FindFirstChild("CauldronLiquid") :: BasePart?
+	if not liquid then
+		return
+	end
+	liquid.Color = if brewing then Color3.fromRGB(110, 255, 140) else Color3.fromRGB(60, 70, 60)
+	liquid.Transparency = if brewing then 0.05 else 0.3
+	local fire = liquid:FindFirstChildOfClass("Fire")
+	if fire then
+		fire.Enabled = brewing
+	end
+	island:SetAttribute("Brewing", brewing)
 end
 
 -- Spends Essence on the next island level. Returns ok, message.

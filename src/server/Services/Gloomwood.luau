@@ -16,6 +16,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage.Shared
 local Gloomwood = require(Shared.Gloomwood)
+local Config = require(Shared.Config)
 local Sanctuary = require(Shared.Sanctuary)
 local Format = require(Shared.Format)
 local Remotes = require(Shared.Remotes)
@@ -451,7 +452,9 @@ function Service.Update(player: Player, dt: number)
 		level = math.max(0, level + cfg.Lantern * dt)
 		warned[player] = false
 	else
-		level += (if ring == "Edge" then cfg.Edge else cfg.Midwood) * dt
+		-- a Gloom Ward (brewed in the Cauldron) slows it down
+		local ward = if (data.Boosts.GloomWard or 0) > os.time() then Config.Boosts.GloomWard else 1
+		level += (if ring == "Edge" then cfg.Edge else cfg.Midwood) * dt * ward
 	end
 	gloom[player] = level
 	player:SetAttribute("Gloom", math.floor(level))

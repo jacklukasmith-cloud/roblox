@@ -333,6 +333,14 @@ Config.GamePasses = {
 		PriceHint = 149, -- shown in the shop UI; set the real price on the Creator Hub
 		Icon = "",
 	},
+	{
+		Key = "MasterAlchemist",
+		Id = 0, -- create it on the Creator Hub and paste the ID here
+		Name = "Master Alchemist",
+		Description = "2 Cauldron slots and brews 25% faster",
+		PriceHint = 149,
+		Icon = "",
+	},
 }
 
 Config.GamePassBonuses = {
@@ -341,6 +349,8 @@ Config.GamePassBonuses = {
 	LuckyHatchLuck = 1.5,
 	ExtraEquipSlots = 3,
 	LongerOfflineHours = 24,
+	CauldronSlots = 2, -- Master Alchemist
+	CauldronSpeed = 0.75, -- Master Alchemist: brewing time multiplier
 }
 
 Config.DevProducts = {
@@ -426,6 +436,7 @@ Config.Boosts = {
 	Power = 1.5, -- creature damage
 	XP = 2, -- creature XP
 	Vision = 1, -- Owl Eye Potion: lighter fog in the Gloomwood (no multiplier; GloomwoodClient)
+	GloomWard = 0.5, -- Gloom Ward: the Gloom meter fills this fast
 }
 
 -- Friend Boost: extra Essence for each Roblox friend playing in the same server

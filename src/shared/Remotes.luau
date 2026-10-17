@@ -51,6 +51,7 @@ local FUNCTIONS = {
 	"SeenWhatsNew",
 	"SetHabitat",
 	"SellCrystals",
+	"Brew",
 	"TradeRequest",
 	"TradeRespond",
 	"TradeSetPet",

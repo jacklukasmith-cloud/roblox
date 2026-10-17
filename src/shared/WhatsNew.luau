@@ -25,6 +25,11 @@ WhatsNew.List = {
 		Text = "Upgrade your island at its Upgrade Stone: it grows and gives more Essence.",
 	},
 	{
+		Icon = "⚗️",
+		Title = "Alchemy Cauldron",
+		Text = "Brew potions on your island from the Gloom Crystals in your Vault. They brew even while you're away!",
+	},
+	{
 		Icon = "🐾",
 		Title = "Pet Habitat",
 		Text = "Pets you put on your island wander around and earn XP, even while you're offline.",

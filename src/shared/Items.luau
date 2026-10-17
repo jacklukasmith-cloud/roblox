@@ -89,6 +89,16 @@ Items.List = {
 		Boosts = { Vision = 300 },
 	},
 	{
+		Id = "GloomWard",
+		Name = "Gloom Ward",
+		Icon = "🛡️",
+		Color = rgb(180, 130, 255),
+		Rarity = "Rare",
+		Description = "The Gloom meter fills half as fast for 10 minutes (brewed in the Cauldron)",
+		Kind = "Boost",
+		Boosts = { GloomWard = 600 },
+	},
+	{
 		Id = "PowerPotion",
 		Name = "Power Potion",
 		Icon = "💪",

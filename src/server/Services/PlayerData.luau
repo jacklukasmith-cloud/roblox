@@ -54,6 +54,7 @@ export type Data = {
 		GloomMined: number,
 		GloomBanked: number,
 		BeastsDefeated: number,
+		PotionsBrewed: number,
 	},
 	Items: { [string]: number }, -- the Bag (Shared/Items): item id -> count
 	RedeemedCodes: { [string]: boolean }, -- codes already used (Services/Codes)
@@ -62,6 +63,7 @@ export type Data = {
 	WeekStats: { Week: number, Base: { [string]: number } }?, -- totals at the start of the week (weekly leaderboards)
 	Missions: { Index: number, Baseline: number?, Id: string?, V: number? }, -- place in the mission chain (Shared/Missions)
 	Gloom: { Satchel: { [string]: number }, Vault: { [string]: number }, CampFound: boolean }, -- the Gloomwood (Shared/Gloomwood): crystals carried, crystals in your island's Vault
+	Cauldron: { Brews: { { Recipe: string, StartedAt: number, DoneAt: number } } }, -- the Alchemy Cauldron (Shared/Alchemy)
 	SeenUpdate: number, -- the last "What's New" the player has seen (Shared/WhatsNew)
 	Daily: { Streak: number, LastClaimDay: number },
 	Season: { Week: number, Points: number, RewardedWeek: number },
@@ -108,6 +110,7 @@ local function defaultData(): Data
 			GloomMined = 0,
 			GloomBanked = 0,
 			BeastsDefeated = 0,
+			PotionsBrewed = 0,
 		},
 		Items = {},
 		RedeemedCodes = {},
@@ -116,6 +119,7 @@ local function defaultData(): Data
 		Missions = { Index = 1 },
 		SeenUpdate = 0,
 		Gloom = { Satchel = {}, Vault = {}, CampFound = false },
+		Cauldron = { Brews = {} },
 		Daily = { Streak = 0, LastClaimDay = -1 },
 		Season = { Week = -1, Points = 0, RewardedWeek = -1 },
 		Titles = {},

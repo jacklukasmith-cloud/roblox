@@ -173,10 +173,15 @@ local function targetFor(target: string?, data: any, from: Vector3): Vector3?
 		end
 		local portal = sanctuaryPortal()
 		return portal and portal.Position
-	elseif target == "Upgrade" or target == "Habitat" then
+	elseif target == "Upgrade" or target == "Habitat" or target == "Cauldron" then
 		-- on an island: the Upgrade Stone / habitat circle; in the hub: the way up
 		local spot = if inTheSky(from)
-			then islandPart(if target == "Upgrade" then "UpgradeStone" else "HabitatPad")
+			then islandPart(
+				if target == "Upgrade"
+					then "UpgradeStone"
+					elseif target == "Cauldron" then "CauldronPad"
+					else "HabitatPad"
+			)
 			else nil
 		local portal = if spot then nil else sanctuaryPortal()
 		return if spot then spot.Position elseif portal then portal.Position else nil

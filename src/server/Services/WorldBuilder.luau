@@ -186,6 +186,8 @@ WorldBuilder.MeshNames = {
 	"FloatingIsland",
 	"RuinedColumn",
 	"StarLantern",
+	-- Sanctuary stations (Services/Sanctuaries)
+	"AlchemyCauldron",
 }
 local CRYSTAL_MESH = { "MeadowCrystal", "EmberCrystal", "FrostCrystal", "SkyCrystal" }
 
@@ -2163,6 +2165,7 @@ WorldBuilder.Helpers = {
 	Light = light,
 	ZoneStart = zoneStartZ,
 	Spread = SPREAD, -- multiply plan positions (x and z offsets) by this
+	PlaceMesh = placeMesh, -- (parent, name, base CFrame, size, byHeight?, collide?) -> Model? (nil = not imported)
 }
 
 return WorldBuilder

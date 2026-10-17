@@ -37,6 +37,7 @@ local FriendBoost = require(Services.FriendBoost)
 local Sanctuaries = require(Services.Sanctuaries)
 local Habitat = require(Services.Habitat)
 local Gloomwood = require(Services.Gloomwood)
+local Cauldron = require(Services.Cauldron)
 
 local notify = Remotes.Event("Notify")
 local dataChanged = Remotes.Event("DataChanged")
@@ -349,6 +350,7 @@ end
 bind("Travel", Sanctuaries.Travel)
 bind("SetHabitat", Habitat.Set)
 bind("SellCrystals", Gloomwood.Sell)
+bind("Brew", Cauldron.Brew)
 bind("SeenWhatsNew", function(player)
 	local data = PlayerData.Get(player) :: any
 	if data.SeenUpdate ~= WhatsNew.Version then
@@ -421,6 +423,7 @@ FriendBoost.Start()
 Sanctuaries.Start()
 Habitat.Start()
 Gloomwood.Start()
+Cauldron.Start()
 Admin.Start()
 
 print("[Mythic Tamers] Server ready")
