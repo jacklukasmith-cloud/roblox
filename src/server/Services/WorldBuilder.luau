@@ -2038,20 +2038,21 @@ function WorldBuilder.Build(): BuiltWorld
 		table.insert(result.HousePedestals, makeHouse(hub, id, position, math.pi / 2))
 	end
 
-	-- Champion Egg under a golden arch, guarded by a Titan Unicorn statue
-	local championPos = sp(-36, 0, -16)
+	-- Champion Egg under a golden arch, guarded by a Titan Unicorn statue: in the west wing between
+	-- the Merchant and the Blacksmith, facing the middle of the hub (+X)
+	local championPos = sp(-64, 0, 3)
 	table.insert(result.EggStands, makeEggStand(hub, "ChampionEgg", championPos))
 	for _, side in { -1, 1 } do
-		column(hub, championPos + Vector3.new(side * 7, 0, 3), 14, 1.6, GOLD, Enum.Material.Metal)
+		column(hub, championPos + Vector3.new(-3, 0, side * 7), 14, 1.6, GOLD, Enum.Material.Metal)
 	end
 	part({
-		Size = Vector3.new(16, 1.4, 1.8),
-		Position = championPos + Vector3.new(0, 14.4, 3),
+		Size = Vector3.new(1.8, 1.4, 16),
+		Position = championPos + Vector3.new(-3, 14.4, 0),
 		Color = GOLD,
 		Material = Enum.Material.Metal,
 		Parent = hub,
 	})
-	statue(hub, "TitanUnicorn", championPos + Vector3.new(0, 18.5, 3), 1.2)
+	statue(hub, "TitanUnicorn", championPos + Vector3.new(-3, 18.5, 0), 1.2, -math.pi / 2)
 
 	makeMerchant(hub, sp(-64, 0, -14))
 	buildDistricts(hub)
