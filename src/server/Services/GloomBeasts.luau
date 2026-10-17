@@ -21,6 +21,7 @@ local Remotes = require(Shared.Remotes)
 local PlayerData = require(script.Parent.PlayerData)
 local Economy = require(script.Parent.Economy)
 local WorldBuilder = require(script.Parent.WorldBuilder)
+local Bag = require(script.Parent.Bag)
 
 local GloomBeasts = {}
 
@@ -184,6 +185,117 @@ local PLANS = {
 		end
 		return Vector3.new(2.6, 2, 3.6), 0.8, hide
 	end,
+	DuskBat = function(model: Model, root: BasePart)
+		local skin = rgb(55, 35, 70)
+		for _, x in { -1, 1 } do
+			-- wings, swept back a little
+			part(
+				model,
+				root,
+				{ Size = Vector3.new(2.4, 0.15, 1.3), Color = rgb(40, 25, 55) },
+				CFrame.new(x * 1.7, 0.2, 0.1) * CFrame.Angles(0, x * -0.3, x * 0.35)
+			)
+			part(
+				model,
+				root,
+				{ ClassName = "WedgePart", Size = Vector3.new(0.25, 0.5, 0.3), Color = skin },
+				CFrame.new(x * 0.3, 0.7, -0.4)
+			)
+			part(
+				model,
+				root,
+				{ Size = Vector3.new(0.2, 0.15, 0.1), Color = rgb(255, 70, 70), Material = Enum.Material.Neon },
+				CFrame.new(x * 0.25, 0.2, -0.72)
+			)
+		end
+		return Vector3.new(1.2, 1, 1.4), 5, skin -- no legs: it flutters 5 studs up
+	end,
+	CinderFox = function(model: Model, root: BasePart)
+		local fur, dark = rgb(205, 85, 40), rgb(50, 30, 25)
+		part(model, root, { Size = Vector3.new(1.2, 1.1, 1.3), Color = fur }, CFrame.new(0, 0.4, -2))
+		part(model, root, { Size = Vector3.new(0.6, 0.5, 0.7), Color = rgb(240, 220, 200) }, CFrame.new(0, 0.2, -2.9))
+		for _, x in { -0.35, 0.35 } do
+			part(
+				model,
+				root,
+				{ ClassName = "WedgePart", Size = Vector3.new(0.35, 0.6, 0.35), Color = dark },
+				CFrame.new(x, 1.25, -1.9)
+			)
+		end
+		-- a bushy tail with a glowing ember tip
+		local tail = CFrame.new(0, 0.6, 2.1) * CFrame.Angles(math.rad(30), 0, 0)
+		part(model, root, { Size = Vector3.new(0.7, 0.7, 2.2), Color = fur }, tail)
+		part(
+			model,
+			root,
+			{ Size = Vector3.new(0.6, 0.6, 0.6), Color = rgb(255, 170, 60), Material = Enum.Material.Neon },
+			tail * CFrame.new(0, 0, 1.3)
+		)
+		for _, x in { -0.5, 0.5 } do
+			for _, z in { -1, 1 } do
+				part(model, root, { Size = Vector3.new(0.4, 1.2, 0.4), Color = dark }, CFrame.new(x, -1.2, z))
+			end
+		end
+		return Vector3.new(1.6, 1.3, 3), 1.15, fur
+	end,
+	ThicketSpider = function(model: Model, root: BasePart)
+		local shell = rgb(35, 50, 35)
+		part(model, root, { Size = Vector3.new(1.4, 1, 1.2), Color = rgb(25, 35, 25) }, CFrame.new(0, -0.1, -1.8))
+		for i = 0, 3 do
+			part(
+				model,
+				root,
+				{ Size = Vector3.new(0.18, 0.18, 0.1), Color = rgb(150, 255, 120), Material = Enum.Material.Neon },
+				CFrame.new(-0.45 + i * 0.3, 0.15 + (i % 2) * 0.15, -2.42)
+			)
+		end
+		-- eight long legs
+		for _, x in { -1, 1 } do
+			for i = 0, 3 do
+				part(
+					model,
+					root,
+					{ Size = Vector3.new(0.22, 0.22, 2.8), Color = shell },
+					CFrame.new(x * 1.4, -0.4, -1.3 + i * 0.75)
+						* CFrame.Angles(0, x * math.rad(90 - i * 12), 0)
+						* CFrame.Angles(math.rad(-25), 0, 0)
+				)
+			end
+		end
+		return Vector3.new(2.4, 1.4, 2.6), 0.9, shell
+	end,
+	FrostStag = function(model: Model, root: BasePart)
+		local coat, ice = rgb(185, 205, 225), rgb(140, 230, 255)
+		part(
+			model,
+			root,
+			{ Size = Vector3.new(0.9, 1.7, 0.9), Color = coat },
+			CFrame.new(0, 1.3, -1.9) * CFrame.Angles(math.rad(-20), 0, 0)
+		)
+		part(model, root, { Size = Vector3.new(0.9, 0.9, 1.6), Color = coat }, CFrame.new(0, 2.3, -2.7))
+		-- glowing ice antlers
+		for _, x in { -1, 1 } do
+			local base = CFrame.new(x * 0.35, 3.3, -2.5) * CFrame.Angles(0, 0, x * -0.4)
+			part(model, root, { Size = Vector3.new(0.18, 1.6, 0.18), Color = ice, Material = Enum.Material.Neon }, base)
+			part(
+				model,
+				root,
+				{ Size = Vector3.new(0.15, 0.9, 0.15), Color = ice, Material = Enum.Material.Neon },
+				base * CFrame.new(0, 0.3, -0.3) * CFrame.Angles(math.rad(-50), 0, 0)
+			)
+		end
+		for _, x in { -0.7, 0.7 } do
+			for _, z in { -1.5, 1.5 } do
+				part(
+					model,
+					root,
+					{ Size = Vector3.new(0.45, 2.4, 0.45), Color = rgb(150, 160, 180) },
+					CFrame.new(x, -2.2, z)
+				)
+			end
+		end
+		return Vector3.new(2.2, 2, 4), 2.4, coat
+	end,
 	MossBear = function(model: Model, root: BasePart)
 		local fur, moss = rgb(80, 60, 45), rgb(70, 130, 60)
 		part(model, root, { Size = Vector3.new(2.6, 2.4, 2.4), Color = fur }, CFrame.new(0, 1.4, -3.8))
@@ -346,17 +458,27 @@ local function hostileSpot(def: any): Vector3?
 	local rng = GloomBeasts.Rng
 	local inner = if def.Ring == "Edge" then Gloomwood.RingEdge + 15 else Gloomwood.RingMid + 20
 	local outer = if def.Ring == "Edge" then Gloomwood.Radius - 20 else Gloomwood.RingEdge - 15
-	for _ = 1, 40 do
-		local pos = Gloomwood.At(rng:NextNumber(0, math.pi * 2), rng:NextNumber(inner, outer))
-		local camp = flat(pos - Gloomwood.Place("DeepCamp")).Magnitude
-		local safe = true
+	-- animals that live by a landmark stay a bit further from lanterns there
+	local keepAway = if def.Near then 25 else 40
+	for _ = 1, 60 do
+		local pos
+		if def.Near then
+			local a, d = rng:NextNumber(0, math.pi * 2), rng:NextNumber(25, 80)
+			pos = Gloomwood.Place(def.Near) + Vector3.new(math.sin(a) * d, 0, math.cos(a) * d)
+		else
+			pos = Gloomwood.At(rng:NextNumber(0, math.pi * 2), rng:NextNumber(inner, outer))
+		end
+		local safe = Gloomwood.RingAt(pos) ~= nil
+			and Gloomwood.RingAt(pos) ~= "Deepwood"
+			and flat(pos - Gloomwood.Place("DeepCamp")).Magnitude > 50
+			and flat(pos - Gloomwood.Place("Gate")).Magnitude > 70
 		for _, lamp in GloomBeasts.Hooks.Lanterns() do
-			if flat(pos - lamp).Magnitude < 40 then
+			if flat(pos - lamp).Magnitude < keepAway then
 				safe = false
 				break
 			end
 		end
-		if safe and camp > 50 then
+		if safe then
 			return pos
 		end
 	end
@@ -376,22 +498,30 @@ end
 
 -- A new crystal grew: maybe a guardian sleeps next to it
 function GloomBeasts.OnCrystal(crystal: Model, crystalId: string, position: Vector3): Beast?
+	-- every kind that guards this crystal gets a roll, in a random order
+	local kinds = {}
 	for _, def in Gloomwood.Beasts do
 		if def.Kind == "Guardian" and table.find(def.Guards, crystalId) then
-			if GloomBeasts.Rng:NextNumber() < def.Chance then
-				local a = GloomBeasts.Rng:NextNumber(0, math.pi * 2)
-				local beast = build(def, position + Vector3.new(math.sin(a) * 5, 0, math.cos(a) * 5))
-				beast.State = "Sleep"
-				beast.Crystal = crystal
-				-- curled up facing its crystal
-				beast.Model:PivotTo(
-					CFrame.lookAt(beast.Root.Position, Vector3.new(position.X, beast.Root.Position.Y, position.Z))
-				)
-				guardianOf[crystal] = beast
-				place(beast)
-				return beast
-			end
-			return nil
+			table.insert(kinds, def)
+		end
+	end
+	for i = #kinds, 2, -1 do
+		local j = GloomBeasts.Rng:NextInteger(1, i)
+		kinds[i], kinds[j] = kinds[j], kinds[i]
+	end
+	for _, def in kinds do
+		if GloomBeasts.Rng:NextNumber() < def.Chance then
+			local a = GloomBeasts.Rng:NextNumber(0, math.pi * 2)
+			local beast = build(def, position + Vector3.new(math.sin(a) * 5, 0, math.cos(a) * 5))
+			beast.State = "Sleep"
+			beast.Crystal = crystal
+			-- curled up facing its crystal
+			beast.Model:PivotTo(
+				CFrame.lookAt(beast.Root.Position, Vector3.new(position.X, beast.Root.Position.Y, position.Z))
+			)
+			guardianOf[crystal] = beast
+			place(beast)
+			return beast
 		end
 	end
 	return nil
@@ -482,6 +612,15 @@ local function defeat(beast: Beast)
 			if data then
 				data.Stats.BeastsDefeated = (data.Stats.BeastsDefeated or 0) + 1
 				PlayerData.MarkChanged(player)
+				-- every few animals: an Owl Eye Potion (see further in the fog)
+				if data.Stats.BeastsDefeated % Gloomwood.VisionPotionEvery == 0 then
+					Bag.Give(player, "OwlEyePotion", 1)
+					notify:FireClient(
+						player,
+						"🦉 You earned an Owl Eye Potion! Drink it from your 🎒 Bag to see further in the fog",
+						rgb(255, 220, 130)
+					)
+				end
 			end
 			Economy.GrantXP(player, def.XP)
 			local extra = ""

@@ -163,15 +163,20 @@ you've unlocked **Frostpeak**.
   your island's **Crystal Vault**.
 - **The Gloom meter** fills while you're in the forest (slowly in the Edge, faster in the Midwood) and drains by a
   lantern. If it fills up you're pushed back to the hub and **drop half** of the crystals you hadn't sent home.
-- **Animals** (`GloomBeasts.luau`, settings in `Gloomwood.Beasts`):
-  - 🐺 **Shadow Wolves** are hostile: they roam the Midwood and chase anyone who comes close. They're a bit slower
-    than you, give up if you run far enough, and **never go near a lantern**, so lanterns are safe. A bite can knock
-    a crystal out of your satchel.
-  - 🐗 **Bramble Boars** (by Moonshards) and 🐻 **Moss Bears** (by Emberhearts and Frostglass) are guardians: they
-    sleep next to a crystal and only wake up when someone starts mining it.
+- **Animals** (`GloomBeasts.luau`, settings in `Gloomwood.Beasts`): seven kinds.
+  - **Hostile** (chase anyone who comes close; a bit slower than you, give up if you run far enough, and **never go
+    near a lantern**, so lanterns are safe):
+    🦇 **Dusk Bats** flutter round the Edge (weak and quick), 🐺 **Shadow Wolves** roam the Midwood (a bite can knock
+    a crystal out of your satchel), 🦊 **Cinder Foxes** prowl round the Burnt Clearing (sneaky: they often snatch a
+    crystal).
+  - **Guardians** (sleep next to a crystal and only wake when someone starts mining it): 🐗 **Bramble Boars** and
+    🕷️ **Thicket Spiders** by Moonshards, 🐻 **Moss Bears** by Emberheart and Frostglass, 🦌 **Frost Stags** by
+    Frostglass.
   - Every hit adds Gloom and shoves you back. Fight back with your pickaxe (it hits an animal that's after you
-    before a crystal) and your equipped pets join in. Beating one gives pet XP (and a Moonshard from a wolf);
-    wolves come back after a minute, and a beaten guardian leaves its crystal unguarded.
+    before a crystal) and your equipped pets join in. Beating one gives pet XP (wolves drop a Moonshard, foxes an
+    Emberheart). Hostiles come back after a while; a beaten guardian leaves its crystal unguarded.
+  - **Every 5th animal** you beat gives an 🦉 **Owl Eye Potion** (into your Bag): for 5 minutes the fog is much
+    lighter and you can see over twice as far.
 - **Deep Camp:** a safe camp in the Midwood. Once you've found it, the orange circle at the gate takes you straight
   there.
 - **Crystal Vault** (on your Sanctuary island): holds 200 crystals, plus 100 for each island level. Sell crystals

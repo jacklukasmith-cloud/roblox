@@ -425,6 +425,7 @@ Config.Boosts = {
 	Speed = 1.3, -- walk speed
 	Power = 1.5, -- creature damage
 	XP = 2, -- creature XP
+	Vision = 1, -- Owl Eye Potion: lighter fog in the Gloomwood (no multiplier; GloomwoodClient)
 }
 
 -- Friend Boost: extra Essence for each Roblox friend playing in the same server

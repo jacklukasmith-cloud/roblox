@@ -47,6 +47,15 @@ local ATMOSPHERE = {
 	Haze = { 1.8, 3 },
 }
 
+-- With an Owl Eye Potion: as if you were only this deep, and these on top (fog much further away)
+local VISION_DEPTH = 0.3
+local VISION = {
+	FogEnd = 2.2, -- times
+	Density = 0.5,
+	Haze = 0.5,
+	Brightness = 1.4,
+}
+
 local function blend(pair: { any }, t: number): any
 	local a, b = pair[1], pair[2]
 	if type(a) == "number" then
@@ -69,14 +78,27 @@ end
 local saved: { [string]: any }? = nil
 local savedAtmosphere: { [string]: any }? = nil
 
+local function hasVision(): boolean
+	local data = State.Data
+	local endsAt = data and data.Boosts and data.Boosts.Vision
+	return endsAt ~= nil and endsAt > State.Now()
+end
+
 -- depth: 0 = the forest's edge, 1 = its centre
 local function apply(depth: number)
+	local vision = hasVision()
+	if vision then
+		depth *= VISION_DEPTH
+	end
 	saved = saved or {}
 	for key, pair in LIGHTING do
 		if (saved :: any)[key] == nil then
 			(saved :: any)[key] = (Lighting :: any)[key]
 		end
 		local value = blend(pair, depth)
+		if vision and VISION[key] then
+			value *= VISION[key]
+		end
 		if differs((Lighting :: any)[key], value) then
 			(Lighting :: any)[key] = value
 		end
@@ -89,6 +111,9 @@ local function apply(depth: number)
 				(savedAtmosphere :: any)[key] = (atmosphere :: any)[key]
 			end
 			local value = blend(pair, depth)
+			if vision and VISION[key] then
+				value *= VISION[key]
+			end
 			if differs((atmosphere :: any)[key], value) then
 				(atmosphere :: any)[key] = value
 			end

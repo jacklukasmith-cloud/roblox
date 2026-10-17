@@ -79,6 +79,16 @@ Items.List = {
 		Boosts = { Speed = 600 },
 	},
 	{
+		Id = "OwlEyePotion",
+		Name = "Owl Eye Potion",
+		Icon = "🦉",
+		Color = rgb(255, 210, 110),
+		Rarity = "Rare",
+		Description = "See much further through the Gloomwood fog for 5 minutes",
+		Kind = "Boost",
+		Boosts = { Vision = 300 },
+	},
+	{
 		Id = "PowerPotion",
 		Name = "Power Potion",
 		Icon = "💪",
