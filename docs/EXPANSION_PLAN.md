@@ -39,6 +39,16 @@ Every player gets their own **Sanctuary**: a floating island they own, reached f
 - **Building it up:** a fixed layout with **upgrade levels 1-10**, paid with Essence. Each level unlocks stations,
   decorations and a bigger island.
 - **First version includes all four stations:** Pet Habitat, Crystal Vault, Alchemy Cauldron and Hangar.
+- **Money (looks and time-savers only, nothing pay-to-win):**
+  - island themes (crystal cave, lava isle, candy island...);
+  - decoration packs;
+  - a faster-crafting pass (2 cauldron slots, 25% faster) plus a small "finish brew now" product;
+  - hoverboard and kart skins.
+- **Fun extras:**
+  - visit and ❤️ like other players' bases, with a weekly "Most Liked Sanctuary" board and prize;
+  - a daily island chest;
+  - a pet playground that earns pet XP while you're away;
+  - a crystal garden where seeds grow over real time (like Grow a Garden).
 
 **How it works (recommended):** each server has a ring of floating base plots away from the main map (like a
 tycoon game's plots). When you join, you're given a free plot and your saved base is built on it. When you leave,
@@ -323,6 +333,13 @@ and potions, Bee Swarm Simulator's treats and Grow a Garden's restocking shop.
 | **Event items** | Grow a Garden | Limited items during weekend events that never return. People log in for them. |
 | ~~**Trading**~~ (done) | Adopt Me / PS99 | Trade creatures and items with a confirm screen. This is the biggest one for a lasting economy. |
 | **Item index** | Pet Simulator 99 | An Index page for items as well as creatures, with a reward for finding every item. |
+
+## Decided next ideas
+
+- **Rule for Robux:** mostly cosmetics and time-savers. Boosts stay modest, so free players can still reach the top.
+- **Weekend events:** limited event realms or eggs (Halloween, Snow festival) with pets that never come back.
+- **Spin wheel:** one free spin every 4 hours, and extra spins for Robux.
+- **Huge pets:** ultra-rare giant versions of creatures (about 1 in 100,000).
 
 ## Missions for the new content
 
