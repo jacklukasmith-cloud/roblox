@@ -1903,8 +1903,8 @@ local function buildDistricts(hub: Instance)
 	-- more lamps for the new areas
 	for _, pos in
 		{
-			sp(-62, 0, -55),
-			sp(62, 0, -55),
+			sp(-74, 0, -77),
+			sp(74, 0, -57),
 			sp(-62, 0, 46),
 			sp(62, 0, 46),
 			sp(-48, 0, -96),
@@ -1990,8 +1990,9 @@ function WorldBuilder.Build(): BuiltWorld
 
 	for _, pos in
 		{
-			sp(-44, 0, -45),
-			sp(44, 0, -45),
+			-- the back pair stand beside the leaderboards, against the walls, not in front of them
+			sp(-74, 0, -31),
+			sp(74, 0, -31),
 			sp(-44, 0, 0),
 			sp(44, 0, 0),
 			sp(-44, 0, 40),
