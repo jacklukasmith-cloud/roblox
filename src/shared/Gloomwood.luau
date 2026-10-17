@@ -113,6 +113,13 @@ function Gloomwood.RingAt(position: Vector3): string?
 	return "Deepwood"
 end
 
+-- How deep into the forest a position is: 0 at the outer edge, 1 at the very centre (the Heart).
+-- The screen gets darker and foggier the deeper you go.
+function Gloomwood.Depth(position: Vector3): number
+	local d = ((position - Gloomwood.Center) * Vector3.new(1, 0, 1)).Magnitude
+	return math.clamp(1 - d / Gloomwood.Radius, 0, 1)
+end
+
 -- Pickaxe damage per swing on a Gloom Crystal (a better pickaxe needs fewer swings)
 function Gloomwood.SwingDamage(pickaxeTier: number, golden: boolean, goldenDamage: number): number
 	return (1 + (math.max(pickaxeTier, 1) - 1) * 0.25) * (if golden then goldenDamage else 1)

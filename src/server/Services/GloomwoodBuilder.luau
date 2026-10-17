@@ -133,7 +133,9 @@ local function tree(parent: Instance, rng: Random, pos: Vector3)
 		Material = Enum.Material.Wood,
 		Parent = parent,
 	})
-	local leaf = rgb(40, 70, 55):Lerp(rgb(60, 45, 85), rng:NextNumber() ^ 2)
+	-- leaves get darker the deeper into the forest the tree is
+	local shade = Gloomwood.Depth(pos) / (1 - Gloomwood.RingMid / Gloomwood.Radius)
+	local leaf = rgb(40, 70, 55):Lerp(rgb(60, 45, 85), rng:NextNumber() ^ 2):Lerp(rgb(12, 12, 20), shade * 0.55)
 	for i = 1, 2 do
 		local size = rng:NextNumber(11, 16) - i * 2
 		part({
@@ -515,9 +517,14 @@ function GloomwoodBuilder.Build(parent: Instance): Layout
 	local ground =
 		disc(model, c - Vector3.new(0, 2, 0), Gloomwood.Radius * 2 + 40, 4, rgb(50, 66, 48), Enum.Material.Grass)
 	ground.Name = "Ground"
-	disc(model, c + Vector3.new(0, 0.02, 0), Gloomwood.RingEdge * 2, 0.1, rgb(40, 52, 42), Enum.Material.Grass).CanCollide =
-		false
-	disc(model, c + Vector3.new(0, 0.04, 0), Gloomwood.RingMid * 2, 0.1, rgb(25, 22, 30), Enum.Material.Slate).CanCollide =
+	-- the grass gets darker step by step towards the middle
+	local steps = 5
+	for i = 1, steps do
+		local radius = Gloomwood.Radius - (Gloomwood.Radius - Gloomwood.RingMid) * i / (steps + 1)
+		local color = rgb(50, 66, 48):Lerp(rgb(22, 26, 28), i / steps)
+		disc(model, c + Vector3.new(0, 0.01 * i, 0), radius * 2, 0.1, color, Enum.Material.Grass).CanCollide = false
+	end
+	disc(model, c + Vector3.new(0, 0.07, 0), Gloomwood.RingMid * 2, 0.1, rgb(18, 16, 24), Enum.Material.Slate).CanCollide =
 		false
 
 	-- trails: gate -> Deep Camp, a loop through the Edge, a loop through the Midwood, spurs to the

@@ -151,7 +151,9 @@ A huge, foggy forest behind the hub (`src/shared/Gloomwood.luau`). Step into the
 you've unlocked **Frostpeak**.
 - **The forest** is 1,200 studs across, built from parts (`GloomwoodBuilder.luau`): winding trails, twisted
   trees, glowing mushrooms and landmarks to find your way (the Burnt Clearing, the Frozen Pond, the Old Dead Tree
-  and the Broken Watchtower). Thick dark fog is added on your screen while you're inside.
+  and the Broken Watchtower). Fog is added on your screen while you're inside, and it gets **darker and thicker
+  the deeper you go**: the light, fog and sky fade smoothly from the gate to the middle, and the grass and
+  treetops get darker too.
 - **Rings:** the **Edge** (outside) and the darker **Midwood** are open. The **Deepwood** and the Heart in the
   middle are behind a thorn wall until part 2.
 - **Gloom Crystals** grow in hidden spots off the trails. Mine them with your **pickaxe** (a better pickaxe takes

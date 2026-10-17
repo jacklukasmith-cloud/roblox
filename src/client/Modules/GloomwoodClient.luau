@@ -1,12 +1,14 @@
 --[[
-	The Gloomwood on your screen: thick dark fog while you're in the forest (put back when you
-	leave), and a small card at the top with your satchel and the Gloom meter.
+	The Gloomwood on your screen: dark fog while you're in the forest that gets thicker and darker
+	the deeper you go (put back when you leave), and a small card at the top with your satchel and
+	the Gloom meter.
 	The server sets the player attributes InGloomwood and Gloom (Services/Gloomwood).
 ]]
 
 local Lighting = game:GetService("Lighting")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Gloomwood = require(ReplicatedStorage.Shared.Gloomwood)
@@ -22,46 +24,70 @@ local GloomwoodClient = {}
 local rgb = Color3.fromRGB
 local PURPLE = rgb(170, 110, 255)
 
--- The forest look (only on this client; the rest of the world is untouched)
+-- The forest look (only on this client; the rest of the world is untouched). The first value is
+-- at the forest's edge, the second at its very centre (Gloomwood.Depth); in between they blend,
+-- so it keeps getting darker the further in you walk.
 local LIGHTING = {
-	ClockTime = 18.3,
-	Brightness = 1.1,
-	OutdoorAmbient = rgb(70, 85, 90),
-	Ambient = rgb(45, 40, 65),
-	FogColor = rgb(40, 55, 50),
-	FogStart = 10,
-	FogEnd = 110,
+	ClockTime = { 17.6, 19.0 },
+	Brightness = { 1.6, 0.3 },
+	OutdoorAmbient = { rgb(95, 110, 110), rgb(25, 25, 40) },
+	Ambient = { rgb(60, 58, 80), rgb(20, 15, 35) },
+	FogColor = { rgb(55, 70, 65), rgb(12, 12, 20) },
+	FogStart = { 20, 0 },
+	FogEnd = { 220, 55 },
 }
 local ATMOSPHERE = {
-	Density = 0.55,
-	Offset = 0,
-	Color = rgb(65, 85, 75),
-	Decay = rgb(55, 40, 80),
-	Glare = 0,
-	Haze = 2.6,
+	Density = { 0.38, 0.8 },
+	Offset = { 0, 0 },
+	Color = { rgb(85, 105, 95), rgb(25, 30, 35) },
+	Decay = { rgb(70, 55, 95), rgb(25, 15, 40) },
+	Glare = { 0, 0 },
+	Haze = { 1.8, 3 },
 }
+
+local function blend(pair: { any }, t: number): any
+	local a, b = pair[1], pair[2]
+	if type(a) == "number" then
+		return a + (b - a) * t
+	end
+	return a:Lerp(b, t) -- a Color3
+end
+
+-- Only change a property when it's really different (setting it every frame isn't free)
+local function differs(a: any, b: any): boolean
+	if type(a) == "number" and type(b) == "number" then
+		return math.abs(a - b) > 0.002
+	elseif typeof(a) == typeof(b) and type(b) ~= "number" and a ~= nil then
+		-- Color3s
+		return math.abs(a.R - b.R) + math.abs(a.G - b.G) + math.abs(a.B - b.B) > 0.004
+	end
+	return true
+end
 
 local saved: { [string]: any }? = nil
 local savedAtmosphere: { [string]: any }? = nil
 
-local function apply()
+-- depth: 0 = the forest's edge, 1 = its centre
+local function apply(depth: number)
 	saved = saved or {}
-	for key, value in LIGHTING do
+	for key, pair in LIGHTING do
 		if (saved :: any)[key] == nil then
 			(saved :: any)[key] = (Lighting :: any)[key]
 		end
-		if (Lighting :: any)[key] ~= value then
+		local value = blend(pair, depth)
+		if differs((Lighting :: any)[key], value) then
 			(Lighting :: any)[key] = value
 		end
 	end
 	local atmosphere = Lighting:FindFirstChildOfClass("Atmosphere")
 	if atmosphere then
 		savedAtmosphere = savedAtmosphere or {}
-		for key, value in ATMOSPHERE do
+		for key, pair in ATMOSPHERE do
 			if (savedAtmosphere :: any)[key] == nil then
 				(savedAtmosphere :: any)[key] = (atmosphere :: any)[key]
 			end
-			if (atmosphere :: any)[key] ~= value then
+			local value = blend(pair, depth)
+			if differs((atmosphere :: any)[key], value) then
 				(atmosphere :: any)[key] = value
 			end
 		end
@@ -124,14 +150,24 @@ function GloomwoodClient.Build(root: Frame)
 		Parent = barBack,
 	})
 
+	-- how deep you are, eased so a jump (the Deep Camp shortcut) fades in rather than snapping
+	local depth: number? = nil
+	local function targetDepth(): number
+		local character = player.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+		return if root then Gloomwood.Depth(root.Position) else depth or 0
+	end
+
 	local function update()
 		local inside = player:GetAttribute("InGloomwood") == true
 		local gloom = tonumber(player:GetAttribute("Gloom")) or 0
 		card.Visible = inside
 		if inside then
-			apply()
+			depth = depth or targetDepth()
+			apply(depth :: number)
 		elseif saved or savedAtmosphere then
 			restore()
+			depth = nil
 		end
 		if inside then
 			local data = State.Data
@@ -152,14 +188,20 @@ function GloomwoodClient.Build(root: Frame)
 			update()
 		end
 	end)
-	-- the server can change the lighting (weather): keep the forest look while inside
-	task.spawn(function()
-		while true do
-			task.wait(1)
-			if player:GetAttribute("InGloomwood") == true then
-				apply()
-			end
+	-- follow how deep you are (10 times a second is plenty). This also keeps the forest look if
+	-- the server changes the lighting (weather) while you're inside.
+	local since = 0
+	RunService.Heartbeat:Connect(function(dt)
+		since += dt
+		if since < 0.1 or player:GetAttribute("InGloomwood") ~= true then
+			return
 		end
+		local step = since
+		since = 0
+		local target = targetDepth()
+		local current = depth or target
+		depth = current + (target - current) * math.min(1, step * 1.5)
+		apply(depth :: number)
 	end)
 	update()
 end
