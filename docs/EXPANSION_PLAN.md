@@ -346,7 +346,7 @@ and potions, Bee Swarm Simulator's treats and Grow a Garden's restocking shop.
 The main game now has a mission chain (`src/shared/Missions.luau`). Each new part of the expansion
 should add its own missions to the end of that list, so the missions keep guiding players into new
 content. For example:
-- "Enter the Gloomwood", "Send 10 crystals home", "Find a Stormquartz", "Reach the Deep Camp"
+- ~~"Enter the Gloomwood", "Send 10 crystals home", "Reach the Deep Camp"~~ (done), "Find a Stormquartz"
 - ~~"Visit your Sanctuary"~~ (done, with "Redeem a code", "Check the Leaderboards" and island levels 2 and 3),
   "Brew your first potion", "Build a hoverboard"
 - "Visit a friend's base", "Unlock Coral Abyss"
@@ -362,7 +362,7 @@ Each step works by itself and makes the next one easier.
 | 3 | ~~Leaderboard panel, weekly boards and your rank~~ (done) | Quick win, gives everyone something to chase | M |
 | 4 | ~~Bigger hub with districts~~ (done: west wing for the Merchant and Blacksmith, House Quarter, Portal Plaza) | Makes room for the portals, boards and vehicles below | M |
 | 5 | Sanctuary base: ~~islands and travel~~ (done), ~~levels 1-10~~ (done), ~~Pet Habitat with XP while away~~ (done), vault | Everything after this needs a base | L |
-| 6a | Gloomwood part 1: Edge and Midwood, Gloom Crystals, satchel, lanterns, Gloom meter, Deep Camp | The main new adventure | L |
+| 6a | ~~Gloomwood part 1: Edge and Midwood, Gloom Crystals, satchel, lanterns, Gloom meter, Deep Camp~~ (done, with the Crystal Vault and selling) | The main new adventure | L |
 | 6b | Gloomwood part 2: Deepwood (cliffs, caves), the Heart, Prismheart, Gloom Treant, Map Fragments | Where the hardest, rarest crystals are | L |
 | 7 | Crafting: potions and teleport crystals | Gives forest crystals a use | M |
 | 8 | Vehicles: hoverboards, then karts | Fun to show off, and good with friends | M |
@@ -381,8 +381,8 @@ Each step works by itself and makes the next one easier.
 ## 9. Questions to decide
 
 1. ~~**Bases:**~~ decided: islands in each server, floating sky island, upgrade levels, all four stations.
-2. **Gloomwood danger:** should the Gloom meter make you **drop** crystals (exciting, but can feel bad), or just
-   push you out with everything safe (gentler)?
+2. ~~**Gloomwood danger:**~~ decided: a full Gloom meter pushes you out and you **drop half** of your unsent
+   crystals. In part 1 the crystals go to the Crystal Vault and can be sold; Shadow Wisps come with part 2.
 3. **Crafting timers:** real-time timers that run while you're offline (keeps people coming back), or instant
    crafting?
 4. **Vehicles in realms:** allowed everywhere, or only in the hub, forest and bases (recommended, so farming

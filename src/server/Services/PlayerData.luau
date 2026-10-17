@@ -50,6 +50,9 @@ export type Data = {
 		SanctuaryVisits: number,
 		CodesRedeemed: number,
 		BoardsViewed: number,
+		GloomwoodVisits: number,
+		GloomMined: number,
+		GloomBanked: number,
 	},
 	Items: { [string]: number }, -- the Bag (Shared/Items): item id -> count
 	RedeemedCodes: { [string]: boolean }, -- codes already used (Services/Codes)
@@ -57,6 +60,7 @@ export type Data = {
 	Sanctuary: { Level: number, Habitat: { string }, HabitatAt: number }, -- your island (Shared/Sanctuary, Services/Sanctuaries); Habitat = creature uids, HabitatAt = last XP time
 	WeekStats: { Week: number, Base: { [string]: number } }?, -- totals at the start of the week (weekly leaderboards)
 	Missions: { Index: number, Baseline: number?, Id: string?, V: number? }, -- place in the mission chain (Shared/Missions)
+	Gloom: { Satchel: { [string]: number }, Vault: { [string]: number }, CampFound: boolean }, -- the Gloomwood (Shared/Gloomwood): crystals carried, crystals in your island's Vault
 	SeenUpdate: number, -- the last "What's New" the player has seen (Shared/WhatsNew)
 	Daily: { Streak: number, LastClaimDay: number },
 	Season: { Week: number, Points: number, RewardedWeek: number },
@@ -99,6 +103,9 @@ local function defaultData(): Data
 			SanctuaryVisits = 0,
 			CodesRedeemed = 0,
 			BoardsViewed = 0,
+			GloomwoodVisits = 0,
+			GloomMined = 0,
+			GloomBanked = 0,
 		},
 		Items = {},
 		RedeemedCodes = {},
@@ -106,6 +113,7 @@ local function defaultData(): Data
 		Sanctuary = { Level = 1, Habitat = {}, HabitatAt = 0 },
 		Missions = { Index = 1 },
 		SeenUpdate = 0,
+		Gloom = { Satchel = {}, Vault = {}, CampFound = false },
 		Daily = { Streak = 0, LastClaimDay = -1 },
 		Season = { Week = -1, Points = 0, RewardedWeek = -1 },
 		Titles = {},

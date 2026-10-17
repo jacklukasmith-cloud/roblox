@@ -17,12 +17,14 @@ local PADS = {
 -- circles on your own Sanctuary island
 local ISLAND_PADS = {
 	HabitatPad = "Habitat",
+	VaultPad = "Vault",
 }
 local RADIUS = 4.5 -- the circle is 9 studs across
 
 function ShopPads.Start()
 	local player = Players.LocalPlayer
 	local inside: string? = nil -- the panel whose circle we're standing in
+	local found: { [string]: BasePart? } = {}
 	task.spawn(function()
 		while true do
 			task.wait(0.2)
@@ -35,7 +37,14 @@ function ShopPads.Start()
 					return
 				end
 				for padName, panel in pads do
-					local pad = container:FindFirstChild(padName, deep) :: BasePart?
+					-- the hub's circles are looked up once (a deep search every 0.2s adds up)
+					local pad = if deep then found[padName] else nil
+					if not pad or not pad.Parent then
+						pad = container:FindFirstChild(padName, deep) :: BasePart?
+						if deep then
+							found[padName] = pad
+						end
+					end
 					if pad then
 						local offset = root.Position - pad.Position
 						if Vector2.new(offset.X, offset.Z).Magnitude <= RADIUS and math.abs(offset.Y) < 8 then

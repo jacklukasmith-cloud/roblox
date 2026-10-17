@@ -7,7 +7,8 @@
 	           Missions.Baseline in the save, so earlier progress doesn't count)
 	  "Reach": get the stat up to N (counts what you already have)
 	Target: where the guide arrow points (Crystal, Egg, Gate, Blacksmith, Boss, Sanctuary (the hub
-	        portal), Upgrade / Habitat (your island's Upgrade Stone / Pet Habitat), or nil for none)
+	        portal), Upgrade / Habitat (your island's Upgrade Stone / Pet Habitat), Gloomwood (the hub gate),
+	        Lantern / DeepCamp (in the forest), or nil for none)
 
 	The save keeps the current mission's Id too, so missions can be added anywhere in the list
 	later without moving anyone to the wrong one (Missions.Sync).
@@ -206,6 +207,36 @@ Missions.List = {
 		Reward = { Essence = 15000 },
 	},
 	{
+		Id = "Gloom1",
+		Text = "Enter the Gloomwood",
+		Stat = "GloomwoodVisits",
+		Kind = "Count",
+		Goal = 1,
+		Target = "Gloomwood",
+		Hint = "Step into the green gate in Portal Plaza, at the back of the hub",
+		Reward = { Essence = 20000 },
+	},
+	{
+		Id = "Gloom10",
+		Text = "Send 10 Gloom Crystals home",
+		Stat = "GloomBanked",
+		Kind = "Reach",
+		Goal = 10,
+		Target = "Lantern",
+		Hint = "Mine glowing crystals with your pickaxe, then stand by a lantern before the Gloom fills up",
+		Reward = { Essence = 25000, Items = { LuckPotion = 1 } },
+	},
+	{
+		Id = "DeepCamp",
+		Text = "Find the Deep Camp",
+		Stat = "DeepCamp",
+		Kind = "Reach",
+		Goal = 1,
+		Target = "DeepCamp",
+		Hint = "Follow the trail from the Gloomwood gate deeper into the Midwood",
+		Reward = { Essence = 30000 },
+	},
+	{
 		Id = "Fuse1",
 		Text = "Fuse creatures for the first time",
 		Stat = "Fusions",
@@ -298,6 +329,8 @@ function Missions.Value(data: any, stat: string): number
 			end
 		end
 		return n
+	elseif stat == "DeepCamp" then
+		return if data.Gloom and data.Gloom.CampFound then 1 else 0
 	elseif stat == "HabitatPets" then
 		return if data.Sanctuary and data.Sanctuary.Habitat then #data.Sanctuary.Habitat else 0
 	elseif stat == "SanctuaryLevel" then

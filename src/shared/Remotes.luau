@@ -49,6 +49,7 @@ local FUNCTIONS = {
 	"Travel",
 	"SeenWhatsNew",
 	"SetHabitat",
+	"SellCrystals",
 	"TradeRequest",
 	"TradeRespond",
 	"TradeSetPet",

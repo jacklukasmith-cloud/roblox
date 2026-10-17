@@ -18,6 +18,7 @@ local Zones = require(Shared.Zones)
 local Format = require(Shared.Format)
 local Missions = require(Shared.Missions)
 local Sanctuary = require(Shared.Sanctuary)
+local Gloomwood = require(Shared.Gloomwood)
 local Remotes = require(Shared.Remotes)
 
 local Modules = script.Parent
@@ -105,16 +106,37 @@ local function activeBoss(): Model?
 	return nil
 end
 
--- The hub's Sanctuary portal
-local function sanctuaryPortal(): BasePart?
+-- A portal in the hub's Portal Plaza ("Sanctuary", "Gloomwood")
+local function hubPortal(to: string): BasePart?
 	local w = world()
 	local hub = w and w:FindFirstChild("Hub")
 	for _, d in if hub then hub:GetDescendants() else {} do
-		if d:IsA("BasePart") and d:GetAttribute("PortalTo") == "Sanctuary" then
+		if d:IsA("BasePart") and d:GetAttribute("PortalTo") == to then
 			return d
 		end
 	end
 	return nil
+end
+
+local function sanctuaryPortal(): BasePart?
+	return hubPortal("Sanctuary")
+end
+
+-- The forest's Courier Lanterns (found once)
+local lanternCache: { BasePart }? = nil
+local function lanterns(): { BasePart }
+	if lanternCache and #lanternCache > 0 then
+		return lanternCache
+	end
+	local list = {}
+	local forest = workspace:FindFirstChild("Gloomwood")
+	for _, d in if forest then forest:GetDescendants() else {} do
+		if d:IsA("Model") and d.Name == "CourierLantern" and d.PrimaryPart then
+			table.insert(list, d.PrimaryPart)
+		end
+	end
+	lanternCache = list
+	return list
 end
 
 -- A part on your own island (the Upgrade Stone, the habitat circle)
@@ -158,6 +180,28 @@ local function targetFor(target: string?, data: any, from: Vector3): Vector3?
 			else nil
 		local portal = if spot then nil else sanctuaryPortal()
 		return if spot then spot.Position elseif portal then portal.Position else nil
+	elseif target == "Gloomwood" or target == "Lantern" or target == "DeepCamp" then
+		if not Gloomwood.RingAt(from) then
+			local portal = hubPortal("Gloomwood")
+			return portal and portal.Position
+		elseif target == "DeepCamp" then
+			return Gloomwood.Place("DeepCamp")
+		elseif target == "Lantern" then
+			-- once you're carrying crystals: the nearest lantern to send them home
+			local satchel = data.Gloom and data.Gloom.Satchel
+			if Gloomwood.SatchelCount(satchel) == 0 then
+				return nil
+			end
+			local best, bestDist = nil, math.huge
+			for _, lamp in lanterns() do
+				local dist = (lamp.Position - from).Magnitude
+				if dist < bestDist then
+					best, bestDist = lamp.Position, dist
+				end
+			end
+			return best
+		end
+		return nil
 	elseif target == "Boss" then
 		local boss = activeBoss()
 		return boss and boss:GetPivot().Position

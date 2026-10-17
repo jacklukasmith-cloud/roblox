@@ -52,6 +52,11 @@ function Sanctuary.HabitatKey(data: any): string
 	return table.concat(parts, ",")
 end
 
+-- Crystal Vault: holds the Gloom Crystals you send home from the Gloomwood
+function Sanctuary.VaultCapacity(level: number): number
+	return 200 + 100 * (math.clamp(level, 1, Sanctuary.MaxLevel) - 1)
+end
+
 -- Island size by level (studs, radius of the grass top)
 function Sanctuary.Radius(level: number): number
 	return 30 + 3 * (math.clamp(level, 1, Sanctuary.MaxLevel) - 1)
@@ -65,7 +70,7 @@ function Sanctuary.SlotPosition(slot: number): Vector3
 end
 
 -- The four stations and the spots they'll stand on (offsets from the island centre, as a fraction of
--- the radius). The Pet Habitat is built; the others are marked "coming soon" for now.
+-- the radius). The Pet Habitat and Crystal Vault are built; the others are marked "coming soon" for now.
 Sanctuary.Stations = {
 	{ Id = "PetHabitat", Name = "Pet Habitat", Icon = "🐾", Spot = Vector2.new(-0.5, -0.45) },
 	{ Id = "Cauldron", Name = "Alchemy Cauldron", Icon = "⚗️", Spot = Vector2.new(0.5, -0.45) },

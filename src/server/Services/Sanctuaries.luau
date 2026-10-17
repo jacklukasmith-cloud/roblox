@@ -260,6 +260,30 @@ local function build(player: Player, slot: number): Model
 			end
 			continue
 		end
+		if station.Id == "Vault" then
+			-- a crystal-topped chest: step into its circle to see and sell your Gloom Crystals
+			helpers.ShopPad(model, "VaultPad", spot + Vector3.new(0, 0.1, 0), rgb(150, 200, 255), "💎 Crystal Vault")
+			local chest = part({
+				Name = "VaultChest",
+				Size = Vector3.new(4, 3, 3),
+				Position = spot + Vector3.new(0, 1.6, -6),
+				Color = rgb(90, 80, 120),
+				Material = Enum.Material.Slate,
+				Parent = model,
+			})
+			for i = -1, 1 do
+				part({
+					Name = "VaultCrystal",
+					Size = Vector3.new(0.8, 2 + math.abs(i), 0.8),
+					CFrame = CFrame.new(chest.Position + Vector3.new(i * 1.2, 2 + math.abs(i) / 2, 0))
+						* CFrame.Angles(0, 0, i * -0.3),
+					Color = if i == 0 then rgb(170, 190, 255) else rgb(120, 230, 255),
+					Material = Enum.Material.Neon,
+					Parent = model,
+				})
+			end
+			continue
+		end
 		local tag = helpers.Billboard(plate, UDim2.fromOffset(200, 44), Vector3.new(4, 0, 0), 80)
 		helpers.Label(tag, { Text = `{station.Icon} {station.Name}`, Size = UDim2.fromScale(1, 0.6) })
 		helpers.Label(tag, {

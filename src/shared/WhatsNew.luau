@@ -15,6 +15,11 @@ WhatsNew.List = {
 		Text = "A floating sky island just for you. Step into the Sanctuary portal or press 🏠.",
 	},
 	{
+		Icon = "🌲",
+		Title = "The Gloomwood",
+		Text = "A huge foggy forest (needs Frostpeak). Mine Gloom Crystals and send them home before the gloom gets you!",
+	},
+	{
 		Icon = "⬆️",
 		Title = "Island levels",
 		Text = "Upgrade your island at its Upgrade Stone: it grows and gives more Essence.",

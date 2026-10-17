@@ -15,10 +15,12 @@ local Shared = ReplicatedStorage.Shared
 local Config = require(Shared.Config)
 local Format = require(Shared.Format)
 local Remotes = require(Shared.Remotes)
+local GloomwoodInfo = require(Shared.Gloomwood)
 
 local PlayerData = require(script.Parent.PlayerData)
 local Economy = require(script.Parent.Economy)
 local Crystals = require(script.Parent.Crystals)
+local Gloomwood = require(script.Parent.Gloomwood)
 local WorldBuilder = require(script.Parent.WorldBuilder)
 local Monetization = require(script.Parent.Monetization)
 
@@ -254,7 +256,14 @@ function Pickaxe.Swing(player: Player, tool: Tool?): boolean
 		* cfg.Tiers[tierOf(player)].Mult
 		* (if golden then cfg.GoldenDamage else 1)
 		* (1 + streak.Count * cfg.StreakStep)
-	local hit, crit = Crystals.Swing(player, power, cfg.Reach, cfg.AxeBossBonus)
+	local hit, crit
+	if Gloomwood.IsInside(player) then
+		-- in the forest the pickaxe mines Gloom Crystals: a fixed number of swings, fewer with a better pickaxe
+		hit = Gloomwood.Swing(player, GloomwoodInfo.SwingDamage(tierOf(player), golden, cfg.GoldenDamage), cfg.Reach)
+		crit = false
+	else
+		hit, crit = Crystals.Swing(player, power, cfg.Reach, cfg.AxeBossBonus)
+	end
 	if hit then
 		data.Stats.PickaxeHits = (data.Stats.PickaxeHits or 0) + 1
 		PlayerData.MarkChanged(player)
@@ -263,7 +272,7 @@ function Pickaxe.Swing(player: Player, tool: Tool?): boolean
 		pickaxeHit:FireClient(player, hit, crit, streak.Count)
 	else
 		-- swinging at air next to something: tell them to step closer
-		local near = Crystals.NearestDistance(player) < cfg.Reach + 12
+		local near = math.min(Crystals.NearestDistance(player), Gloomwood.NearestDistance(player)) < cfg.Reach + 12
 		pickaxeHit:FireClient(player, nil, false, streak.Count, near)
 	end
 	-- whatever you actually hit decides the side too (pick for crystals, axe for bosses)

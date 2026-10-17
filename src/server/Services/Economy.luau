@@ -469,6 +469,7 @@ function Economy.BuildSnapshot(player: Player)
 		FriendBoost = FriendBoost.Count(player),
 		Sanctuary = (data :: any).Sanctuary,
 		SeenUpdate = (data :: any).SeenUpdate,
+		Gloom = (data :: any).Gloom,
 	}
 end
 

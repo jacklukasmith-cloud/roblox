@@ -142,14 +142,37 @@ marked spots for the stations still to come (Pet Habitat, Alchemy Cauldron, Hang
   Only unequipped pets can live there; equipping, trading or releasing one takes it out.
   Code: `src/server/Services/Habitat.luau`, `src/client/Modules/HabitatPanel.luau`, `IslandPets.luau`.
 - **Settings:** in `src/shared/Sanctuary.luau` (island size, costs and bonus per level, habitat slots and XP, ring
-  position); the building code is in `src/server/Services/Sanctuaries.luau`. Next step: the Crystal Vault,
-  Alchemy Cauldron and Hangar.
+  position); the building code is in `src/server/Services/Sanctuaries.luau`. The **Crystal Vault** is explained in
+  the Gloomwood section below. Next step: the Alchemy Cauldron and Hangar.
+
+## The Gloomwood (part 1)
+
+A huge, foggy forest behind the hub (`src/shared/Gloomwood.luau`). Step into the green gate in Portal Plaza once
+you've unlocked **Frostpeak**.
+- **The forest** is 1,200 studs across, built from parts (`GloomwoodBuilder.luau`): winding trails, twisted
+  trees, glowing mushrooms and landmarks to find your way (the Burnt Clearing, the Frozen Pond, the Old Dead Tree
+  and the Broken Watchtower). Thick dark fog is added on your screen while you're inside.
+- **Rings:** the **Edge** (outside) and the darker **Midwood** are open. The **Deepwood** and the Heart in the
+  middle are behind a thorn wall until part 2.
+- **Gloom Crystals** grow in hidden spots off the trails. Mine them with your **pickaxe** (a better pickaxe takes
+  fewer swings): **Moonshard** everywhere, **Emberheart** round the Burnt Clearing, **Frostglass** round the
+  Frozen Pond. Everyone who helps mine one gets it. A mined crystal grows back somewhere else.
+- **Satchel:** you carry up to **20** crystals. Stand by a **Courier Lantern** (or the gate) to send them home to
+  your island's **Crystal Vault**.
+- **The Gloom meter** fills while you're in the forest (slowly in the Edge, faster in the Midwood) and drains by a
+  lantern. If it fills up you're pushed back to the hub and **drop half** of the crystals you hadn't sent home.
+- **Deep Camp:** a safe camp in the Midwood. Once you've found it, the orange circle at the gate takes you straight
+  there.
+- **Crystal Vault** (on your Sanctuary island): holds 200 crystals, plus 100 for each island level. Sell crystals
+  for Essence there, or keep them for crafting (next).
+- Settings: crystals, rings, gloom speeds and satchel size in `src/shared/Gloomwood.luau`. Code:
+  `src/server/Services/Gloomwood.luau`, `src/client/Modules/GloomwoodClient.luau`, `VaultPanel.luau`.
 
 ## Missions
 
-A chain of 26 missions guides players from their first crystal to discovering all 25 species
+A chain of 29 missions guides players from their first crystal to discovering all 25 species
 (`src/shared/Missions.luau`). Some of them send new players to try the newer things: visit your Sanctuary,
-redeem a code, check the Leaderboards, upgrade your island and fill your Pet Habitat. Each one pays Essence (the last ones pay Trophies and the "Master Tamer"
+redeem a code, check the Leaderboards, upgrade your island, fill your Pet Habitat and explore the Gloomwood. Each one pays Essence (the last ones pay Trophies and the "Master Tamer"
 title). The **mission card** sits under the left menu and shows the mission, progress and reward.
 Up to the pickaxe-upgrade mission a glowing line and arrow point to where the mission happens. After that, tap
 the card to turn the arrow on or off; this also shows a tip. To add, remove or reorder missions, edit
