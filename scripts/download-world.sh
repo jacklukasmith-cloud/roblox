@@ -47,6 +47,7 @@ Snowman https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf
 FloatingIsland https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203714_b668cb0e-fc5c-48b8-b5b9-809a5039b85c.glb
 RuinedColumn https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203716_3424e4bf-5868-4b99-97a8-38861620cb8b.glb
 StarLantern https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203717_046700b4-5a99-4829-92ce-31e6de5aa90d.glb
+AlchemyCauldron https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261017_201330_a94f052f-aa33-4a7a-93d7-f451a20de906.glb
 MerchantTent https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_200802_63cfd9f7-3dd7-4a70-8806-b9ee08a1395a.glb
 LIST
 echo "$ok models saved in world-models/"

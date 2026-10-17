@@ -47,6 +47,15 @@ free spots around the hub.
 | `RuinedColumn` | Sky Sanctum | 6 ruined columns | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203632_da560f91-3b08-4ddf-9352-1b776e3d5e21.png) |
 | `StarLantern` | Sky Sanctum | 6 glowing star lanterns | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_203633_f2cfeaff-65d0-4def-8090-e80a90d465ef.png) |
 
+## Sanctuary stations
+
+| Model name | Where | Preview image |
+|---|---|---|
+| `AlchemyCauldron` | The Alchemy Cauldron on every Sanctuary island (replaces the built-in black pot; the glowing brew sits on top) | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261017_201305_0fef0686-af1c-4558-adaa-a788f7539b14.png) |
+
+If the brew's glow doesn't line up with the top of the imported pot, add a number attribute `Scale` to the model
+(e.g. 0.9 or 1.1) to make it smaller or bigger.
+
 ## Add them to the game
 
 1. Run `powershell -ExecutionPolicy Bypass -File scripts\download-world.ps1` in the roblox
@@ -54,7 +63,7 @@ free spots around the hub.
 2. In Studio: **File → Import 3D**, select all the `.glb` files, and import them into Workspace.
    Keep the file names (e.g. `MeadowEgg`) as the model names.
 3. Press **Play**. The server moves them into `ReplicatedStorage.WorldMeshes` and builds the world
-   with them. The Output shows `World 3D models ready: 28/28`.
+   with them. The Output shows how many World 3D models are ready.
 4. That's it: leave them in Workspace. Every time the game starts they are picked up
    automatically (or drag them into `ReplicatedStorage > WorldMeshes` yourself, same result).
 
