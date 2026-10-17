@@ -83,6 +83,7 @@ local function build(player: Player, slot: number): Model
 	model.Name = `Sanctuary_{player.UserId}`
 	model:SetAttribute("OwnerId", player.UserId)
 	model:SetAttribute("Level", level)
+	model:SetAttribute("Habitat", Sanctuary.HabitatKey(PlayerData.Get(player)))
 
 	-- grass top + a rocky underside that narrows to a point
 	local top = slab(model, c, r * 2, 3, rgb(95, 180, 90), Enum.Material.Grass)
@@ -228,11 +229,37 @@ local function build(player: Player, slot: number): Model
 		Size = UDim2.fromScale(1, 0.4),
 		TextColor3 = rgb(140, 230, 255),
 	})
-	-- where the stations will go (built in the next steps)
+	-- the stations (the ones not built yet say "coming soon")
 	for _, station in Sanctuary.Stations do
 		local spot = c + Vector3.new(station.Spot.X * r, 1.75, station.Spot.Y * r)
 		local plate = slab(model, spot, 12, 0.2, rgb(150, 130, 100), Enum.Material.Cobblestone)
 		plate.Name = station.Id .. "Spot"
+		if station.Id == "PetHabitat" then
+			-- a little fenced garden with a circle: the owner steps in to choose pets
+			local pad = helpers.ShopPad(
+				model,
+				"HabitatPad",
+				spot + Vector3.new(0, 0.1, 0),
+				rgb(140, 230, 160),
+				`🐾 Pet Habitat ({Sanctuary.HabitatSlots(level)} pets)`
+			)
+			pad:SetAttribute("Owner", player.UserId)
+			for i = 0, 11 do
+				if i ~= 3 then -- a gap to walk in through
+					local a = i / 12 * math.pi * 2
+					part({
+						Name = "Fence",
+						Size = Vector3.new(0.5, 2, 0.5),
+						Position = spot + Vector3.new(math.sin(a) * 5.6, 1.1, math.cos(a) * 5.6),
+						Color = rgb(235, 220, 190),
+						Material = Enum.Material.Wood,
+						CanCollide = false,
+						Parent = model,
+					})
+				end
+			end
+			continue
+		end
 		local tag = helpers.Billboard(plate, UDim2.fromOffset(200, 44), Vector3.new(4, 0, 0), 80)
 		helpers.Label(tag, { Text = `{station.Icon} {station.Name}`, Size = UDim2.fromScale(1, 0.6) })
 		helpers.Label(tag, {

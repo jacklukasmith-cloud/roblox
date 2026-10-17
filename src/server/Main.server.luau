@@ -35,6 +35,7 @@ local Codes = require(Services.Codes)
 local Trading = require(Services.Trading)
 local FriendBoost = require(Services.FriendBoost)
 local Sanctuaries = require(Services.Sanctuaries)
+local Habitat = require(Services.Habitat)
 
 local notify = Remotes.Event("Notify")
 local dataChanged = Remotes.Event("DataChanged")
@@ -345,6 +346,7 @@ Remotes.Function("GetBoard").OnServerInvoke = function(player, boardId, scope)
 end
 
 bind("Travel", Sanctuaries.Travel)
+bind("SetHabitat", Habitat.Set)
 bind("SeenWhatsNew", function(player)
 	local data = PlayerData.Get(player) :: any
 	if data.SeenUpdate ~= WhatsNew.Version then
@@ -415,6 +417,7 @@ Bag.Start()
 Trading.Start()
 FriendBoost.Start()
 Sanctuaries.Start()
+Habitat.Start()
 Admin.Start()
 
 print("[Mythic Tamers] Server ready")

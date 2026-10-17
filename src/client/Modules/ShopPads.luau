@@ -1,6 +1,7 @@
 --[[
 	Shop circles: walk into one and its window opens, step out and it closes. The circles are
-	built on the server (WorldBuilder's shopPad) and found here by name.
+	built on the server (WorldBuilder's shopPad) and found here by name. Island circles only work
+	on your own island.
 ]]
 
 local Players = game:GetService("Players")
@@ -12,6 +13,10 @@ local ShopPads = {}
 local PADS = {
 	BlacksmithPad = "Blacksmith",
 	MerchantPad = "Merchant",
+}
+-- circles on your own Sanctuary island
+local ISLAND_PADS = {
+	HabitatPad = "Habitat",
 }
 local RADIUS = 4.5 -- the circle is 9 studs across
 
@@ -25,9 +30,12 @@ function ShopPads.Start()
 			local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
 			local world = workspace:FindFirstChild("World")
 			local now: string? = nil
-			if root and world then
-				for padName, panel in PADS do
-					local pad = world:FindFirstChild(padName, true) :: BasePart?
+			local function check(container: Instance?, pads: { [string]: string }, deep: boolean)
+				if not root or not container then
+					return
+				end
+				for padName, panel in pads do
+					local pad = container:FindFirstChild(padName, deep) :: BasePart?
 					if pad then
 						local offset = root.Position - pad.Position
 						if Vector2.new(offset.X, offset.Z).Magnitude <= RADIUS and math.abs(offset.Y) < 8 then
@@ -36,6 +44,9 @@ function ShopPads.Start()
 					end
 				end
 			end
+			check(world, PADS, true)
+			local islands = workspace:FindFirstChild("Sanctuaries")
+			check(islands and islands:FindFirstChild(`Sanctuary_{player.UserId}`), ISLAND_PADS, false)
 			if now ~= inside then
 				if inside and Ui.isOpen(inside) then
 					Ui.toggle(inside, false)

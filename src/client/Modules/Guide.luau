@@ -117,11 +117,12 @@ local function sanctuaryPortal(): BasePart?
 	return nil
 end
 
-local function upgradeStone(): BasePart?
+-- A part on your own island (the Upgrade Stone, the habitat circle)
+local function islandPart(name: string): BasePart?
 	local islands = workspace:FindFirstChild("Sanctuaries")
 	local mine = islands and islands:FindFirstChild(`Sanctuary_{Players.LocalPlayer.UserId}`)
-	local stone = mine and mine:FindFirstChild("UpgradeStone")
-	return if stone and stone:IsA("BasePart") then stone else nil
+	local found = mine and mine:FindFirstChild(name)
+	return if found and found:IsA("BasePart") then found else nil
 end
 
 local function inTheSky(position: Vector3): boolean
@@ -150,11 +151,13 @@ local function targetFor(target: string?, data: any, from: Vector3): Vector3?
 		end
 		local portal = sanctuaryPortal()
 		return portal and portal.Position
-	elseif target == "Upgrade" then
-		-- on an island: the Upgrade Stone; in the hub: the way up
-		local stone = if inTheSky(from) then upgradeStone() else nil
-		local portal = if stone then nil else sanctuaryPortal()
-		return if stone then stone.Position elseif portal then portal.Position else nil
+	elseif target == "Upgrade" or target == "Habitat" then
+		-- on an island: the Upgrade Stone / habitat circle; in the hub: the way up
+		local spot = if inTheSky(from)
+			then islandPart(if target == "Upgrade" then "UpgradeStone" else "HabitatPad")
+			else nil
+		local portal = if spot then nil else sanctuaryPortal()
+		return if spot then spot.Position elseif portal then portal.Position else nil
 	elseif target == "Boss" then
 		local boss = activeBoss()
 		return boss and boss:GetPivot().Position

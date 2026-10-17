@@ -54,7 +54,7 @@ export type Data = {
 	Items: { [string]: number }, -- the Bag (Shared/Items): item id -> count
 	RedeemedCodes: { [string]: boolean }, -- codes already used (Services/Codes)
 	TradeLog: { any }, -- last 20 trades (Services/Trading)
-	Sanctuary: { Level: number }, -- your island (Shared/Sanctuary, Services/Sanctuaries)
+	Sanctuary: { Level: number, Habitat: { string }, HabitatAt: number }, -- your island (Shared/Sanctuary, Services/Sanctuaries); Habitat = creature uids, HabitatAt = last XP time
 	WeekStats: { Week: number, Base: { [string]: number } }?, -- totals at the start of the week (weekly leaderboards)
 	Missions: { Index: number, Baseline: number?, Id: string?, V: number? }, -- place in the mission chain (Shared/Missions)
 	SeenUpdate: number, -- the last "What's New" the player has seen (Shared/WhatsNew)
@@ -103,7 +103,7 @@ local function defaultData(): Data
 		Items = {},
 		RedeemedCodes = {},
 		TradeLog = {},
-		Sanctuary = { Level = 1 },
+		Sanctuary = { Level = 1, Habitat = {}, HabitatAt = 0 },
 		Missions = { Index = 1 },
 		SeenUpdate = 0,
 		Daily = { Streak = 0, LastClaimDay = -1 },

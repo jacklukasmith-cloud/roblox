@@ -19,6 +19,11 @@ WhatsNew.List = {
 		Title = "Island levels",
 		Text = "Upgrade your island at its Upgrade Stone: it grows and gives more Essence.",
 	},
+	{
+		Icon = "🐾",
+		Title = "Pet Habitat",
+		Text = "Pets you put on your island wander around and earn XP, even while you're offline.",
+	},
 	{ Icon = "🎯", Title = "Missions", Text = "Follow the mission card under the menu for rewards." },
 	{
 		Icon = "🎒",

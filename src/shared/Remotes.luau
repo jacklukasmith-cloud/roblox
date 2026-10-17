@@ -48,6 +48,7 @@ local FUNCTIONS = {
 	"GetBoard",
 	"Travel",
 	"SeenWhatsNew",
+	"SetHabitat",
 	"TradeRequest",
 	"TradeRespond",
 	"TradeSetPet",

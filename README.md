@@ -136,14 +136,20 @@ marked spots for the stations still to come (Pet Habitat, Alchemy Cauldron, Hang
 - **Levels 1-10:** hold **E** at the glowing **Upgrade Stone** on your own island. Each level costs 10× the last
   (💎 2K for level 2, up to 💎 200B for level 10), makes the island bigger and gives **+2% Essence** (+18% at
   level 10). The island is rebuilt bigger straight away.
-- **Settings:** in `src/shared/Sanctuary.luau` (island size, costs and bonus per level, ring position); the building
-  code is in `src/server/Services/Sanctuaries.luau`. Next step: the stations.
+- **Pet Habitat:** step into the green circle in the fenced garden on your island and tap pets to move them in.
+  They wander around your island for visitors to see and earn **2 XP a minute**, even while you're offline (up to
+  8 hours, with a message when you come back). Room for 2 pets, plus one more every 2 island levels (6 at level 9).
+  Only unequipped pets can live there; equipping, trading or releasing one takes it out.
+  Code: `src/server/Services/Habitat.luau`, `src/client/Modules/HabitatPanel.luau`, `IslandPets.luau`.
+- **Settings:** in `src/shared/Sanctuary.luau` (island size, costs and bonus per level, habitat slots and XP, ring
+  position); the building code is in `src/server/Services/Sanctuaries.luau`. Next step: the Crystal Vault,
+  Alchemy Cauldron and Hangar.
 
 ## Missions
 
-A chain of 25 missions guides players from their first crystal to discovering all 25 species
+A chain of 26 missions guides players from their first crystal to discovering all 25 species
 (`src/shared/Missions.luau`). Some of them send new players to try the newer things: visit your Sanctuary,
-redeem a code, check the Leaderboards, and upgrade your island. Each one pays Essence (the last ones pay Trophies and the "Master Tamer"
+redeem a code, check the Leaderboards, upgrade your island and fill your Pet Habitat. Each one pays Essence (the last ones pay Trophies and the "Master Tamer"
 title). The **mission card** sits under the left menu and shows the mission, progress and reward.
 Up to the pickaxe-upgrade mission a glowing line and arrow point to where the mission happens. After that, tap
 the card to turn the arrow on or off; this also shows a tip. To add, remove or reorder missions, edit

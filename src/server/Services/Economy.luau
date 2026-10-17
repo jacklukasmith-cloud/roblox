@@ -77,9 +77,9 @@ function Economy.GetTeamSpeed(data: PlayerData.Data): number
 	return if count > 0 then sum / count else 1
 end
 
--- Gives XP to every equipped creature (capped at Creatures.MaxLevel) and tells the owner about
--- any level-ups. Levels live on the creature entries (missing = level 1, 0 XP).
-function Economy.GrantXP(player: Player, amount: number)
+-- Gives XP to every equipped creature (or just the uids in `only`), capped at Creatures.MaxLevel,
+-- and tells the owner about any level-ups. Levels live on the creature entries (missing = level 1, 0 XP).
+function Economy.GrantXP(player: Player, amount: number, only: { [string]: boolean }?)
 	local data = PlayerData.Get(player)
 	if not data or amount <= 0 then
 		return
@@ -90,7 +90,8 @@ function Economy.GrantXP(player: Player, amount: number)
 	local ups = {}
 	for uid, entry in data.Creatures do
 		local level = entry.Level or 1
-		if entry.Equipped and level < Creatures.MaxLevel then
+		local chosen = if only then only[uid] == true else entry.Equipped
+		if chosen and level < Creatures.MaxLevel then
 			local xp = (entry.XP or 0) + amount
 			while level < Creatures.MaxLevel and xp >= Creatures.XPToNext(level) do
 				xp -= Creatures.XPToNext(level)
