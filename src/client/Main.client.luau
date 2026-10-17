@@ -94,6 +94,9 @@ end)
 start("Shop circles", function()
 	require(Modules.ShopPads).Start()
 end)
+start("Home button", function()
+	require(Modules.HomeButton).Build(root)
+end)
 
 -- Networking ------------------------------------------------------------------------------
 Remotes.Event("DataChanged").OnClientEvent:Connect(function(snapshot)

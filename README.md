@@ -121,6 +121,19 @@ The hub is about twice as big as before and split into districts:
 
 The realms start in the same place as before.
 
+## Sanctuary (player islands), step 1
+
+Every player in the server gets a **floating sky island**. The islands sit in a ring high above and behind Portal
+Plaza, so you can see them from the hub. Each island has your name, waterfalls, glowing crystals, trees and four
+marked spots for the stations still to come (Pet Habitat, Alchemy Cauldron, Hangar, Crystal Vault).
+- **Getting there:**
+  - walk into the **Sanctuary portal** in Portal Plaza;
+  - press the **🏠** button next to the pickaxe button (or **H**);
+  - on an island the button turns into **🌀**, which takes you back to the hub, and so does the blue circle at the island's edge.
+- **Falling off:** puts you straight back onto the island.
+- **Settings:** in `src/shared/Sanctuary.luau` (island size per level, ring position); the building code is in
+  `src/server/Services/Sanctuaries.luau`. Next steps: base levels, then the stations.
+
 ## Missions
 
 A chain of 20 missions guides players from their first crystal to discovering all 25 species

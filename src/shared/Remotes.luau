@@ -46,6 +46,7 @@ local FUNCTIONS = {
 	"UseItem",
 	"RedeemCode",
 	"GetBoard",
+	"Travel",
 	"TradeRequest",
 	"TradeRespond",
 	"TradeSetPet",

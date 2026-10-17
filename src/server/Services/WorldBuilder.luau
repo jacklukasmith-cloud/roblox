@@ -1793,7 +1793,8 @@ end
 
 -- Hub districts ----------------------------------------------------------------------------------
 -- A big archway for a part of the game that's coming soon (the Gloomwood, your Sanctuary)
-local function portal(parent: Instance, position: Vector3, title: string, color: Color3)
+-- portalTo: set when the portal works (walk in to travel; Services/Sanctuaries), nil = coming soon
+local function portal(parent: Instance, position: Vector3, title: string, color: Color3, portalTo: string?)
 	local folder = Instance.new("Model")
 	folder.Name = title .. "Portal"
 	for _, side in { -1, 1 } do
@@ -1814,14 +1815,17 @@ local function portal(parent: Instance, position: Vector3, title: string, color:
 		Color = color,
 		Material = Enum.Material.Neon,
 		Transparency = 0.55,
-		CanCollide = true,
+		CanCollide = portalTo == nil,
 		Parent = folder,
 	})
+	if portalTo then
+		glow:SetAttribute("PortalTo", portalTo)
+	end
 	glowAt(folder, position + Vector3.new(0, 8, 2), color, 22)
 	local gui = billboard(glow, UDim2.fromOffset(260, 70), Vector3.new(0, 11.5, 0), 160)
 	label(gui, { Text = title, TextColor3 = color, Size = UDim2.fromScale(1, 0.6) })
 	label(gui, {
-		Text = "Coming soon!",
+		Text = if portalTo then "Step in to go home!" else "Coming soon!",
 		Position = UDim2.fromScale(0, 0.6),
 		Size = UDim2.fromScale(1, 0.4),
 		TextColor3 = WHITE,
@@ -1886,7 +1890,7 @@ local function buildDistricts(hub: Instance)
 		TextColor3 = rgb(140, 220, 255),
 	})
 	portal(hub, sp(-30, 0, -90), "🌲 The Gloomwood", rgb(120, 220, 140))
-	portal(hub, sp(30, 0, -90), "🏝️ Your Sanctuary", rgb(255, 170, 230))
+	portal(hub, sp(30, 0, -90), "🏝️ Your Sanctuary", rgb(255, 170, 230), "Sanctuary")
 	disc(hub, sp(0, 0.6, -84), 18, 1.2, rgb(110, 100, 150), Enum.Material.Slate)
 	disc(hub, sp(0, 1.25, -84), 15, 0.2, rgb(90, 170, 255), Enum.Material.Glass).Transparency = 0.3
 	column(hub, sp(0, 1, -84), 4, 1.6, rgb(150, 140, 190), Enum.Material.Marble)

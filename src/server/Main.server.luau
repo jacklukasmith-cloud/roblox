@@ -33,6 +33,7 @@ local Bag = require(Services.Bag)
 local Codes = require(Services.Codes)
 local Trading = require(Services.Trading)
 local FriendBoost = require(Services.FriendBoost)
+local Sanctuaries = require(Services.Sanctuaries)
 
 local notify = Remotes.Event("Notify")
 local dataChanged = Remotes.Event("DataChanged")
@@ -337,6 +338,7 @@ Remotes.Function("GetBoard").OnServerInvoke = function(player, boardId, scope)
 	return Leaderboards.GetBoard(player, boardId, scope)
 end
 
+bind("Travel", Sanctuaries.Travel)
 bind("TradeRequest", Trading.Request)
 bind("TradeRespond", Trading.Respond)
 bind("TradeSetPet", Trading.SetPet)
@@ -398,6 +400,7 @@ Missions.Start()
 Bag.Start()
 Trading.Start()
 FriendBoost.Start()
+Sanctuaries.Start()
 Admin.Start()
 
 print("[Mythic Tamers] Server ready")

@@ -464,6 +464,7 @@ function Economy.BuildSnapshot(player: Player)
 		Missions = (data :: any).Missions,
 		Items = (data :: any).Items,
 		FriendBoost = FriendBoost.Count(player),
+		Sanctuary = (data :: any).Sanctuary,
 	}
 end
 
