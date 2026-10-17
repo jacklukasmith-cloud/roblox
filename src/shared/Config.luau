@@ -335,7 +335,7 @@ Config.GamePasses = {
 	},
 	{
 		Key = "MasterAlchemist",
-		Id = 0, -- create it on the Creator Hub and paste the ID here
+		Id = 2038185382,
 		Name = "Master Alchemist",
 		Description = "2 Cauldron slots and brews 25% faster",
 		PriceHint = 149,

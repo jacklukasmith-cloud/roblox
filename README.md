@@ -148,7 +148,7 @@ Vault), all laid out so the path from your bridge to your home spot stays clear.
   in your Vault plus a little Essence (`src/shared/Alchemy.luau`): Luck, Speed, Owl Eye, **Gloom Ward** (the Gloom
   meter fills half as fast for 10 minutes), Essence, Power and Shiny. Brews take real time (3-10 minutes) and keep
   brewing while you're away; the finished potion goes straight into your 🎒 Bag. The pot glows and bubbles while
-  something's brewing. The **Master Alchemist** game pass (`Config.GamePasses`, set its ID on the Creator Hub) gives a
+  something's brewing. The **Master Alchemist** game pass gives a
   second slot and 25% faster brews. Code: `src/server/Services/Cauldron.luau`, `src/client/Modules/CauldronPanel.luau`.
 - **Settings:** in `src/shared/Sanctuary.luau` (island size, costs and bonus per level, habitat slots and XP, ring
   position); the building code is in `src/server/Services/Sanctuaries.luau`. The **Crystal Vault** is explained in
