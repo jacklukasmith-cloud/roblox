@@ -1897,7 +1897,21 @@ local function buildDistricts(hub: Instance)
 	districtSign(hub, sp(55, 0, -36), "🏛️ House Quarter", rgb(190, 160, 255))
 
 	-- Portal Plaza (back): the ways to the Gloomwood and your Sanctuary (coming soon) + a fountain
-	districtSign(hub, sp(0, 0, -64), "🌀 Portal Plaza", rgb(140, 220, 255))
+	-- just floating text over the walkway (no posts or board)
+	local anchor = part({
+		Name = "PortalPlazaSign",
+		Size = Vector3.one,
+		Position = sp(0, 9, -64),
+		Transparency = 1,
+		CanCollide = false,
+		CanQuery = false,
+		CanTouch = false,
+		Parent = hub,
+	})
+	label(billboard(anchor, UDim2.fromOffset(240, 46), Vector3.zero, 140), {
+		Text = "🌀 Portal Plaza",
+		TextColor3 = rgb(140, 220, 255),
+	})
 	portal(hub, sp(-30, 0, -90), "🌲 The Gloomwood", rgb(120, 220, 140))
 	portal(hub, sp(30, 0, -90), "🏝️ Your Sanctuary", rgb(255, 170, 230))
 	disc(hub, sp(0, 0.6, -84), 18, 1.2, rgb(110, 100, 150), Enum.Material.Slate)
