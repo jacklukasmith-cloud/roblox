@@ -24,6 +24,7 @@ local EVENTS = {
 	"ItemGained", -- server -> client: item id, count (something went into your Bag)
 	"TradeInvite", -- server -> client: from user id, from name
 	"TradeUpdate", -- server -> client: trade view (nil = closed), message, colour
+	"BeastHit", -- server -> client: animal id, push direction (a forest animal hit you)
 }
 
 local FUNCTIONS = {

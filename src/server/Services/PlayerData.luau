@@ -53,6 +53,7 @@ export type Data = {
 		GloomwoodVisits: number,
 		GloomMined: number,
 		GloomBanked: number,
+		BeastsDefeated: number,
 	},
 	Items: { [string]: number }, -- the Bag (Shared/Items): item id -> count
 	RedeemedCodes: { [string]: boolean }, -- codes already used (Services/Codes)
@@ -106,6 +107,7 @@ local function defaultData(): Data
 			GloomwoodVisits = 0,
 			GloomMined = 0,
 			GloomBanked = 0,
+			BeastsDefeated = 0,
 		},
 		Items = {},
 		RedeemedCodes = {},

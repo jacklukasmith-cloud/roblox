@@ -163,6 +163,15 @@ you've unlocked **Frostpeak**.
   your island's **Crystal Vault**.
 - **The Gloom meter** fills while you're in the forest (slowly in the Edge, faster in the Midwood) and drains by a
   lantern. If it fills up you're pushed back to the hub and **drop half** of the crystals you hadn't sent home.
+- **Animals** (`GloomBeasts.luau`, settings in `Gloomwood.Beasts`):
+  - 🐺 **Shadow Wolves** are hostile: they roam the Midwood and chase anyone who comes close. They're a bit slower
+    than you, give up if you run far enough, and **never go near a lantern**, so lanterns are safe. A bite can knock
+    a crystal out of your satchel.
+  - 🐗 **Bramble Boars** (by Moonshards) and 🐻 **Moss Bears** (by Emberhearts and Frostglass) are guardians: they
+    sleep next to a crystal and only wake up when someone starts mining it.
+  - Every hit adds Gloom and shoves you back. Fight back with your pickaxe (it hits an animal that's after you
+    before a crystal) and your equipped pets join in. Beating one gives pet XP (and a Moonshard from a wolf);
+    wolves come back after a minute, and a beaten guardian leaves its crystal unguarded.
 - **Deep Camp:** a safe camp in the Midwood. Once you've found it, the orange circle at the gate takes you straight
   there.
 - **Crystal Vault** (on your Sanctuary island): holds 200 crystals, plus 100 for each island level. Sell crystals

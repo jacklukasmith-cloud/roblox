@@ -23,6 +23,7 @@ local Remotes = require(Shared.Remotes)
 local PlayerData = require(script.Parent.PlayerData)
 local Economy = require(script.Parent.Economy)
 local GloomwoodBuilder = require(script.Parent.GloomwoodBuilder)
+local GloomBeasts = require(script.Parent.GloomBeasts)
 
 local Service = {}
 
@@ -174,6 +175,7 @@ local function spawnCrystal(def: any): Model?
 		Hitters = {},
 	}
 	model.Parent = crystalFolder
+	GloomBeasts.OnCrystal(model, def.Id, spots[index])
 	return model
 end
 
@@ -196,6 +198,7 @@ end
 local function mined(model: Model, state: CrystalState)
 	local def = Gloomwood.Get(state.Id)
 	crystals[model] = nil
+	GloomBeasts.CrystalGone(model)
 	local now = Service.Clock()
 	for player, at in state.Hitters do
 		if player.Parent and now - at <= HELP_WINDOW then
@@ -221,11 +224,16 @@ local function mined(model: Model, state: CrystalState)
 	end)
 end
 
--- A pickaxe swing in the forest: hits the nearest Gloom Crystal in reach. Returns the model hit.
+-- A pickaxe swing in the forest: hits an animal that's after you, or else the nearest Gloom Crystal
+-- in reach (which wakes up its guardian, if it has one). Returns the model hit.
 function Service.Swing(player: Player, damage: number, reach: number): Model?
 	local root = rootOf(player)
 	if not root or damage <= 0 then
 		return nil
+	end
+	local beast = GloomBeasts.Swing(player, damage, reach)
+	if beast then
+		return beast
 	end
 	local best, bestDist = nil, math.huge
 	for model, state in crystals do
@@ -239,6 +247,7 @@ function Service.Swing(player: Player, damage: number, reach: number): Model?
 		return nil
 	end
 	state.Hitters[player] = Service.Clock()
+	GloomBeasts.CrystalHit(best :: Model, player)
 	state.HP -= damage
 	if state.HP <= 0 then
 		mined(best :: Model, state)
@@ -256,6 +265,38 @@ function Service.NearestDistance(player: Player): number
 		end
 	end
 	return best
+end
+
+-- An animal's hit: more Gloom
+function Service.AddGloom(player: Player, amount: number)
+	local level = math.clamp((gloom[player] or 0) + amount, 0, Gloomwood.Gloom.Max)
+	gloom[player] = level
+	player:SetAttribute("Gloom", math.floor(level))
+end
+
+-- Knocks one random crystal out of the satchel (it's lost). Returns which.
+function Service.Steal(player: Player): string?
+	local data = PlayerData.Get(player) :: any
+	if not data then
+		return nil
+	end
+	local g = gloomData(data)
+	local ids = {}
+	for id, n in g.Satchel do
+		for _ = 1, n do
+			table.insert(ids, id)
+		end
+	end
+	if #ids == 0 then
+		return nil
+	end
+	local id = ids[Service.Rng:NextInteger(1, #ids)]
+	g.Satchel[id] -= 1
+	if g.Satchel[id] <= 0 then
+		g.Satchel[id] = nil
+	end
+	PlayerData.MarkChanged(player)
+	return id
 end
 
 -- Satchel and Vault ----------------------------------------------------------------------
@@ -474,6 +515,14 @@ function Service.Start()
 	folder.Name = "GloomCrystals"
 	folder.Parent = built.Folder
 	crystalFolder = folder
+	-- the animals (they need the crystals' spots, so they start first)
+	GloomBeasts.Hooks.AddGloom = Service.AddGloom
+	GloomBeasts.Hooks.AddToSatchel = Service.AddToSatchel
+	GloomBeasts.Hooks.Steal = Service.Steal
+	GloomBeasts.Hooks.Lanterns = function()
+		return built.Lanterns
+	end
+	GloomBeasts.Start(built.Folder)
 	for _, def in Gloomwood.Crystals do
 		for _ = 1, def.Active do
 			spawnCrystal(def)

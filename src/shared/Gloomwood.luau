@@ -80,6 +80,77 @@ Gloomwood.Crystals = {
 	},
 }
 
+-- Forest animals. "Hostile" ones roam their ring and chase anyone who comes close (but never go
+-- near a lantern: lanterns are safe). "Guardian" ones sleep next to a crystal (Chance = how many
+-- crystals of the kinds in Guards get one) and only wake up when someone starts mining it.
+-- A hit adds Gloom (and Steal = the chance to knock a crystal out of your satchel). You and your pets
+-- can fight back: HP = pickaxe swings to beat one (your pets help). Leash = how far from where they
+-- started they'll chase you. Drop = a crystal for everyone who helped beat it.
+Gloomwood.Beasts = {
+	{
+		Id = "ShadowWolf",
+		Name = "Shadow Wolf",
+		Icon = "🐺",
+		Kind = "Hostile",
+		Ring = "Midwood",
+		Count = 8,
+		HP = 6,
+		Speed = 13, -- a bit slower than you, so you can run
+		Aggro = 32,
+		Leash = 70,
+		Reach = 4,
+		Gloom = 8,
+		Steal = 0.25,
+		Cooldown = 1.6,
+		XP = 15,
+		Drop = "Moonshard",
+		Respawn = 60,
+	},
+	{
+		Id = "BrambleBoar",
+		Name = "Bramble Boar",
+		Icon = "🐗",
+		Kind = "Guardian",
+		Guards = { "Moonshard" },
+		Chance = 0.3,
+		HP = 5,
+		Speed = 12,
+		Leash = 40,
+		Reach = 4,
+		Gloom = 6,
+		Steal = 0,
+		Cooldown = 1.8,
+		XP = 10,
+	},
+	{
+		Id = "MossBear",
+		Name = "Moss Bear",
+		Icon = "🐻",
+		Kind = "Guardian",
+		Guards = { "Emberheart", "Frostglass" },
+		Chance = 0.6,
+		HP = 12,
+		Speed = 11,
+		Leash = 45,
+		Reach = 6,
+		Gloom = 12,
+		Steal = 0,
+		Cooldown = 2.2,
+		XP = 30,
+	},
+}
+Gloomwood.PetBeastDamage = 0.3 -- hits per second each equipped pet does to an animal
+Gloomwood.PetBeastDamageMax = 2
+
+function Gloomwood.GetBeast(id: string): any
+	for _, beast in Gloomwood.Beasts do
+		if beast.Id == id then
+			return beast
+		end
+	end
+	return nil
+end
+
 function Gloomwood.Get(id: string): any
 	for _, crystal in Gloomwood.Crystals do
 		if crystal.Id == id then

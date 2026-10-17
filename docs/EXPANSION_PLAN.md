@@ -153,6 +153,8 @@ faintly and hums when you're close. You mine them with **your pickaxe**, which g
 - **Gloom meter:** it slowly fills while you're deep in the forest and fills faster in the dark areas. Standing
   by a lantern lowers it. If it fills up, you're pushed out of the forest and **drop half of your unsent
   crystals**. So you choose between pushing deeper for rare crystals and heading back to bank them.
+- ~~Forest animals~~ (done): Shadow Wolves roam and chase, Bramble Boars and Moss Bears guard crystals and wake
+  when you mine them; pets help fight them.
 - **Shadow Wisps** float around and try to drain your satchel. Your pets fight them, so pet Power and Speed matter
   here too.
 - **Gloom Ward potions** (crafted) slow the meter down.

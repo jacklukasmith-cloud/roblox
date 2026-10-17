@@ -12,10 +12,12 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Gloomwood = require(ReplicatedStorage.Shared.Gloomwood)
+local Remotes = require(ReplicatedStorage.Shared.Remotes)
 
 local Modules = script.Parent
 local Ui = require(Modules.Ui)
 local State = require(Modules.State)
+local Sound = require(Modules.Sound)
 
 local T = Ui.Theme
 
@@ -188,6 +190,31 @@ function GloomwoodClient.Build(root: Frame)
 			update()
 		end
 	end)
+	-- a forest animal hit you: a shove, a red flash and a word about the Gloom it cost
+	local flash = Ui.new("Frame", {
+		Name = "BeastFlash",
+		Size = UDim2.fromScale(1, 1),
+		BackgroundColor3 = rgb(200, 20, 40),
+		BackgroundTransparency = 1,
+		ZIndex = 50,
+		Parent = root,
+	})
+	Remotes.Event("BeastHit").OnClientEvent:Connect(function(beastId, push)
+		local def = type(beastId) == "string" and Gloomwood.GetBeast(beastId)
+		if not def then
+			return
+		end
+		local character = player.Character
+		local hrp = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+		if hrp and typeof(push) == "Vector3" then
+			hrp.AssemblyLinearVelocity = push * 45 + Vector3.new(0, 28, 0)
+		end
+		flash.BackgroundTransparency = 0.6
+		TweenService:Create(flash, TweenInfo.new(0.5), { BackgroundTransparency = 1 }):Play()
+		Sound.Play("Hit", 0.6, 1)
+		Ui.toast(`{def.Icon} {def.Name}! +{def.Gloom} Gloom`, rgb(255, 120, 140))
+	end)
+
 	-- follow how deep you are (10 times a second is plenty). This also keeps the forest look if
 	-- the server changes the lighting (weather) while you're inside.
 	local since = 0

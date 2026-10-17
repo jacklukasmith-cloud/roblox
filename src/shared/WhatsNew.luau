@@ -17,7 +17,7 @@ WhatsNew.List = {
 	{
 		Icon = "🌲",
 		Title = "The Gloomwood",
-		Text = "A huge foggy forest (needs Frostpeak). Mine Gloom Crystals and send them home before the gloom gets you!",
+		Text = "A huge foggy forest (needs Frostpeak). Mine Gloom Crystals, watch out for wolves and sleeping bears, and send them home before the gloom gets you!",
 	},
 	{
 		Icon = "⬆️",
