@@ -111,6 +111,14 @@ local function runPersonal(player: Player, command: string, args: { string }): b
 		data.Bestiary[Config.StarterCreature] = true
 		local Pickaxe = require(script.Parent.Pickaxe) :: any
 		pcall(Pickaxe.Give, player, true)
+		pcall(Economy.UpdateFollowerAttribute, player)
+		-- a fresh level 1 island too
+		local Sanctuaries = require(script.Parent.Sanctuaries) :: any
+		pcall(function()
+			Sanctuaries.Remove(player)
+			Sanctuaries.Assign(player)
+		end)
+		PlayerData.MarkChanged(player)
 		notify:FireClient(player, "[TEST] Progress wiped - fresh start!", Color3.fromRGB(140, 255, 200))
 	elseif command == "nopasses" then
 		-- play as a player with no game passes (type it again to get them back)
