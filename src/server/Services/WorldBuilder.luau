@@ -32,7 +32,10 @@ local function sp(x: number, y: number, z: number): Vector3
 	return Vector3.new(x * SPREAD, y, z * SPREAD)
 end
 local WIDTH = 100 * SPREAD
-local HUB_START, HUB_END = -60 * SPREAD, 50 * SPREAD
+-- The hub is wider than the realms (Market Row in the west wing, the House Quarter in the east)
+-- and reaches back behind the spawn (Portal Plaza). The realms still start at HUB_END.
+local HUB_HALF = 80 * SPREAD
+local HUB_START, HUB_END = -100 * SPREAD, 50 * SPREAD
 local ZONE_LENGTH = 130 * SPREAD
 local CRYSTALS_PER_ZONE = 10
 
@@ -1759,6 +1762,189 @@ local function groundTexture(floor: BasePart, key: any)
 	end)
 end
 
+-- Hub districts ----------------------------------------------------------------------------------
+-- A floating sign on two posts, e.g. "Market Row"
+local function districtSign(parent: Instance, position: Vector3, text: string, color: Color3)
+	for _, side in { -1, 1 } do
+		column(parent, position + Vector3.new(side * 5, 0, 0), 9, 0.8, rgb(60, 45, 80), Enum.Material.Wood)
+	end
+	local board = part({
+		Name = "DistrictSign",
+		Size = Vector3.new(11, 2.6, 0.6),
+		Position = position + Vector3.new(0, 8.4, 0),
+		Color = rgb(45, 32, 70),
+		Material = Enum.Material.WoodPlanks,
+		Parent = parent,
+	})
+	part({
+		Size = Vector3.new(11.4, 0.25, 0.8),
+		Position = position + Vector3.new(0, 9.85, 0),
+		Color = color,
+		Material = Enum.Material.Neon,
+		Parent = parent,
+	})
+	local gui = billboard(board, UDim2.fromOffset(240, 46), Vector3.zero, 140)
+	label(gui, { Text = text, TextColor3 = color })
+end
+
+-- A market stall: four posts and a striped awning
+local function stall(parent: Instance, position: Vector3, color: Color3)
+	part({
+		Size = Vector3.new(7, 2.6, 3),
+		Position = position + Vector3.new(0, 1.3, 0),
+		Color = rgb(120, 80, 50),
+		Material = Enum.Material.WoodPlanks,
+		Parent = parent,
+	})
+	for _, x in { -3.3, 3.3 } do
+		for _, z in { -1.3, 1.3 } do
+			column(parent, position + Vector3.new(x, 0, z), 6, 0.35, rgb(90, 60, 40), Enum.Material.Wood)
+		end
+	end
+	for i = 0, 4 do
+		part({
+			Size = Vector3.new(1.6, 0.25, 4.2),
+			CFrame = CFrame.new(position + Vector3.new(-3.2 + i * 1.6, 6.3, 0)) * CFrame.Angles(math.rad(8), 0, 0),
+			Color = if i % 2 == 0 then color else WHITE,
+			Material = Enum.Material.Fabric,
+			Parent = parent,
+		})
+	end
+	-- a few goods on the counter
+	for i, c in { rgb(255, 120, 120), rgb(120, 220, 255), rgb(255, 220, 90) } do
+		part({
+			Shape = Enum.PartType.Ball,
+			Size = Vector3.one * 0.9,
+			Position = position + Vector3.new(-2.2 + i * 1.1, 3.05, 0.3),
+			Color = c,
+			Material = Enum.Material.Glass,
+			Parent = parent,
+		})
+	end
+end
+
+-- A big archway for a part of the game that's coming soon (the Gloomwood, your Sanctuary)
+local function portal(parent: Instance, position: Vector3, title: string, color: Color3)
+	local folder = Instance.new("Model")
+	folder.Name = title .. "Portal"
+	for _, side in { -1, 1 } do
+		column(folder, position + Vector3.new(side * 7, 0, 0), 16, 2.4, rgb(70, 60, 95), Enum.Material.Slate)
+	end
+	part({
+		Size = Vector3.new(17, 2, 3),
+		Position = position + Vector3.new(0, 17, 0),
+		Color = rgb(70, 60, 95),
+		Material = Enum.Material.Slate,
+		Parent = folder,
+	})
+	-- the glowing (closed) gateway
+	local glow = part({
+		Name = "Gateway",
+		Size = Vector3.new(11.6, 15, 0.4),
+		Position = position + Vector3.new(0, 8, 0),
+		Color = color,
+		Material = Enum.Material.Neon,
+		Transparency = 0.55,
+		CanCollide = true,
+		Parent = folder,
+	})
+	glowAt(folder, position + Vector3.new(0, 8, 2), color, 22)
+	local gui = billboard(glow, UDim2.fromOffset(260, 70), Vector3.new(0, 11.5, 0), 160)
+	label(gui, { Text = title, TextColor3 = color, Size = UDim2.fromScale(1, 0.6) })
+	label(gui, {
+		Text = "Coming soon!",
+		Position = UDim2.fromScale(0, 0.6),
+		Size = UDim2.fromScale(1, 0.4),
+		TextColor3 = WHITE,
+	})
+	folder.Parent = parent
+end
+
+local function buildDistricts(hub: Instance)
+	local wingWidth = HUB_HALF - WIDTH / 2
+	-- paving so each district reads as its own area
+	for _, side in { -1, 1 } do
+		part({
+			Name = if side < 0 then "MarketFloor" else "HouseQuarterFloor",
+			Size = Vector3.new(wingWidth - 4, 0.2, HUB_END - HUB_START - 70 * SPREAD),
+			Position = Vector3.new(side * (WIDTH / 2 + wingWidth / 2), 0.04, (HUB_END + -60 * SPREAD) / 2),
+			Color = if side < 0 then rgb(150, 95, 70) else rgb(95, 85, 140),
+			Material = Enum.Material.Brick,
+			Parent = hub,
+		})
+		-- a low wall where the wing meets the realm gate
+		part({
+			Size = Vector3.new(wingWidth, 3, 2),
+			Position = Vector3.new(side * (WIDTH / 2 + wingWidth / 2), 1.5, HUB_END - 1),
+			Color = rgb(80, 70, 110),
+			Material = Enum.Material.Slate,
+			Parent = hub,
+		})
+	end
+	part({
+		Name = "PortalPlazaFloor",
+		Size = Vector3.new(90 * SPREAD, 0.2, 36 * SPREAD),
+		Position = sp(0, 0.04, -80),
+		Color = rgb(100, 95, 150),
+		Material = Enum.Material.Slate,
+		Parent = hub,
+	})
+	-- two walkways back to the Portal Plaza, through the gaps between the leaderboards
+	for _, x in { -12.5, 12.5 } do
+		part({
+			Size = Vector3.new(9, 0.2, 22 * SPREAD),
+			Position = sp(x, 0.05, -60),
+			Color = rgb(120, 105, 160),
+			Material = Enum.Material.Slate,
+			Parent = hub,
+		})
+	end
+
+	-- Market Row (west): the Merchant, the Blacksmith and some stalls
+	districtSign(hub, sp(-55, 0, -36), "🛒 Market Row", rgb(255, 190, 110))
+	stall(hub, sp(-74, 0, -38), rgb(230, 80, 80))
+	stall(hub, sp(-74, 0, 2), rgb(80, 160, 230))
+	stall(hub, sp(-74, 0, 40), rgb(110, 200, 110))
+
+	-- House Quarter (east): the three House statues
+	districtSign(hub, sp(55, 0, -36), "🏛️ House Quarter", rgb(190, 160, 255))
+
+	-- Portal Plaza (back): the ways to the Gloomwood and your Sanctuary (coming soon) + a fountain
+	districtSign(hub, sp(0, 0, -64), "🌀 Portal Plaza", rgb(140, 220, 255))
+	portal(hub, sp(-30, 0, -90), "🌲 The Gloomwood", rgb(120, 220, 140))
+	portal(hub, sp(30, 0, -90), "🏝️ Your Sanctuary", rgb(255, 170, 230))
+	disc(hub, sp(0, 0.6, -84), 18, 1.2, rgb(110, 100, 150), Enum.Material.Slate)
+	disc(hub, sp(0, 1.25, -84), 15, 0.2, rgb(90, 170, 255), Enum.Material.Glass).Transparency = 0.3
+	column(hub, sp(0, 1, -84), 4, 1.6, rgb(150, 140, 190), Enum.Material.Marble)
+	part({
+		Shape = Enum.PartType.Ball,
+		Size = Vector3.one * 2.2,
+		Position = sp(0, 5.6, -84),
+		Color = rgb(140, 220, 255),
+		Material = Enum.Material.Neon,
+		Parent = hub,
+	})
+	glowAt(hub, sp(0, 6, -84), rgb(140, 220, 255), 16)
+
+	-- more lamps for the new areas
+	for _, pos in
+		{
+			sp(-62, 0, -55),
+			sp(62, 0, -55),
+			sp(-62, 0, 46),
+			sp(62, 0, 46),
+			sp(-48, 0, -96),
+			sp(48, 0, -96),
+		}
+	do
+		if placeMesh(hub, "HubLamp", CFrame.new(pos), 12, true) then
+			glowAt(hub, pos + Vector3.new(0, 11, 0), rgb(200, 160, 255), 18)
+		else
+			makeLamp(hub, pos, rgb(200, 160, 255))
+		end
+	end
+end
+
 -- Build ------------------------------------------------------------------------------------------
 
 export type BuiltWorld = {
@@ -1793,7 +1979,7 @@ function WorldBuilder.Build(): BuiltWorld
 	local hubMid = (HUB_START + HUB_END) / 2
 	local hubFloor = part({
 		Name = "HubFloor",
-		Size = Vector3.new(WIDTH, 2, HUB_END - HUB_START),
+		Size = Vector3.new(HUB_HALF * 2, 2, HUB_END - HUB_START),
 		Position = Vector3.new(0, -1, hubMid),
 		Color = rgb(85, 75, 120),
 		Material = Enum.Material.Cobblestone,
@@ -1858,9 +2044,9 @@ function WorldBuilder.Build(): BuiltWorld
 		placeMesh(hub, "HubBanner", CFrame.new(pos), 13, true)
 	end
 
-	-- Houses line the east side of the hub, facing the path, so the way to the realms stays clear
+	-- Houses stand in the House Quarter (east wing), facing the plaza
 	for i, id in Houses.Order do
-		local position = sp(32, 0, 2 + (i - 1) * 19)
+		local position = sp(64, 0, -12 + (i - 1) * 24)
 		table.insert(result.HousePedestals, makeHouse(hub, id, position, math.pi / 2))
 	end
 
@@ -1879,7 +2065,8 @@ function WorldBuilder.Build(): BuiltWorld
 	})
 	statue(hub, "TitanUnicorn", championPos + Vector3.new(0, 18.5, 3), 1.2)
 
-	makeMerchant(hub, sp(36, 0, -16))
+	makeMerchant(hub, sp(-64, 0, -14))
+	buildDistricts(hub)
 
 	-- Zones ------------------------------------------------------------------------------------
 	local zonesFolder = Instance.new("Folder")
@@ -1950,28 +2137,28 @@ function WorldBuilder.Build(): BuiltWorld
 		end
 	end
 
-	-- Invisible boundary walls so nobody walks around the gates
+	-- Invisible boundary walls so nobody walks around the gates. The hub is wider than the realms,
+	-- so it has its own side walls plus a short wall across each wing where the realms begin.
 	local worldEnd = zoneStartZ(#Zones.List + 1)
-	local length = worldEnd - HUB_START
-	local midZ = (HUB_START + worldEnd) / 2
-	for _, x in { -WIDTH / 2 - 0.5, WIDTH / 2 + 0.5 } do
-		part({
-			Name = "Wall",
-			Size = Vector3.new(1, 80, length),
-			Position = Vector3.new(x, 40, midZ),
-			Transparency = 1,
-			Parent = world,
-		})
+	local function wall(size: Vector3, position: Vector3)
+		part({ Name = "Wall", Size = size, Position = position, Transparency = 1, Parent = world })
 	end
-	for _, z in { HUB_START - 0.5, worldEnd + 0.5 } do
-		part({
-			Name = "Wall",
-			Size = Vector3.new(WIDTH, 80, 1),
-			Position = Vector3.new(0, 40, z),
-			Transparency = 1,
-			Parent = world,
-		})
+	for _, side in { -1, 1 } do
+		wall(
+			Vector3.new(1, 80, HUB_END - HUB_START),
+			Vector3.new(side * (HUB_HALF + 0.5), 40, (HUB_START + HUB_END) / 2)
+		)
+		wall(
+			Vector3.new(1, 80, worldEnd - HUB_END),
+			Vector3.new(side * (WIDTH / 2 + 0.5), 40, (HUB_END + worldEnd) / 2)
+		)
+		wall(
+			Vector3.new(HUB_HALF - WIDTH / 2, 80, 1),
+			Vector3.new(side * (WIDTH / 2 + HUB_HALF) / 2, 40, HUB_END + 0.5)
+		)
 	end
+	wall(Vector3.new(HUB_HALF * 2, 80, 1), Vector3.new(0, 40, HUB_START - 0.5))
+	wall(Vector3.new(WIDTH, 80, 1), Vector3.new(0, 40, worldEnd + 0.5))
 
 	world.Parent = workspace
 	return result

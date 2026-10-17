@@ -108,6 +108,17 @@ Testing commands (only affect you; everyone is an admin in Studio):
 | `!reset confirm` | Wipe all your progress back to a brand-new save (Robux purchases and game passes are kept) |
 | `!seasonend` | End the season now on this server and hand out the rewards (for testing) |
 
+## The hub
+
+The hub is about twice as big as before and split into districts:
+- **Centre:** the spawn, the plaza with the Mana Surge obelisk, the leaderboards and the Champion Egg.
+- **Market Row** (west wing): the Wandering Merchant, the Blacksmith's anvil and shop circle, and market stalls.
+- **House Quarter** (east wing): the three House statues.
+- **Portal Plaza** (behind the leaderboards): a fountain and two *coming soon* portals, for the Gloomwood and
+  your Sanctuary.
+
+The realms start in the same place as before.
+
 ## Missions
 
 A chain of 20 missions guides players from their first crystal to discovering all 25 species

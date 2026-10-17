@@ -28,7 +28,7 @@ local cfg = Config.Pickaxe
 local lastSwing: { [Player]: number } = {}
 local streaks: { [Player]: { Count: number, LastHit: number } } = {}
 local pickaxeHit = Remotes.Event("PickaxeHit")
-local ANVIL_PLAN = Vector3.new(-30, 0, 18) -- on the 100-wide map plan (spread out by WorldBuilder)
+local ANVIL_PLAN = Vector3.new(-64, 0, 20) -- Market Row, on the map plan (spread out by WorldBuilder)
 
 local function tierOf(player: Player): number
 	local data = PlayerData.Get(player) :: any
