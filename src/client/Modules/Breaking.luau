@@ -292,7 +292,7 @@ local function cameraKick(strength: number)
 	end)
 end
 
--- Combo meter (right side of the screen) -----------------------------------------------
+-- Combo meter (upper right, below the top-right buttons and clear of the player list) ----
 local comboGui: ScreenGui? = nil
 local comboLabel: TextLabel? = nil
 local comboSub: TextLabel? = nil
@@ -309,16 +309,16 @@ local function buildComboMeter()
 	gui.Enabled = false
 	gui.Parent = player:WaitForChild("PlayerGui")
 	local frame = Instance.new("Frame")
-	frame.AnchorPoint = Vector2.new(0.5, 0)
-	frame.Position = UDim2.fromScale(0.5, 0.2)
-	frame.Size = UDim2.fromOffset(170, 74)
+	frame.AnchorPoint = Vector2.new(1, 0)
+	frame.Position = UDim2.new(1, -230, 0, 150)
+	frame.Size = UDim2.fromOffset(128, 56)
 	frame.BackgroundTransparency = 1
 	frame.Parent = gui
 	local scale = Instance.new("UIScale")
 	scale.Parent = frame
 	local label = Instance.new("TextLabel")
 	label.BackgroundTransparency = 1
-	label.Size = UDim2.new(1, 0, 0, 40)
+	label.Size = UDim2.new(1, 0, 0, 30)
 	label.Font = Enum.Font.FredokaOne
 	label.TextScaled = true
 	label.TextColor3 = GOLD
@@ -328,14 +328,14 @@ local function buildComboMeter()
 	stroke.Thickness = 2.5
 	stroke.Parent = label
 	local sub = label:Clone()
-	sub.Position = UDim2.fromOffset(0, 40)
-	sub.Size = UDim2.new(1, 0, 0, 18)
+	sub.Position = UDim2.fromOffset(0, 30)
+	sub.Size = UDim2.new(1, 0, 0, 14)
 	sub.TextColor3 = Color3.new(1, 1, 1)
 	sub.Parent = frame
 	local back = Instance.new("Frame")
 	back.AnchorPoint = Vector2.new(0.5, 0)
-	back.Position = UDim2.new(0.5, 0, 0, 62)
-	back.Size = UDim2.new(0.8, 0, 0, 6)
+	back.Position = UDim2.new(0.5, 0, 0, 48)
+	back.Size = UDim2.new(0.8, 0, 0, 5)
 	back.BackgroundColor3 = Color3.fromRGB(20, 20, 35)
 	back.BackgroundTransparency = 0.3
 	back.BorderSizePixel = 0
