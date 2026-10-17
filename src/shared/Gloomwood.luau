@@ -11,7 +11,7 @@
 
 local Gloomwood = {}
 
-Gloomwood.Center = Vector3.new(0, 0, -1500)
+Gloomwood.Center = Vector3.new(-6000, 0, -6000) -- far from the hub (and the islands) so it can't be seen from there
 Gloomwood.Radius = 600
 Gloomwood.RingEdge = 420 -- Edge is outside this, Midwood inside
 Gloomwood.RingMid = 220 -- the Deepwood wall

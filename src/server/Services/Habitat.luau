@@ -94,9 +94,9 @@ function Habitat.Set(player: Player, uid: any, on: any): (boolean, string?)
 	return true, nil
 end
 
--- Gives habitat XP for the minutes since the last time (offline time is capped). Returns the XP
+-- Gives habitat XP for the minutes since the last time (offline time is capped, and earns less). Returns the XP
 -- each pet got.
-function Habitat.Tick(player: Player, now: number): number
+function Habitat.Tick(player: Player, now: number, offline: boolean?): number
 	local data = PlayerData.Get(player) :: any
 	if not data then
 		return 0
@@ -126,7 +126,8 @@ function Habitat.Tick(player: Player, now: number): number
 			anyToLevel = true
 		end
 	end
-	local xp = minutes * Sanctuary.HabitatXPPerMinute
+	local xp =
+		math.floor(minutes * Sanctuary.HabitatXPPerMinute * (if offline then Sanctuary.HabitatOfflineRate else 1))
 	if anyToLevel then
 		Economy.GrantXP(player, xp, only)
 	end
@@ -141,7 +142,7 @@ function Habitat.Start()
 		if data and prune(data) then
 			PlayerData.MarkChanged(player)
 		end
-		local xp = Habitat.Tick(player, os.time())
+		local xp = Habitat.Tick(player, os.time(), true)
 		Habitat.Refresh(player)
 		if xp >= 10 then
 			task.delay(6, function()

@@ -125,9 +125,12 @@ The realms start in the same place as before.
 
 ## Sanctuary (player islands)
 
-Every player in the server (up to 8) gets a **floating sky island**. The islands sit in a ring high above and behind Portal
-Plaza, so you can see them from the hub. Each island has your name, waterfalls, glowing crystals, trees and four
-marked spots for the stations still to come (Pet Habitat, Alchemy Cauldron, Hangar, Crystal Vault).
+Every player in the server (up to 8) gets a big **floating sky island**. The islands float in a ring round the
+**Sky Plaza**, and each one has a sky bridge (with railings and lanterns) to the plaza, so you can walk over to
+anyone's island; a name plate at the end of each bridge says whose it is. The plaza has a circle back to the hub.
+The islands and the Gloomwood are built far away from the hub, so they can't be seen from it. Each island has your
+name, waterfalls, glowing crystals, trees and the station spots (Pet Habitat, Alchemy Cauldron, Hangar, Crystal
+Vault), all laid out so the path from your bridge to your home spot stays clear.
 - **Getting there:**
   - walk into the **Sanctuary portal** in Portal Plaza;
   - press the **🏠** button next to the pickaxe button (or **H**);
@@ -137,8 +140,8 @@ marked spots for the stations still to come (Pet Habitat, Alchemy Cauldron, Hang
   (💎 2K for level 2, up to 💎 200B for level 10), makes the island bigger and gives **+2% Essence** (+18% at
   level 10). The island is rebuilt bigger straight away.
 - **Pet Habitat:** step into the green circle in the fenced garden on your island and tap pets to move them in.
-  They wander around your island for visitors to see and earn **2 XP a minute**, even while you're offline (up to
-  8 hours, with a message when you come back). Room for 2 pets, plus one more every 2 island levels (6 at level 9).
+  They wander around your island for visitors to see and earn **2 XP a minute** (half that while you're offline,
+  for up to 8 hours, with a message when you come back). Room for 2 pets, plus one more every 2 island levels (6 at level 9).
   Only unequipped pets can live there; equipping, trading or releasing one takes it out.
   Code: `src/server/Services/Habitat.luau`, `src/client/Modules/HabitatPanel.luau`, `IslandPets.luau`.
 - **Settings:** in `src/shared/Sanctuary.luau` (island size, costs and bonus per level, habitat slots and XP, ring

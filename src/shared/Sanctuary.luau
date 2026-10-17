@@ -1,13 +1,18 @@
 --[[
 	Sanctuary (player bases): every player gets a floating sky island in their server. Islands sit in
-	a ring high above and behind the hub's Portal Plaza. Level 1-10 (upgraded with Essence) makes the
+	a ring high above and behind the hub's Portal Plaza, around the Sky Plaza, and a sky bridge joins each
+	one to the plaza, so you can walk over to anyone's island. Level 1-10 (upgraded with Essence) makes the
 	island bigger and unlocks the stations (see docs/EXPANSION_PLAN.md).
 ]]
 
 local Sanctuary = {}
 
-Sanctuary.Center = Vector3.new(0, 260, -460) -- middle of the ring of islands
-Sanctuary.RingRadius = 200
+-- middle of the ring of islands (the Sky Plaza). Far away from the hub so it can't be seen from there:
+-- the portal and the 🏠 button take you
+Sanctuary.Center = Vector3.new(6000, 300, -6000)
+Sanctuary.RingRadius = 330
+Sanctuary.PlazaRadius = 100 -- the Sky Plaza in the middle; every island has a bridge to it
+Sanctuary.BridgeWidth = 12
 Sanctuary.Slots = 8 -- islands per server (one per player; set the place's Max Players to 8 to match)
 Sanctuary.MaxLevel = 10
 
@@ -32,6 +37,7 @@ end
 -- Pet Habitat: unequipped pets you put here wander your island and earn XP, even while you're away
 Sanctuary.HabitatXPPerMinute = 2
 Sanctuary.HabitatOfflineHours = 8 -- the most XP time you can bank while offline
+Sanctuary.HabitatOfflineRate = 0.5 -- while you're offline they earn half as much
 
 -- How many pets the habitat holds: 2, then one more every 2 levels (6 at level 9)
 function Sanctuary.HabitatSlots(level: number): number
@@ -59,7 +65,7 @@ end
 
 -- Island size by level (studs, radius of the grass top)
 function Sanctuary.Radius(level: number): number
-	return 30 + 3 * (math.clamp(level, 1, Sanctuary.MaxLevel) - 1)
+	return 60 + 6 * (math.clamp(level, 1, Sanctuary.MaxLevel) - 1)
 end
 
 -- Where island number slot (1..Slots) floats

@@ -84,15 +84,24 @@ local function build(player: Player, slot: number): Model
 	model:SetAttribute("OwnerId", player.UserId)
 	model:SetAttribute("Level", level)
 	model:SetAttribute("Habitat", Sanctuary.HabitatKey(PlayerData.Get(player)))
+	-- everything is laid out facing the Sky Plaza: local -Z points down the bridge, so the path
+	-- from the bridge to your home spot (x = 0) stays clear
+	local toPlaza = ((Sanctuary.Center - c) * Vector3.new(1, 0, 1)).Unit
+	local frame = CFrame.lookAt(c, c + toPlaza)
+	local function at(x: number, y: number, z: number): Vector3
+		return frame:PointToWorldSpace(Vector3.new(x, y, z))
+	end
+	local rng = Random.new(player.UserId + slot)
 
 	-- grass top + a rocky underside that narrows to a point
 	local top = slab(model, c, r * 2, 3, rgb(95, 180, 90), Enum.Material.Grass)
 	top.Name = "Ground"
 	slab(model, c + Vector3.new(0, 1.6, 0), r * 2 - 1, 0.2, rgb(110, 200, 100), Enum.Material.Grass)
+	local depthScale = r / 40
 	local layers = { { 0.92, 7 }, { 0.68, 9 }, { 0.42, 10 }, { 0.18, 9 } }
 	local y = c.Y - 1.5
 	for i, layer in layers do
-		local h = layer[2]
+		local h = layer[2] * depthScale
 		slab(
 			model,
 			Vector3.new(c.X, y - h / 2, c.Z),
@@ -103,15 +112,18 @@ local function build(player: Player, slot: number): Model
 		)
 		y -= h
 	end
-	-- waterfalls pouring off three edges, with a little stream on top
-	for i = 0, 2 do
-		local a = i / 3 * math.pi * 2 + 0.6
-		local edge = c + Vector3.new(math.sin(a) * (r - 1), 0, math.cos(a) * (r - 1))
+	-- local angle a: 0 = the back (hub circle side), pi = the bridge side
+	local function rim(a: number, inset: number, height: number): Vector3
+		return at(math.sin(a) * (r - inset), height, math.cos(a) * (r - inset))
+	end
+	-- waterfalls pouring off three edges (away from the bridge and the hub circle), with a stream on top
+	for _, a in { 1.4, 4.1, 5.2 } do
+		local edge = rim(a, 1, 0)
 		local face = CFrame.lookAt(edge, Vector3.new(c.X, edge.Y, c.Z))
 		part({
 			Name = "Waterfall",
-			Size = Vector3.new(7, 34, 0.6),
-			CFrame = face * CFrame.new(0, -16, 1.2),
+			Size = Vector3.new(9, 34 * depthScale, 0.6),
+			CFrame = face * CFrame.new(0, -16 * depthScale, 1.2),
 			Color = rgb(120, 200, 255),
 			Material = Enum.Material.Glass,
 			Transparency = 0.35,
@@ -119,8 +131,8 @@ local function build(player: Player, slot: number): Model
 			Parent = model,
 		})
 		part({
-			Size = Vector3.new(7, 0.3, r * 0.45),
-			CFrame = face * CFrame.new(0, 1.6, -r * 0.22),
+			Size = Vector3.new(7, 0.3, r * 0.3),
+			CFrame = face * CFrame.new(0, 1.6, -r * 0.15),
 			Color = rgb(120, 200, 255),
 			Material = Enum.Material.Glass,
 			Transparency = 0.3,
@@ -128,46 +140,137 @@ local function build(player: Player, slot: number): Model
 			Parent = model,
 		})
 	end
-	-- glowing crystals around the rim
-	for i = 0, 5 do
-		local a = i / 6 * math.pi * 2
-		local pos = c + Vector3.new(math.sin(a) * (r - 4), 1.5, math.cos(a) * (r - 4))
-		local color = if i % 2 == 0 then rgb(255, 120, 230) else rgb(110, 220, 255)
-		for j = 0, 2 do
+	-- glowing crystals around the rim (more on bigger islands)
+	local crystals = 8 + level
+	for i = 0, crystals - 1 do
+		local a = (i + 0.5) / crystals * math.pi * 2
+		local nearPath = math.abs(math.sin(a)) < 0.2 -- the bridge (pi) and the hub circle (0)
+		if not nearPath then
+			local pos = rim(a, 5, 1.5)
+			local color = if i % 2 == 0 then rgb(255, 120, 230) else rgb(110, 220, 255)
+			for j = 0, 2 do
+				part({
+					Name = "Crystal",
+					Size = Vector3.new(1.4, 4 + j * 1.2, 1.4),
+					CFrame = CFrame.new(pos + Vector3.new(j - 1, (4 + j * 1.2) / 2, (j % 2) * 0.8))
+						* CFrame.Angles(math.rad(-12 + j * 12), a, math.rad(10 - j * 10)),
+					Color = color,
+					Material = Enum.Material.Neon,
+					Transparency = 0.15,
+					Parent = model,
+				})
+			end
+		end
+	end
+	-- round trees dotted about (not on the path, the stations or the Upgrade Stone)
+	local busy = { Vector3.new(14, 0, 0) }
+	for _, station in Sanctuary.Stations do
+		table.insert(busy, Vector3.new(station.Spot.X * r, 0, station.Spot.Y * r))
+	end
+	local trees = 0
+	for _ = 1, 80 do
+		if trees >= 8 + level * 2 then
+			break
+		end
+		local a, d = rng:NextNumber(0, math.pi * 2), rng:NextNumber(0.3, 0.85) * r
+		local spot = Vector3.new(math.sin(a) * d, 0, math.cos(a) * d)
+		local free = math.abs(spot.X) > 10
+		for _, b in busy do
+			if (spot - b).Magnitude < 13 then
+				free = false
+			end
+		end
+		if free then
+			table.insert(busy, spot)
+			trees += 1
+			local base = at(spot.X, 1.5, spot.Z)
+			local size = rng:NextNumber(0.9, 1.5)
 			part({
-				Name = "Crystal",
-				Size = Vector3.new(1.2, 3.5 + j, 1.2),
-				CFrame = CFrame.new(pos + Vector3.new(j - 1, (3.5 + j) / 2, (j % 2) * 0.8))
-					* CFrame.Angles(math.rad(-12 + j * 12), a, math.rad(10 - j * 10)),
-				Color = color,
-				Material = Enum.Material.Neon,
-				Transparency = 0.15,
+				Name = "Trunk",
+				Shape = Enum.PartType.Cylinder,
+				Size = Vector3.new(7 * size, 1.4 * size, 1.4 * size),
+				CFrame = CFrame.new(base + Vector3.new(0, 3.5 * size, 0)) * CFrame.Angles(0, 0, math.pi / 2),
+				Color = rgb(115, 80, 55),
+				Material = Enum.Material.Wood,
+				Parent = model,
+			})
+			part({
+				Name = "Leaves",
+				Shape = Enum.PartType.Ball,
+				Size = Vector3.one * 7 * size,
+				Position = base + Vector3.new(0, 8.5 * size, 0),
+				Color = if trees % 3 == 0 then rgb(255, 170, 210) else rgb(90, 190, 110),
+				Material = Enum.Material.Grass,
 				Parent = model,
 			})
 		end
 	end
-	-- a few round trees in the gaps between the station spots (not on the way back to the hub)
-	for i, a in { math.pi / 2, math.pi, math.pi * 1.5 } do
-		local base = c + Vector3.new(math.sin(a) * r * 0.78, 1.5, math.cos(a) * r * 0.78)
+	-- the sky bridge to the Sky Plaza (every island joins it, so you can walk to anyone's)
+	local deckY = c.Y + 1.2
+	local from = at(0, 0, -(r - 3))
+	local to = Sanctuary.Center - toPlaza * (Sanctuary.PlazaRadius - 3)
+	from = Vector3.new(from.X, deckY, from.Z)
+	to = Vector3.new(to.X, deckY, to.Z)
+	local length = (to - from).Magnitude
+	local along = CFrame.lookAt((from + to) / 2, to)
+	part({
+		Name = "Bridge",
+		Size = Vector3.new(Sanctuary.BridgeWidth, 1, length),
+		CFrame = along,
+		Color = rgb(150, 110, 75),
+		Material = Enum.Material.WoodPlanks,
+		Parent = model,
+	})
+	for _, side in { -1, 1 } do
+		local x = side * (Sanctuary.BridgeWidth / 2 - 0.3)
 		part({
-			Name = "Trunk",
-			Shape = Enum.PartType.Cylinder,
-			Size = Vector3.new(6, 1.2, 1.2),
-			CFrame = CFrame.new(base + Vector3.new(0, 3, 0)) * CFrame.Angles(0, 0, math.pi / 2),
-			Color = rgb(115, 80, 55),
+			Name = "BridgeRail",
+			Size = Vector3.new(0.4, 0.4, length),
+			CFrame = along * CFrame.new(x, 3, 0),
+			Color = rgb(120, 85, 55),
 			Material = Enum.Material.Wood,
 			Parent = model,
 		})
-		part({
-			Name = "Leaves",
-			Shape = Enum.PartType.Ball,
-			Size = Vector3.one * 6,
-			Position = base + Vector3.new(0, 7.5, 0),
-			Color = if i == 2 then rgb(255, 170, 210) else rgb(90, 190, 110),
-			Material = Enum.Material.Grass,
-			Parent = model,
-		})
+		local posts = math.floor(length / 16)
+		for i = 0, posts do
+			local z = -length / 2 + i * (length / math.max(posts, 1))
+			local post = part({
+				Name = "BridgePost",
+				Size = Vector3.new(0.6, 3.5, 0.6),
+				CFrame = along * CFrame.new(x, 1.5, z),
+				Color = rgb(110, 75, 50),
+				Material = Enum.Material.Wood,
+				Parent = model,
+			})
+			-- a lantern on every third post
+			if i % 3 == 1 then
+				local lamp = part({
+					Name = "BridgeLamp",
+					Size = Vector3.new(0.9, 1.1, 0.9),
+					CFrame = post.CFrame * CFrame.new(0, 2.3, 0),
+					Color = rgb(255, 210, 130),
+					Material = Enum.Material.Neon,
+					CanCollide = false,
+					Parent = model,
+				})
+				helpers.Light(lamp, rgb(255, 200, 130), 14, 1)
+			end
+		end
 	end
+	-- a name plate where your bridge meets the plaza, so visitors can find you
+	local plate = part({
+		Name = "BridgeSign",
+		Size = Vector3.one,
+		Position = to + toPlaza * 4 + Vector3.new(0, 7, 0),
+		Transparency = 1,
+		CanCollide = false,
+		CanQuery = false,
+		Parent = model,
+	})
+	helpers.Label(helpers.Billboard(plate, UDim2.fromOffset(220, 34), Vector3.zero, 120), {
+		Text = `🏝️ {player.DisplayName} (Lv {level})`,
+		TextColor3 = rgb(255, 210, 120),
+	})
 	-- arrival spot in the middle, with the owner's name above it
 	local home = slab(model, c + Vector3.new(0, 1.7, 0), 8, 0.2, rgb(170, 140, 255), Enum.Material.Neon)
 	home.Name = "HomePad"
@@ -195,14 +298,13 @@ local function build(player: Player, slot: number): Model
 		Size = UDim2.fromScale(1, 0.4),
 	})
 	-- the way back: walk into this circle to return to the hub
-	local back =
-		helpers.ShopPad(model, "HubPad", c + Vector3.new(0, 1.6, r - 8), rgb(140, 220, 255), "🌀 Back to the hub")
+	local back = helpers.ShopPad(model, "HubPad", at(0, 1.6, r - 10), rgb(140, 220, 255), "🌀 Back to the hub")
 	back:SetAttribute("Travel", "Hub")
 	-- the Upgrade Stone: hold E on your own island to level it up
 	local stone = part({
 		Name = "UpgradeStone",
 		Size = Vector3.new(3, 5, 3),
-		CFrame = CFrame.new(c + Vector3.new(0, 4, -10)) * CFrame.Angles(0, math.pi / 4, 0),
+		CFrame = CFrame.new(at(14, 4, 0)) * CFrame.Angles(0, math.pi / 4, 0),
 		Color = rgb(150, 120, 255),
 		Material = Enum.Material.Neon,
 		Transparency = 0.1,
@@ -231,7 +333,7 @@ local function build(player: Player, slot: number): Model
 	})
 	-- the stations (the ones not built yet say "coming soon")
 	for _, station in Sanctuary.Stations do
-		local spot = c + Vector3.new(station.Spot.X * r, 1.75, station.Spot.Y * r)
+		local spot = at(station.Spot.X * r, 1.75, station.Spot.Y * r)
 		local plate = slab(model, spot, 12, 0.2, rgb(150, 130, 100), Enum.Material.Cobblestone)
 		plate.Name = station.Id .. "Spot"
 		if station.Id == "PetHabitat" then
@@ -294,6 +396,77 @@ local function build(player: Player, slot: number): Model
 		})
 	end
 	helpers.Light(sign, rgb(255, 220, 160), 30, 1.2)
+	model.PrimaryPart = top
+	model.Parent = folder()
+	return model
+end
+
+-- The Sky Plaza in the middle of the ring: every island's bridge ends here. It has a circle back to
+-- the hub and a big glowing crystal to steer by.
+local plazaHubPad: BasePart? = nil
+local function buildPlaza(): Model
+	local helpers = WorldBuilder.Helpers
+	local c = Sanctuary.Center
+	local r = Sanctuary.PlazaRadius
+	local model = Instance.new("Model")
+	model.Name = "SkyPlaza"
+	local top = slab(model, c, r * 2, 3, rgb(205, 200, 225), Enum.Material.Marble)
+	top.Name = "Ground"
+	slab(model, c + Vector3.new(0, 1.6, 0), r * 2 - 6, 0.2, rgb(110, 200, 100), Enum.Material.Grass)
+	slab(model, c + Vector3.new(0, 1.65, 0), r * 0.7, 0.2, rgb(220, 215, 235), Enum.Material.Marble)
+	local y = c.Y - 1.5
+	for i, layer in { { 0.9, 14 }, { 0.6, 18 }, { 0.3, 16 } } do
+		local h = layer[2]
+		slab(
+			model,
+			Vector3.new(c.X, y - h / 2, c.Z),
+			r * 2 * layer[1],
+			h,
+			rgb(120, 110, 130):Lerp(rgb(70, 60, 80), i / 3),
+			Enum.Material.Rock
+		)
+		y -= h
+	end
+	-- the big crystal in the middle
+	for i = 0, 4 do
+		local a = i / 5 * math.pi * 2
+		local h = if i == 0 then 26 else 12 + i * 2
+		part({
+			Name = "PlazaCrystal",
+			Size = Vector3.new(3, h, 3),
+			CFrame = CFrame.new(
+				c
+					+ Vector3.new(
+						if i == 0 then 0 else math.sin(a) * 4,
+						1.7 + h / 2,
+						if i == 0 then 0 else math.cos(a) * 4
+					)
+			) * CFrame.Angles(if i == 0 then 0 else math.cos(a) * 0.3, 0, if i == 0 then 0 else -math.sin(a) * 0.3),
+			Color = if i % 2 == 0 then rgb(170, 140, 255) else rgb(120, 220, 255),
+			Material = Enum.Material.Neon,
+			Transparency = 0.1,
+			Parent = model,
+		})
+	end
+	local sign = part({
+		Name = "PlazaSign",
+		Size = Vector3.one,
+		Position = c + Vector3.new(0, 34, 0),
+		Transparency = 1,
+		CanCollide = false,
+		CanQuery = false,
+		Parent = model,
+	})
+	helpers.Label(helpers.Billboard(sign, UDim2.fromOffset(300, 50), Vector3.zero, 400), {
+		Text = "☁️ Sky Plaza",
+		TextColor3 = rgb(200, 230, 255),
+	})
+	helpers.Light(sign, rgb(190, 170, 255), 60, 2)
+	-- the way back to the hub
+	local back =
+		helpers.ShopPad(model, "PlazaHubPad", c + Vector3.new(0, 1.7, 22), rgb(140, 220, 255), "🌀 Back to the hub")
+	back:SetAttribute("Travel", "Hub")
+	plazaHubPad = back
 	model.PrimaryPart = top
 	model.Parent = folder()
 	return model
@@ -451,7 +624,13 @@ local function islandUnder(position: Vector3): Model?
 	return nil
 end
 
+-- Builds the Sky Plaza once
+function Sanctuaries.EnsurePlaza(): Model
+	return (folder():FindFirstChild("SkyPlaza") :: Model?) or buildPlaza()
+end
+
 function Sanctuaries.Start()
+	Sanctuaries.EnsurePlaza()
 	-- the Upgrade Stone (only works on your own island)
 	folder().DescendantAdded:Connect(function(d)
 		if d:IsA("ProximityPrompt") and d.Name == "UpgradePrompt" then
@@ -508,17 +687,26 @@ function Sanctuaries.Start()
 				if root then
 					local pos = root.Position
 					local skyY = Sanctuary.Center.Y
-					if pos.Y > skyY - 60 and pos.Y < skyY - 8 then
-						-- fell off an island: back onto it
+					local fromCenter = ((pos - Sanctuary.Center) * Vector3.new(1, 0, 1)).Magnitude
+					local inSky = fromCenter < Sanctuary.RingRadius + Sanctuary.Radius(Sanctuary.MaxLevel) + 60
+					if inSky and pos.Y > skyY - 80 and pos.Y < skyY - 8 then
+						-- fell off: back onto the plaza (if that's where you fell) or the island
 						local island = islandUnder(pos) or islands[player]
 						local pad = island and island:FindFirstChild("HomePad") :: BasePart?
-						if pad then
-							teleport(player, pad.Position)
-							notify:FireClient(player, "Whoops! Back onto the island", rgb(140, 220, 255))
+						local spot = if fromCenter < Sanctuary.PlazaRadius + 25
+							then Sanctuary.Center + Vector3.new(0, 2, 0)
+							elseif pad then pad.Position
+							else nil
+						if spot then
+							teleport(player, spot)
+							notify:FireClient(player, "Whoops! Back up you go", rgb(140, 220, 255))
 						end
-					elseif pos.Y > skyY - 8 then
+					elseif inSky and pos.Y > skyY - 8 then
 						local island = islandUnder(pos)
 						local back = island and island:FindFirstChild("HubPad") :: BasePart?
+						if not island then
+							back = plazaHubPad
+						end
 						if back then
 							local flat = (pos - back.Position) * Vector3.new(1, 0, 1)
 							if flat.Magnitude <= 4.5 and math.abs(pos.Y - back.Position.Y) < 8 then

@@ -220,7 +220,7 @@ Config.Rebirth = {
 -- Offline earnings (idle-game hook) ---------------------------------------------
 Config.Offline = {
 	MaxHours = 8,
-	Efficiency = 0.5, -- "virtual hits per second" your creatures make while you're away
+	Efficiency = 0.15, -- "virtual hits per second" your creatures make while you're away (much less than playing)
 	MinSeconds = 120, -- don't bother for very short absences
 }
 
