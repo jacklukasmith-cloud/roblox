@@ -901,8 +901,9 @@ end
 
 -- Hub pieces -----------------------------------------------------------------------------------
 
-local function makeBoard(parent: Instance, name: string, title: string, position: Vector3, color: Color3)
-	local facing = CFrame.new(position) * CFrame.Angles(0, math.pi, 0) -- front face looks toward spawn (+Z)
+-- yaw: which way the front faces (default pi = towards the realms, +Z; -pi/2 = +X; pi/2 = -X)
+local function makeBoard(parent: Instance, name: string, title: string, position: Vector3, color: Color3, yaw: number?)
+	local facing = CFrame.new(position) * CFrame.Angles(0, yaw or math.pi, 0)
 	local board = part({
 		Name = name,
 		Size = Vector3.new(18, 20, 1),
@@ -915,7 +916,7 @@ local function makeBoard(parent: Instance, name: string, title: string, position
 	for _, side in { -1, 1 } do
 		column(
 			board,
-			position + Vector3.new(side * 10, -position.Y, 0),
+			facing:PointToWorldSpace(Vector3.new(side * 10, -position.Y, 0)),
 			position.Y + 11,
 			2.2,
 			STONE,
@@ -924,7 +925,7 @@ local function makeBoard(parent: Instance, name: string, title: string, position
 		part({
 			Shape = Enum.PartType.Ball,
 			Size = Vector3.one * 1.8,
-			Position = position + Vector3.new(side * 10, 11.8, 0),
+			Position = facing:PointToWorldSpace(Vector3.new(side * 10, 11.8, 0)),
 			Color = color,
 			Material = Enum.Material.Neon,
 			Parent = board,
@@ -1881,16 +1882,14 @@ local function buildDistricts(hub: Instance)
 		Material = Enum.Material.Slate,
 		Parent = hub,
 	})
-	-- two walkways back to the Portal Plaza, through the gaps between the leaderboards
-	for _, x in { -12.5, 12.5 } do
-		part({
-			Size = Vector3.new(9, 0.2, 22 * SPREAD),
-			Position = sp(x, 0.05, -60),
-			Color = rgb(120, 105, 160),
-			Material = Enum.Material.Slate,
-			Parent = hub,
-		})
-	end
+	-- a wide walkway from the spawn back to the Portal Plaza
+	part({
+		Size = Vector3.new(16, 0.2, 22 * SPREAD),
+		Position = sp(0, 0.05, -60),
+		Color = rgb(120, 105, 160),
+		Material = Enum.Material.Slate,
+		Parent = hub,
+	})
 
 	-- west wing: the Merchant and the Blacksmith (no sign)
 
@@ -1995,9 +1994,11 @@ function WorldBuilder.Build(): BuiltWorld
 	spawn.Duration = 0
 	spawn.Parent = hub
 
-	makeBoard(hub, "TrophyBoard", "Top Trophies", sp(-25, 11, -55), rgb(0, 255, 225))
-	makeBoard(hub, "EssenceBoard", "Weekly Season", sp(0, 11, -55), rgb(140, 255, 200))
-	makeBoard(hub, "HouseBoard", "House War", sp(25, 11, -55), rgb(255, 200, 90))
+	-- Leaderboards stand at the back of the wings facing the middle, so the way from the spawn
+	-- to the Portal Plaza stays open
+	makeBoard(hub, "TrophyBoard", "Top Trophies", sp(-72, 11, -44), rgb(0, 255, 225), -math.pi / 2)
+	makeBoard(hub, "EssenceBoard", "Weekly Season", sp(-72, 11, -64), rgb(140, 255, 200), -math.pi / 2)
+	makeBoard(hub, "HouseBoard", "House War", sp(72, 11, -44), rgb(255, 200, 90), math.pi / 2)
 	makeObelisk(hub, sp(0, 0, 5))
 
 	for _, pos in
@@ -2020,10 +2021,9 @@ function WorldBuilder.Build(): BuiltWorld
 	for _, pos in { sp(-44, 0, -22), sp(44, 0, -22), sp(-44, 0, 20), sp(44, 0, 20) } do
 		placeMesh(hub, "FlowerPlanter", CFrame.new(pos), 5)
 	end
-	-- benches in front of the leaderboards, turned round to face them
-	for _, x in { -16, 16 } do
-		placeMesh(hub, "Bench", CFrame.new(sp(x, 0, -42)) * CFrame.Angles(0, math.pi, 0), 7)
-	end
+	-- benches in front of the Trophy and House War boards, facing them
+	placeMesh(hub, "Bench", CFrame.new(sp(-60, 0, -44)) * CFrame.Angles(0, -math.pi / 2, 0), 7)
+	placeMesh(hub, "Bench", CFrame.new(sp(60, 0, -44)) * CFrame.Angles(0, math.pi / 2, 0), 7)
 	-- banners: the pair beside the leaderboards is turned round to face the hub
 	for _, pos in { sp(-42, 0, -55), sp(42, 0, -55) } do
 		placeMesh(hub, "HubBanner", CFrame.new(pos) * CFrame.Angles(0, math.pi, 0), 13, true)

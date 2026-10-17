@@ -111,10 +111,12 @@ Testing commands (only affect you; everyone is an admin in Studio):
 ## The hub
 
 The hub is about twice as big as before and split into districts:
-- **Centre:** the spawn, the plaza with the Mana Surge obelisk, the leaderboards and the Champion Egg.
+- **Centre:** the spawn, the plaza with the Mana Surge obelisk and the Champion Egg, with a clear walkway back to the portals.
+- **Leaderboards:** the Trophy board (with the top-3 statues) and the Season board stand at the back of the west wing,
+  and the House War board at the back of the east wing. All three face the middle.
 - **West wing:** the Wandering Merchant and the Blacksmith. Each has a glowing **shop circle**: walk in and its window opens, walk out and it closes.
 - **House Quarter** (east wing): the three House statues.
-- **Portal Plaza** (behind the leaderboards): a fountain and two *coming soon* portals, for the Gloomwood and
+- **Portal Plaza** (behind the spawn): a fountain and two *coming soon* portals, for the Gloomwood and
   your Sanctuary.
 
 The realms start in the same place as before.
@@ -165,7 +167,7 @@ The **🏆 Top** button (top-right) opens the leaderboards window. It has 6 cate
 Each board has a **🌍 Global** top 50 with avatar pictures and a **👥 Friends** tab (you and your Roblox friends), and it
 always shows **your own rank**. If you're not in the top 50, it shows how much more you need to get on.
 
-In the hub, the left board cycles through every category every 12 seconds. Statues of the **top 3 trophy holders**
+In the hub, the Trophy board (west wing) cycles through every category every 12 seconds. Statues of the **top 3 trophy holders**
 (their real avatars) stand on top of it. Scores are saved every 90 seconds, and only when they've changed.
 
 ## Friend Boost
