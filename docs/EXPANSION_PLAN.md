@@ -32,6 +32,14 @@ How it all fits together:
 
 Every player gets their own **Sanctuary**: a floating island they own, reached from a portal in the hub.
 
+**Decided:**
+- **Location:** islands in each server that other players can visit, reached through the Sanctuary portal in
+  Portal Plaza.
+- **Look:** a floating sky island with waterfalls off the edges and glowing crystals.
+- **Building it up:** a fixed layout with **upgrade levels 1-10**, paid with Essence. Each level unlocks stations,
+  decorations and a bigger island.
+- **First version includes all four stations:** Pet Habitat, Crystal Vault, Alchemy Cauldron and Hangar.
+
 **How it works (recommended):** each server has a ring of floating base plots away from the main map (like a
 tycoon game's plots). When you join, you're given a free plot and your saved base is built on it. When you leave,
 it's removed. Everyone in the server can visit everyone else's base. This is simpler and cheaper than private
@@ -354,7 +362,7 @@ Each step works by itself and makes the next one easier.
 
 ## 9. Questions to decide
 
-1. **Bases:** floating plots in each server (recommended), or a separate private place you teleport to?
+1. ~~**Bases:**~~ decided: islands in each server, floating sky island, upgrade levels, all four stations.
 2. **Gloomwood danger:** should the Gloom meter make you **drop** crystals (exciting, but can feel bad), or just
    push you out with everything safe (gentler)?
 3. **Crafting timers:** real-time timers that run while you're offline (keeps people coming back), or instant
