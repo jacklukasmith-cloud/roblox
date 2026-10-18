@@ -400,13 +400,16 @@ end
 
 -- Getting in and out -----------------------------------------------------------------------
 
-function Service.Enter(player: Player): (boolean, string?)
+function Service.Enter(player: Player, force: boolean?): (boolean, string?)
 	local data = PlayerData.Get(player) :: any
 	if not data or not layout then
 		return false, nil
 	end
 	if (data.ZonesUnlocked or 1) < Gloomwood.UnlockZone then
 		return false, "🌲 Unlock Frostpeak to enter the Gloomwood"
+	end
+	if force then
+		lastTeleport[player] = nil -- a teleport crystal always works
 	end
 	if not teleport(player, layout.Arrival, Gloomwood.Center) then
 		return false, nil
@@ -415,6 +418,31 @@ function Service.Enter(player: Player): (boolean, string?)
 	warned[player] = false
 	data.Stats.GloomwoodVisits = (data.Stats.GloomwoodVisits or 0) + 1
 	PlayerData.MarkChanged(player)
+	return true, nil
+end
+
+-- A Camp Crystal: straight to the Deep Camp, if you've found it
+function Service.GoToCamp(player: Player): (boolean, string?)
+	local data = PlayerData.Get(player) :: any
+	if not data or not layout then
+		return false, nil
+	end
+	if (data.ZonesUnlocked or 1) < Gloomwood.UnlockZone then
+		return false, "🌲 Unlock Frostpeak to enter the Gloomwood"
+	end
+	if not gloomData(data).CampFound then
+		return false, "⛺ Find the Deep Camp on foot first (it's in the Midwood)"
+	end
+	lastTeleport[player] = nil
+	if not teleport(player, layout.CampArrival, Gloomwood.Center) then
+		return false, nil
+	end
+	if gloom[player] == nil then
+		gloom[player] = 0
+		warned[player] = false
+		data.Stats.GloomwoodVisits = (data.Stats.GloomwoodVisits or 0) + 1
+		PlayerData.MarkChanged(player)
+	end
 	return true, nil
 end
 

@@ -349,7 +349,9 @@ Remotes.Function("GetBoard").OnServerInvoke = function(player, boardId, scope)
 	return Leaderboards.GetBoard(player, boardId, scope)
 end
 
-bind("Travel", Sanctuaries.Travel)
+bind("Travel", function(player, destination)
+	return Sanctuaries.Travel(player, destination)
+end)
 bind("SetHabitat", Habitat.Set)
 bind("SellCrystals", Gloomwood.Sell)
 bind("Brew", Cauldron.Brew)

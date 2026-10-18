@@ -366,7 +366,7 @@ Each step works by itself and makes the next one easier.
 | 5 | ~~Sanctuary base: islands and travel, levels 1-10, Pet Habitat with XP while away, Crystal Vault, Alchemy Cauldron, Hangar~~ (done) | Everything after this needs a base | L |
 | 6a | ~~Gloomwood part 1: Edge and Midwood, Gloom Crystals, satchel, lanterns, Gloom meter, Deep Camp~~ (done, with the Crystal Vault and selling) | The main new adventure | L |
 | 6b | Gloomwood part 2: Deepwood (cliffs, caves), the Heart, Prismheart, Gloom Treant, Map Fragments | Where the hardest, rarest crystals are | L |
-| 7 | Crafting: potions and teleport crystals | Gives forest crystals a use | M |
+| 7 | ~~Crafting: potions and teleport crystals~~ (done: the Cauldron brews 9 potions and 3 teleport crystals) | Gives forest crystals a use | M |
 | 8 | Vehicles: ~~hoverboards~~ (done: the Hangar, three boards, Board Skins pass), ~~then karts~~ (done: Mushroom Kart with a passenger seat; the 4-seat Gloom Wagon is still to come) | Fun to show off, and good with friends | M |
 | 9 | Realms 5 and 6, plus Rebirth requirements | Fixes "I finished it" for top players | M each |
 | 10 | Joined-with-a-friend reward, co-op bonuses, friend quests | Builds on bases and vehicles | M |

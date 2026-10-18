@@ -192,6 +192,37 @@ Items.List = {
 			{ Item = "RainbowBrew", Weight = 0.1 },
 		},
 	},
+	-- Teleport crystals (brewed at the Cauldron) -----------------------------------------------
+	{
+		Id = "HomeCrystal",
+		Name = "Home Crystal",
+		Icon = "🏠",
+		Color = rgb(140, 220, 255),
+		Rarity = "Common",
+		Description = "Warps you straight to your Sanctuary island from anywhere",
+		Kind = "Teleport",
+		To = "Home",
+	},
+	{
+		Id = "GloomCrystal",
+		Name = "Gloom Crystal",
+		Icon = "🌲",
+		Color = rgb(120, 200, 140),
+		Rarity = "Rare",
+		Description = "Warps you to the Gloomwood gate (needs Frostpeak)",
+		Kind = "Teleport",
+		To = "Gloom",
+	},
+	{
+		Id = "CampCrystal",
+		Name = "Camp Crystal",
+		Icon = "⛺",
+		Color = rgb(255, 200, 120),
+		Rarity = "Epic",
+		Description = "Warps you right into the Deep Camp in the Midwood (once you've found it)",
+		Kind = "Teleport",
+		To = "Camp",
+	},
 	-- Special -------------------------------------------------------------------------------
 	{
 		Id = "TreasureMap",

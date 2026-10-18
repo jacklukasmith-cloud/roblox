@@ -823,9 +823,9 @@ local function hubSpawn(): Vector3
 end
 
 -- "Home", "Hub" or a user id (visit their island). Returns ok, message.
-function Sanctuaries.Travel(player: Player, destination: any): (boolean, string?)
+function Sanctuaries.Travel(player: Player, destination: any, force: boolean?): (boolean, string?)
 	local now = os.clock()
-	if now - (lastTravel[player] or 0) < TRAVEL_COOLDOWN then
+	if not force and now - (lastTravel[player] or 0) < TRAVEL_COOLDOWN then
 		return false, nil
 	end
 	local target: Model? = nil

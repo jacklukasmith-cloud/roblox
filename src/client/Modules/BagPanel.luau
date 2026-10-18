@@ -138,7 +138,7 @@ function BagPanel.Build(screen: Frame)
 		detailName.Text = `{item.Name}  x{count}`
 		detailName.TextColor3 = rarityColor(item.Rarity):Lerp(Color3.new(1, 1, 1), 0.3)
 		detailText.Text = item.Description
-		useButton.Text = if item.Kind == "Gift" then "Open" else "Use"
+		useButton.Text = if item.Kind == "Gift" then "Open" elseif item.Kind == "Teleport" then "Warp" else "Use"
 		useButton.Visible = true
 	end
 

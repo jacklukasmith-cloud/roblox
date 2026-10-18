@@ -97,6 +97,23 @@ local function apply(player: Player, data: any, item: Items.Item): (boolean, str
 			return false, "Couldn't hide a treasure right now"
 		end
 		return true, nil -- Treasures tells everyone where it is
+	elseif item.Kind == "Teleport" then
+		local Trading = require(script.Parent.Trading) :: any
+		if Trading.InTrade(player) then
+			return false, "Finish your trade first"
+		end
+		if item.To == "Home" then
+			local Sanctuaries = require(script.Parent.Sanctuaries) :: any
+			local ok, message = Sanctuaries.Travel(player, "Home", true)
+			return ok, if ok then `{item.Icon} Whoosh! Welcome home` else (message or "Couldn't warp right now")
+		end
+		local Gloomwood = require(script.Parent.Gloomwood) :: any
+		if item.To == "Camp" then
+			local ok, message = Gloomwood.GoToCamp(player)
+			return ok, if ok then `{item.Icon} Whoosh! You're at the Deep Camp` else message
+		end
+		local ok, message = Gloomwood.Enter(player, true)
+		return ok, if ok then `{item.Icon} Whoosh! The Gloomwood gate` else message
 	elseif item.Kind == "Boss" then
 		local BossRaid = require(script.Parent.BossRaid) :: any
 		if not BossRaid.Spawn() then

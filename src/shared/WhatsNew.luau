@@ -45,6 +45,11 @@ WhatsNew.List = {
 		Text = "A treasure chest on your island opens once a day. Higher island levels give better loot.",
 	},
 	{
+		Icon = "🏠",
+		Title = "Teleport crystals",
+		Text = "Brew Home, Gloom and Camp Crystals at your Cauldron and warp there from your Bag.",
+	},
+	{
 		Icon = "🏎️",
 		Title = "Mushroom Kart",
 		Text = "Build a kart at your Hangar with a seat on the back for a friend.",

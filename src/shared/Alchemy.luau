@@ -64,6 +64,22 @@ Alchemy.Recipes = {
 		Essence = 40,
 		Minutes = 8,
 	},
+	-- teleport crystals: cheap and quick, so they're something to brew every visit
+	{ Id = "HomeCrystal", Item = "HomeCrystal", Ingredients = { Moonshard = 2 }, Essence = 5, Minutes = 1 },
+	{
+		Id = "GloomCrystal",
+		Item = "GloomCrystal",
+		Ingredients = { Moonshard = 3, Emberheart = 1 },
+		Essence = 10,
+		Minutes = 2,
+	},
+	{
+		Id = "CampCrystal",
+		Item = "CampCrystal",
+		Ingredients = { Moonshard = 4, Voidstone = 1 },
+		Essence = 20,
+		Minutes = 4,
+	},
 	{
 		Id = "RainbowBrew",
 		Item = "RainbowBrew",

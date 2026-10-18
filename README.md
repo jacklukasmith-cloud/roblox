@@ -7,6 +7,7 @@ compete in server-wide **Mana Surges** and a weekly cross-server **House War**.
 - **[docs/GAME_DESIGN.md](docs/GAME_DESIGN.md)**: every system, the economy numbers and the monetization plan
 - **[docs/MARKET_RESEARCH.md](docs/MARKET_RESEARCH.md)**: what makes the top simulators different, and which ideas we borrowed
 - **[docs/ICONS.md](docs/ICONS.md)**: generated icons for every game pass and product
+- **[docs/YOUR_TODO.md](docs/YOUR_TODO.md)**: the list of things only you can do (IDs, uploads, imports, playtests)
 - **[docs/SOUNDS.md](docs/SOUNDS.md)**: sound effects, music, and how to swap in your own
 - **[docs/CREATURE_MESHES.md](docs/CREATURE_MESHES.md)**: 3D models (GLB) of all 25 creatures and how to import them
 - **[docs/WORLD_MESHES.md](docs/WORLD_MESHES.md)**: 3D models for eggs, crystals, Mana Chests, the merchant stall and trees, and how to import them
@@ -148,8 +149,10 @@ all of this are listed in [docs/HIGGSFIELD_TODO.md](docs/HIGGSFIELD_TODO.md).
 - **Alchemy Cauldron:** step into the green circle by the big pot on your island. Brew potions from the Gloom Crystals
   in your Vault plus a little Essence (`src/shared/Alchemy.luau`): Luck, Speed, Owl Eye, **Gloom Ward** (the Gloom
   meter fills half as fast for 10 minutes), Essence, Power, Shiny, XP and the
-  **Rainbow Brew** (needs a Prismheart; the rarer potions need Stormquartz and Voidstone from the Deepwood). Brews
-  take real time (3-20 minutes) and keep
+  **Rainbow Brew** (needs a Prismheart; the rarer potions need Stormquartz and Voidstone from the Deepwood), plus
+  three **teleport crystals**: the 🏠 Home Crystal (2 Moonshards, 1 minute: warp to your island from anywhere), the
+  🌲 Gloom Crystal (warp to the forest gate) and the ⛺ Camp Crystal (straight into the Deep Camp once you've found
+  it). Use them from the Bag with **Warp**. Brews take real time (1-20 minutes) and keep
   brewing while you're away; the finished potion goes straight into your 🎒 Bag. The pot glows and bubbles while
   something's brewing. The **Master Alchemist** game pass gives a
   second slot and 25% faster brews. Code: `src/server/Services/Cauldron.luau`, `src/client/Modules/CauldronPanel.luau`.
@@ -253,6 +256,7 @@ Tap an item to see what it does, then press **Use** (or **Open** for gifts). Ite
 | 🍪 Pet Treat / 🍯 Golden Treat | Instant XP for every equipped creature |
 | 💰 Essence Sack | Instant Essence |
 | 🥚 Mystic Egg | Hatches a guaranteed Rare or better |
+| 🏠 Home / 🌲 Gloom / ⛺ Camp Crystal | Teleports (brewed at the Cauldron) |
 | 🎁 Mystery Gift | Opens into a random item |
 | 🗺️ Treasure Map | Hides a Lost Treasure in one of your realms |
 | 📯 Boss Horn | Calls a boss to the server right now |
