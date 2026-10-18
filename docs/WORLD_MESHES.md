@@ -61,7 +61,7 @@ If the brew's glow doesn't line up with the top of the imported pot, add a numbe
 | Model name | Where | Preview image |
 |---|---|---|
 | `PrismheartCrystal` | The legendary Prismheart in the Heart of the Gloomwood (replaces the built-in shards; works for any crystal as `<Id>Crystal`) | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261017_235536_1f03c5e8-21e4-48e5-a477-3953fa38eee1.png) |
-| `GloomTreant` | Concept + static GLB only ([image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261017_235537_a16029f8-0693-4a3a-a5ca-08ee9b6e55a5.png)); the walking treant in the game stays the block one until it's rigged | |
+| `GloomTreant` | Not placed by the game yet: a static model ([GLB](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261017_235601_9af95ab7-f85a-4ef1-9302-75eb634d8ced.glb), [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261017_235537_a16029f8-0693-4a3a-a5ca-08ee9b6e55a5.png)) to rig later; the walking treant stays the block one until then | |
 
 ## Add them to the game
 
