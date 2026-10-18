@@ -69,6 +69,8 @@ If the brew's glow doesn't line up with the top of the imported pot, add a numbe
 |---|---|---|
 | `VehicleMossBoard` | The Moss Board under your feet while riding (replaces the glowing plank) | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_000838_d646bbaa-00b7-4340-bea3-4faa85341b2a.png) |
 | `VehicleCrystalBoard` | The Crystal Hoverboard | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_000840_9fa8857d-2b38-4e24-b9f8-30933921cf9b.png) |
+| `VehicleMushroomKart` | The Mushroom Kart (the passenger Seat is added by the game behind the driver) | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_084517_2ef7202d-4780-416e-bb30-c2af649a25bc.png) |
+| `IslandChest` | The daily chest on every island (replaces the wooden box) | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_084517_267a85f9-1de5-4237-b82e-423ead90c4c3.png) |
 
 Boards are scaled to 6 studs long automatically. If one sits too high or low under the character, it's the
 pivot of the imported model: in Studio, move the model's pivot to its bottom centre.

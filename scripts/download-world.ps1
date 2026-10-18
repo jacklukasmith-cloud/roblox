@@ -50,6 +50,8 @@ $models = [ordered]@{
     "PrismheartCrystal" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261017_235559_8b4caf86-2343-4101-8b9a-b6b467841730.glb"
     "VehicleMossBoard" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_001114_1d4fcdc2-cfd9-42e0-a14b-7c9bf4e2f074.glb"
     "VehicleCrystalBoard" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_001115_f8b35508-1898-4e42-93da-f68501074a75.glb"
+    "VehicleMushroomKart" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_084558_91a8fa54-b4c4-43e8-ba7c-757632da1874.glb"
+    "IslandChest" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_084559_a0037d6b-a20f-49c1-9ae3-3662c0b07d4b.glb"
     "MerchantTent" = "https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_200802_63cfd9f7-3dd7-4a70-8806-b9ee08a1395a.glb"
 }
 $ok = 0
