@@ -381,7 +381,11 @@ function TradePanel.Build(screen: Frame, creatureIcon: IconFn)
 	end
 
 	local function variantPrefix(variant: string): string
-		return if variant == "Shiny" then "✨ " elseif variant == "Rainbow" then "🌈 " else ""
+		return if variant == "Shiny"
+			then "✨ "
+			elseif variant == "Rainbow" then "🌈 "
+			elseif variant == "Huge" then "🐘 "
+			else ""
 	end
 
 	local function updateStatus()

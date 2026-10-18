@@ -342,7 +342,7 @@ and potions, Bee Swarm Simulator's treats and Grow a Garden's restocking shop.
 - **Rule for Robux:** mostly cosmetics and time-savers. Boosts stay modest, so free players can still reach the top.
 - **Weekend events:** ~~rotating bonus weekends~~ (done: Double Essence, Lucky, Hatch Fest, Gloom Rush, Shiny); limited event realms or eggs (Halloween, Snow festival) with pets that never come back are still to come.
 - ~~**Spin wheel:** one free spin every 4 hours, and extra spins for Robux.~~ (done: 🎡 Spin, Spin Pack product)
-- **Huge pets:** ultra-rare giant versions of creatures (about 1 in 100,000).
+- ~~**Huge pets:** ultra-rare giant versions of creatures.~~ (done: 1 in 50,000, x12 power, 2.4x size, global banner, Most HUGE Pets board)
 
 ## Missions for the new content
 

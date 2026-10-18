@@ -98,6 +98,22 @@ Boards.List = {
 		end,
 	},
 	{
+		Id = "Huges",
+		Name = "Most HUGE Pets",
+		Icon = "🐘",
+		Store = "MythicTamers_Huges_v1",
+		Weekly = false,
+		Value = function(d)
+			local n = 0
+			for _, entry in d.Creatures or {} do
+				if entry.Variant == "Huge" then
+					n += 1
+				end
+			end
+			return n
+		end,
+	},
+	{
 		Id = "WeekLikes",
 		Name = "Most Liked Sanctuary",
 		Icon = "❤️",

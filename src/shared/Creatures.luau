@@ -1,6 +1,6 @@
 --[[
 	Every creature in the game. Power = how much damage it adds to each crystal hit.
-	Variants (Shiny / Rainbow) multiply power, inspired by PS99's Gold/Rainbow pets
+	Variants (Shiny / Rainbow / Huge) multiply power, inspired by PS99's Gold/Rainbow/Huge pets
 	and Grow a Garden's mutations.
 ]]
 
@@ -35,7 +35,10 @@ Creatures.Variants = {
 	Normal = { Order = 0, Multiplier = 1, Chance = 0, Prefix = "" },
 	Shiny = { Order = 1, Multiplier = 2, Chance = 1 / 40, Prefix = "Shiny " },
 	Rainbow = { Order = 2, Multiplier = 5, Chance = 1 / 400, Prefix = "Rainbow " },
+	-- HUGE: the ultra-rare giant version (Scale = how much bigger it's drawn). Can't be fused into.
+	Huge = { Order = 3, Multiplier = 12, Chance = 1 / 50000, Prefix = "HUGE ", Scale = 2.4 },
 }
+Creatures.HugeChance = Creatures.Variants.Huge.Chance
 
 local rgb = Color3.fromRGB
 local defs: { CreatureDef } = {
@@ -308,8 +311,13 @@ Creatures.FuseNext = { Normal = "Shiny", Shiny = "Rainbow" }
 -- Rolls a variant. shinyMultiplier boosts both Shiny and Rainbow odds.
 function Creatures.RollVariant(rng: Random, shinyMultiplier: number): string
 	local roll = rng:NextNumber()
+	local huge = Creatures.Variants.Huge.Chance * shinyMultiplier
 	local rainbow = Creatures.Variants.Rainbow.Chance * shinyMultiplier
 	local shiny = Creatures.Variants.Shiny.Chance * shinyMultiplier
+	if roll < huge then
+		return "Huge"
+	end
+	roll -= huge
 	if roll < rainbow then
 		return "Rainbow"
 	elseif roll < rainbow + shiny then

@@ -98,10 +98,13 @@ local function creatureIcon(
 		Rotation = 90,
 		Parent = icon,
 	})
-	if variant == "Shiny" or variant == "Rainbow" then
+	if variant == "Shiny" or variant == "Rainbow" or variant == "Huge" then
 		Ui.new("UIStroke", {
-			Color = if variant == "Rainbow" then Color3.fromRGB(255, 120, 220) else Color3.fromRGB(255, 225, 120),
-			Thickness = 2.5,
+			Color = if variant == "Rainbow"
+				then Color3.fromRGB(255, 120, 220)
+				elseif variant == "Huge" then Color3.fromRGB(120, 255, 200)
+				else Color3.fromRGB(255, 225, 120),
+			Thickness = if variant == "Huge" then 3.5 else 2.5,
 			Parent = icon,
 		})
 	end

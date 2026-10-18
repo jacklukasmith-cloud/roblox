@@ -69,7 +69,14 @@ end
 local function tierOf(result): number
 	local def = Creatures.Get(result.Id)
 	local order = if def then Creatures.Rarities[def.Rarity].Order else 1
-	return order + (if result.Variant == "Rainbow" then 2 elseif result.Variant == "Shiny" then 1 else 0)
+	return order
+		+ (
+			if result.Variant == "Huge"
+				then 4
+				elseif result.Variant == "Rainbow" then 2
+				elseif result.Variant == "Shiny" then 1
+				else 0
+		)
 end
 
 -- Egg in a ViewportFrame, with crack lines that can be revealed in stages ------------------
@@ -702,12 +709,14 @@ function HatchAnim.Init(root: Frame)
 		title.Text = ""
 		if bestTier >= 3 and bestDef then
 			local word = BANNER_WORDS[math.min(Creatures.Rarities[bestDef.Rarity].Order, 7)] or "WOW!"
-			if bestResult.Variant == "Rainbow" then
+			if bestResult.Variant == "Huge" then
+				word = "HUGE!!!"
+			elseif bestResult.Variant == "Rainbow" then
 				word = "RAINBOW " .. word
 			elseif bestResult.Variant == "Shiny" then
 				word = "SHINY " .. word
 			end
-			if Creatures.Rarities[bestDef.Rarity].Order < 3 then
+			if Creatures.Rarities[bestDef.Rarity].Order < 3 and bestResult.Variant ~= "Huge" then
 				word = string.upper(Creatures.DisplayName(bestDef.Id, bestResult.Variant)) .. "!"
 			end
 			banner.Text = word

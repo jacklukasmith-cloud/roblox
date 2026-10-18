@@ -45,6 +45,11 @@ WhatsNew.List = {
 		Text = "A treasure chest on your island opens once a day. Higher island levels give better loot.",
 	},
 	{
+		Icon = "🐘",
+		Title = "HUGE pets",
+		Text = "A 1 in 50,000 chance on every egg: a giant version with x12 power. The whole game hears about it.",
+	},
+	{
 		Icon = "🎉",
 		Title = "Weekend events",
 		Text = "Every weekend something's on: Double Essence, Lucky, Hatch Fest, Gloom Rush or Shiny. The HUD counts down.",

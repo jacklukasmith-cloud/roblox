@@ -166,7 +166,7 @@ function Celebrate.Build(root: Frame)
 			return
 		end
 		local rarityColor = Creatures.Rarities[def.Rarity].Color
-		local rainbow = pull.Variant == "Rainbow"
+		local rainbow = pull.Variant == "Rainbow" or pull.Variant == "Huge"
 		who.Text = `{if pull.Global then "🌍" else "✨"} {pull.Name} {pull.Verb} a`
 		what.Text = Creatures.DisplayName(pull.Id, pull.Variant)
 		what.TextColor3 = if rainbow then RAINBOW[1] else rarityColor
@@ -265,7 +265,9 @@ function Celebrate.Build(root: Frame)
 		if not def then
 			return
 		end
-		local colors = if pull.Variant == "Rainbow" then RAINBOW else { Creatures.Rarities[def.Rarity].Color, GOLD }
+		local colors = if pull.Variant == "Rainbow" or pull.Variant == "Huge"
+			then RAINBOW
+			else { Creatures.Rarities[def.Rarity].Color, GOLD }
 		local mine = pull.UserId == player.UserId
 		if pull.UserId ~= 0 then
 			-- your own fireworks wait until the hatch reveal has had its moment

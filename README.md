@@ -329,6 +329,12 @@ tile counts rewards ready to claim. Days roll over at midnight UTC.
 
 Rewards and the quest pool live in `src/shared/Daily.luau`; Essence rewards scale with your best zone.
 
+## HUGE pets
+
+Every egg has a **1 in 50,000** chance (doubled on Shiny Weekends and by Shiny Elixirs) of hatching a **HUGE**
+version: drawn 2.4x bigger, **x12 power**, a global banner in every server, and a place on the **Most HUGE Pets**
+leaderboard. HUGE pets can't be fused into; they're the thing to chase and trade. Test one with `!give EmberFox Huge`.
+
 ## Weekend events
 
 Every weekend (Saturday 00:00 to Monday 00:00 UTC) one event is on in every server, rotating through

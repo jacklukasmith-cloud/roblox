@@ -9,7 +9,7 @@
 
 	Testing commands (only affect you, only on this server):
 	  !essence 1000000           give yourself Essence
-	  !give EmberFox             hatch a specific creature (add "Shiny" or "Rainbow" after the name)
+	  !give EmberFox             hatch a specific creature (add "Shiny", "Rainbow" or "Huge" after the name)
 	  !giveall                   get one of every creature and equip your best
 	  !boss                      spawn a boss raid now (on this server)
 	  !bigpull Phoenix Rainbow   show the big-pull banner + fireworks (Legendary+ or Rainbow)
@@ -86,7 +86,7 @@ local function runPersonal(player: Player, command: string, args: { string }): b
 			end
 		end
 		local variant = args[2]
-		if variant ~= "Shiny" and variant ~= "Rainbow" then
+		if variant ~= "Shiny" and variant ~= "Rainbow" and variant ~= "Huge" then
 			variant = "Normal"
 		end
 		for _, id in list do
@@ -168,7 +168,7 @@ local function runPersonal(player: Player, command: string, args: { string }): b
 				id = def.Id
 			end
 		end
-		local variant = if args[2] == "Shiny" or args[2] == "Rainbow" then args[2] else "Normal"
+		local variant = if args[2] == "Shiny" or args[2] == "Rainbow" or args[2] == "Huge" then args[2] else "Normal"
 		local Celebrations = require(script.Parent.Celebrations) :: any
 		Celebrations.Announce(player, id, variant, nil, true)
 		return true
@@ -184,8 +184,11 @@ local function runPersonal(player: Player, command: string, args: { string }): b
 		local results = {}
 		for _, word in args do
 			local lower = string.lower(word)
-			if (lower == "shiny" or lower == "rainbow") and #results > 0 then
-				results[#results].Variant = if lower == "shiny" then "Shiny" else "Rainbow"
+			if (lower == "shiny" or lower == "rainbow" or lower == "huge") and #results > 0 then
+				results[#results].Variant = if lower == "shiny"
+					then "Shiny"
+					elseif lower == "huge" then "Huge"
+					else "Rainbow"
 			else
 				for _, def in Creatures.Ordered do
 					if string.lower(def.Id) == lower and #results < 3 then

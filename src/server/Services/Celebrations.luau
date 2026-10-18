@@ -29,6 +29,9 @@ function Celebrations.Tier(creatureId: string, variant: string?): number
 	end
 	local order = Creatures.Rarities[def.Rarity].Order
 	local rainbow = variant == "Rainbow"
+	if variant == "Huge" then
+		return 2 -- a HUGE anything is news everywhere
+	end
 	if order >= 6 or (rainbow and order >= 4) then
 		return 2
 	end
@@ -76,7 +79,7 @@ function Celebrations.Start()
 				Name = string.sub(data.Name, 1, 40),
 				UserId = 0, -- not in this server: banner only, no fireworks
 				Id = data.Id,
-				Variant = if data.Variant == "Shiny" or data.Variant == "Rainbow" then data.Variant else "Normal",
+				Variant = if Creatures.Variants[data.Variant] then data.Variant else "Normal",
 				Verb = if data.Verb == "fused" or data.Verb == "got" then data.Verb else "hatched",
 				Global = true,
 			})

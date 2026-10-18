@@ -1229,7 +1229,7 @@ local function effects(ctx: Ctx, def: Creatures.CreatureDef, variant: string, pl
 	if variant ~= "Normal" then
 		local sparkle = Instance.new("ParticleEmitter")
 		sparkle.Name = "VariantSparkle"
-		sparkle.Rate = if variant == "Rainbow" then 14 else 7
+		sparkle.Rate = if variant == "Rainbow" or variant == "Huge" then 14 else 7
 		sparkle.Lifetime = NumberRange.new(0.6, 1.1)
 		sparkle.Speed = NumberRange.new(0.5, 1.5)
 		sparkle.SpreadAngle = Vector2.new(180, 180)
@@ -1389,6 +1389,11 @@ function CreatureModels.Build(id: string, variant: string?, scale: number?): Rig
 	local def = Creatures.Get(id) :: Creatures.CreatureDef
 	assert(def, "Unknown creature " .. tostring(id))
 	local v = variant or "Normal"
+	-- HUGE pets are drawn much bigger
+	local vdef = Creatures.Variants[v]
+	if vdef and vdef.Scale then
+		scale = (scale or 1) * vdef.Scale
+	end
 	local plan = PLANS[id] or { Type = "Quadruped", Ears = "Pointy", Tail = "Bushy", Snout = "Short" }
 	local template = getMeshTemplate(id)
 	if template then
@@ -1403,6 +1408,8 @@ function CreatureModels.Build(id: string, variant: string?, scale: number?): Rig
 		body = body:Lerp(GOLD, 0.45)
 		accent = accent:Lerp(WHITE, 0.25)
 		reflectance = 0.25
+	elseif v == "Huge" then
+		reflectance = 0.1
 	end
 
 	local model = Instance.new("Model")
