@@ -167,6 +167,9 @@ function Bag.Start()
 					local speed = if Economy.HasBoost(player, "Speed")
 						then BASE_WALK * Config.Boosts.Speed
 						else BASE_WALK
+					-- riding a hoverboard (Services/Hangar) multiplies it
+					local Hangar = require(script.Parent.Hangar) :: any
+					speed *= Hangar.SpeedMultiplier(player)
 					if math.abs(humanoid.WalkSpeed - speed) > 0.01 then
 						humanoid.WalkSpeed = speed
 					end

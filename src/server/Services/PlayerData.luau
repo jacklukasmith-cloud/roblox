@@ -58,6 +58,7 @@ export type Data = {
 		GloomRare: number,
 		Prismhearts: number,
 		MapFragments: number,
+		VehiclesBuilt: number,
 	},
 	Items: { [string]: number }, -- the Bag (Shared/Items): item id -> count
 	RedeemedCodes: { [string]: boolean }, -- codes already used (Services/Codes)
@@ -66,6 +67,7 @@ export type Data = {
 	WeekStats: { Week: number, Base: { [string]: number } }?, -- totals at the start of the week (weekly leaderboards)
 	Missions: { Index: number, Baseline: number?, Id: string?, V: number? }, -- place in the mission chain (Shared/Missions)
 	Gloom: { Satchel: { [string]: number }, Vault: { [string]: number }, CampFound: boolean, Map: { [number]: boolean } }, -- the Gloomwood (Shared/Gloomwood): crystals carried, crystals in your island's Vault
+	Vehicles: { Owned: { [string]: boolean }, Skin: string, LastRidden: string? }, -- the Hangar (Shared/Vehicles)
 	Cauldron: { Brews: { { Recipe: string, StartedAt: number, DoneAt: number } } }, -- the Alchemy Cauldron (Shared/Alchemy)
 	SeenUpdate: number, -- the last "What's New" the player has seen (Shared/WhatsNew)
 	Daily: { Streak: number, LastClaimDay: number },
@@ -117,6 +119,7 @@ local function defaultData(): Data
 			GloomRare = 0,
 			Prismhearts = 0,
 			MapFragments = 0,
+			VehiclesBuilt = 0,
 		},
 		Items = {},
 		RedeemedCodes = {},
@@ -126,6 +129,7 @@ local function defaultData(): Data
 		SeenUpdate = 0,
 		Gloom = { Satchel = {}, Vault = {}, CampFound = false, Map = {} },
 		Cauldron = { Brews = {} },
+		Vehicles = { Owned = {}, Skin = "Default" },
 		Daily = { Streak = 0, LastClaimDay = -1 },
 		Season = { Week = -1, Points = 0, RewardedWeek = -1 },
 		Titles = {},

@@ -471,6 +471,7 @@ function Economy.BuildSnapshot(player: Player)
 		SeenUpdate = (data :: any).SeenUpdate,
 		Gloom = (data :: any).Gloom,
 		Cauldron = (data :: any).Cauldron,
+		Vehicles = (data :: any).Vehicles,
 	}
 end
 

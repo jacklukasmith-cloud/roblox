@@ -18,7 +18,8 @@ Done items move to the bottom.
 | `SkyBridgeLamp` | Small hanging lantern for the bridge posts | the glowing cubes |
 | `PlazaCrystal` | Huge floating crystal cluster for the Sky Plaza | the neon pillars in the middle |
 | `IslandTree` | Round pastel tree (2-3 colour variants: green, pink) | the ball-on-trunk trees |
-| `Hangar` | Open workshop shed with a hoverboard rack (when the Hangar is built) | - |
+| `Hangar` | Open workshop shed with a hoverboard rack | the plank shed on every island |
+| `VehiclePrismGlider` | A translucent rainbow-prism glider board | the glass board |
 
 ### Gloomwood
 | Model name | What | Replaces |
@@ -67,7 +68,7 @@ Done items move to the bottom.
 | Pass | Done? |
 |---|---|
 | Master Alchemist | done ([ICONS.md](ICONS.md)) |
-| Hangar / vehicle skins (when vehicles exist) | - |
+| Board Skins | done ([ICONS.md](ICONS.md)) |
 
 ### Item icons (the Bag uses emoji for now; proper icons would look much better)
 Luck Potion, Essence Potion, Shiny Elixir, Speed Potion, Owl Eye Potion, Gloom Ward, Power Potion, XP Potion,
@@ -88,5 +89,7 @@ Moonshard, Emberheart, Frostglass, Stormquartz, Voidstone, Prismheart.
 | `AlchemyCauldron` | The Cauldron on every island ([WORLD_MESHES.md](WORLD_MESHES.md)) |
 | `PrismheartCrystal` | The legendary crystal in the Heart (see WORLD_MESHES.md) |
 | `GloomTreant` | Static 3D model made (see WORLD_MESHES.md); it still needs rigging before it can replace the block treant that walks |
+| `VehicleMossBoard` | The starter hoverboard (see WORLD_MESHES.md) |
+| `VehicleCrystalBoard` | The Crystal Hoverboard (see WORLD_MESHES.md) |
 | Gloomwood map parchment | Background for the 🗺️ forest map ([image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261017_235908_cd0256e5-ec3c-45fc-b808-7306ae8a2396.png)). Upload it to Roblox as a Decal and put its `rbxassetid://` in `Gloomwood.MapImage` (`src/shared/Gloomwood.luau`) |
 | Master Alchemist icon | Game pass icon ([ICONS.md](ICONS.md)) |

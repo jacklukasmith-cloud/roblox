@@ -7,7 +7,7 @@
 	           Missions.Baseline in the save, so earlier progress doesn't count)
 	  "Reach": get the stat up to N (counts what you already have)
 	Target: where the guide arrow points (Crystal, Egg, Gate, Blacksmith, Boss, Sanctuary (the hub
-	        portal), Upgrade / Habitat / Cauldron (your island's Upgrade Stone / Pet Habitat / Cauldron), Gloomwood (the hub gate),
+	        portal), Upgrade / Habitat / Cauldron / Hangar (stations on your island), Gloomwood (the hub gate),
 	        Lantern / DeepCamp / Fragment / Deepwood / Heart (in the forest), or nil for none)
 
 	The save keeps the current mission's Id too, so missions can be added anywhere in the list
@@ -255,6 +255,16 @@ Missions.List = {
 		Target = "Fragment",
 		Hint = "Glowing scrolls hide near the landmarks. Each one fills in your 🗺️ forest map",
 		Reward = { Essence = 40000, Items = { OwlEyePotion = 1 } },
+	},
+	{
+		Id = "Board1",
+		Text = "Build a hoverboard at your Hangar",
+		Stat = "VehiclesBuilt",
+		Kind = "Reach",
+		Goal = 1,
+		Target = "Hangar",
+		Hint = "Step into the orange circle by the Hangar on your island. The Moss Board needs 10 Moonshards",
+		Reward = { Essence = 45000, Items = { SpeedPotion = 2 } },
 	},
 	{
 		Id = "Deepwood1",

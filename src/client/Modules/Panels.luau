@@ -940,6 +940,7 @@ local SHOP_EMOJI = {
 	LongerOffline = "🌙",
 	GoldenPickaxe = "⛏",
 	MasterAlchemist = "⚗️",
+	BoardSkins = "🛹",
 	EssencePouch = "👝",
 	EssenceChest = "🧰",
 	LuckPotion = "🧪",

@@ -416,6 +416,58 @@ local function build(player: Player, slot: number): Model
 			Sanctuaries.ShowBrewing(model, brewing)
 			continue
 		end
+		if station.Id == "Hangar" then
+			-- an open workshop: step into its circle to build and pick hoverboards
+			helpers.ShopPad(model, "HangarPad", spot + Vector3.new(0, 0.1, 0), rgb(255, 190, 110), "🛹 Hangar")
+			local back = at(station.Spot.X * r, 0, station.Spot.Y * r + 8)
+			local base = Vector3.new(back.X, c.Y + 1.7, back.Z)
+			local facing = CFrame.lookAt(base, Vector3.new(spot.X, base.Y, spot.Z))
+			local mesh = helpers.PlaceMesh(model, "Hangar", facing, 12, false, true)
+			if not mesh then
+				-- built-in shed: two side walls, a back wall, a slanted roof and a board rack
+				for _, side in { -1, 1 } do
+					part({
+						Name = "HangarWall",
+						Size = Vector3.new(0.8, 7, 9),
+						CFrame = facing * CFrame.new(side * 5.6, 3.5, 0),
+						Color = rgb(150, 110, 75),
+						Material = Enum.Material.WoodPlanks,
+						Parent = model,
+					})
+				end
+				part({
+					Name = "HangarBack",
+					Size = Vector3.new(12, 7, 0.8),
+					CFrame = facing * CFrame.new(0, 3.5, 4.2),
+					Color = rgb(150, 110, 75),
+					Material = Enum.Material.WoodPlanks,
+					Parent = model,
+				})
+				part({
+					Name = "HangarRoof",
+					Size = Vector3.new(13.5, 0.6, 11),
+					CFrame = facing * CFrame.new(0, 7.3, 0.5) * CFrame.Angles(math.rad(-10), 0, 0),
+					Color = rgb(90, 70, 60),
+					Material = Enum.Material.Slate,
+					Parent = model,
+				})
+				-- boards on the rack (just for show)
+				for i, color in { rgb(110, 200, 110), rgb(255, 240, 120), rgb(255, 190, 255) } do
+					part({
+						Name = "RackBoard",
+						Size = Vector3.new(2.2, 0.3, 5),
+						CFrame = facing
+							* CFrame.new(-3.5 + i * 1.8, 1.4 + i * 1.1, 3.4)
+							* CFrame.Angles(math.rad(70), 0, 0),
+						Color = color,
+						Material = Enum.Material.Neon,
+						CanCollide = false,
+						Parent = model,
+					})
+				end
+			end
+			continue
+		end
 		if station.Id == "Vault" then
 			-- a crystal-topped chest: step into its circle to see and sell your Gloom Crystals
 			helpers.ShopPad(model, "VaultPad", spot + Vector3.new(0, 0.1, 0), rgb(150, 200, 255), "💎 Crystal Vault")

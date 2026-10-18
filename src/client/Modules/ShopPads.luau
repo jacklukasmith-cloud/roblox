@@ -19,6 +19,7 @@ local ISLAND_PADS = {
 	HabitatPad = "Habitat",
 	VaultPad = "Vault",
 	CauldronPad = "Cauldron",
+	HangarPad = "Hangar",
 }
 local RADIUS = 4.5 -- the circle is 9 studs across
 

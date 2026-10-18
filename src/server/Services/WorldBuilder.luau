@@ -188,6 +188,11 @@ WorldBuilder.MeshNames = {
 	"StarLantern",
 	-- Sanctuary stations (Services/Sanctuaries)
 	"AlchemyCauldron",
+	-- Sanctuary Hangar and its vehicles (Services/Hangar): "Vehicle<vehicle id>"
+	"Hangar",
+	"VehicleMossBoard",
+	"VehicleCrystalBoard",
+	"VehiclePrismGlider",
 	-- Gloom Crystals (Services/Gloomwood): "<crystal id>Crystal"
 	"MoonshardCrystal",
 	"EmberheartCrystal",
@@ -1992,13 +1997,14 @@ function WorldBuilder.Build(): BuiltWorld
 		Parent = hub,
 	})
 
+	-- invisible, and turned round so new players face the realms (+Z), not the back of the hub
 	local spawn = Instance.new("SpawnLocation")
 	spawn.Name = "HubSpawn"
 	spawn.Anchored = true
 	spawn.Size = Vector3.new(10, 1, 10)
-	spawn.Position = sp(0, 0.5, -32)
-	spawn.Color = rgb(150, 110, 255)
-	spawn.Material = Enum.Material.Neon
+	spawn.CFrame = CFrame.new(sp(0, 0.5, -32)) * CFrame.Angles(0, math.pi, 0)
+	spawn.Transparency = 1
+	spawn.CanCollide = false
 	spawn.Duration = 0
 	spawn.Parent = hub
 
@@ -2173,6 +2179,7 @@ WorldBuilder.Helpers = {
 	ZoneStart = zoneStartZ,
 	Spread = SPREAD, -- multiply plan positions (x and z offsets) by this
 	PlaceMesh = placeMesh, -- (parent, name, base CFrame, size, byHeight?, collide?) -> Model? (nil = not imported)
+	MeshTemplate = meshTemplate, -- (name) -> the imported Model/MeshPart, or nil
 }
 
 return WorldBuilder

@@ -334,6 +334,14 @@ Config.GamePasses = {
 		Icon = "",
 	},
 	{
+		Key = "BoardSkins",
+		Id = 0, -- create it on the Creator Hub and paste the ID here
+		Name = "Board Skins",
+		Description = "Neon, Ice, Gold and Void colours for your hoverboards",
+		PriceHint = 79,
+		Icon = "",
+	},
+	{
 		Key = "MasterAlchemist",
 		Id = 2038185382,
 		Name = "Master Alchemist",

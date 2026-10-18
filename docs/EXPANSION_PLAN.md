@@ -349,8 +349,8 @@ The main game now has a mission chain (`src/shared/Missions.luau`). Each new par
 should add its own missions to the end of that list, so the missions keep guiding players into new
 content. For example:
 - ~~"Enter the Gloomwood", "Send 10 crystals home", "Reach the Deep Camp"~~ (done), "Find a Stormquartz"
-- ~~"Visit your Sanctuary"~~ (done, with "Redeem a code", "Check the Leaderboards" and island levels 2 and 3),
-  "Brew your first potion", "Build a hoverboard"
+- ~~"Visit your Sanctuary", "Redeem a code", "Check the Leaderboards", island levels 2 and 3, "Brew your first
+  potion", "Build a hoverboard"~~ (done)
 - "Visit a friend's base", "Unlock Coral Abyss"
 
 ## 8. Build order
@@ -363,11 +363,11 @@ Each step works by itself and makes the next one easier.
 | 2 | ~~Friend Boost (+5% per friend) and the invite button~~ (done) | Quick, and helps the game grow straight away | S |
 | 3 | ~~Leaderboard panel, weekly boards and your rank~~ (done) | Quick win, gives everyone something to chase | M |
 | 4 | ~~Bigger hub with districts~~ (done: west wing for the Merchant and Blacksmith, House Quarter, Portal Plaza) | Makes room for the portals, boards and vehicles below | M |
-| 5 | Sanctuary base: ~~islands and travel~~ (done), ~~levels 1-10~~ (done), ~~Pet Habitat with XP while away~~ (done), vault | Everything after this needs a base | L |
+| 5 | ~~Sanctuary base: islands and travel, levels 1-10, Pet Habitat with XP while away, Crystal Vault, Alchemy Cauldron, Hangar~~ (done) | Everything after this needs a base | L |
 | 6a | ~~Gloomwood part 1: Edge and Midwood, Gloom Crystals, satchel, lanterns, Gloom meter, Deep Camp~~ (done, with the Crystal Vault and selling) | The main new adventure | L |
 | 6b | Gloomwood part 2: Deepwood (cliffs, caves), the Heart, Prismheart, Gloom Treant, Map Fragments | Where the hardest, rarest crystals are | L |
 | 7 | Crafting: potions and teleport crystals | Gives forest crystals a use | M |
-| 8 | Vehicles: hoverboards, then karts | Fun to show off, and good with friends | M |
+| 8 | Vehicles: ~~hoverboards~~ (done: the Hangar, three boards, Board Skins pass), then karts | Fun to show off, and good with friends | M |
 | 9 | Realms 5 and 6, plus Rebirth requirements | Fixes "I finished it" for top players | M each |
 | 10 | Joined-with-a-friend reward, co-op bonuses, friend quests | Builds on bases and vehicles | M |
 | 11 | Wild pets in the Gloomwood, realms 7 and 8 | Later content updates | M to L |
