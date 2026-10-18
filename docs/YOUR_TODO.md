@@ -36,6 +36,11 @@ New since the last import:
 | `IslandChest` | the daily chest on every island |
 | `GloomTreant` | static only: needs rigging in Studio (or Higgsfield rigging) before it can replace the walking block treant |
 
+## 3b. Optional art for realms 5 and 6
+
+Ground textures for `Config.GroundTextures[5]` / `[6]` and music for `Config.Sounds.MusicStarfall` / `MusicVoid`
+are empty: the realms use plain sand and slate materials and the Sky music until you add them.
+
 ## 4. Game settings
 
 - **Max Players = 8** (Creator Hub → experience → Places → Server size). There are 8 islands per server.
@@ -48,6 +53,7 @@ New since the last import:
   kart jitters, say so and it'll be rebuilt as a proper driven vehicle.
 - **Spin Wheel** animation and that the toast shows the right prize.
 - **Island chest:** hold E on it, check the prompt switches to "Opened · back tomorrow".
+- **Realms 5 and 6:** give yourself Essence with `!essence 50000000`, Rebirth, then check the Starfall gate shows "1 Rebirth" and refused before you had one.
 - **Weekend events:** try `!event HatchFest 5` in chat and check the egg stands show the sale price and the HUD line.
 - **❤️ Likes:** like a friend's island, check their sign count goes up and the weekly board shows it.
 - **Teleport crystals** from the Bag: Home Crystal from the forest, Camp Crystal into the Deep Camp.

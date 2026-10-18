@@ -22,7 +22,7 @@ local rgb = Color3.fromRGB
 
 local Eggs = {}
 
-Eggs.Order = { "MeadowEgg", "EmberEgg", "FrostEgg", "SkyEgg", "ChampionEgg" }
+Eggs.Order = { "MeadowEgg", "EmberEgg", "FrostEgg", "SkyEgg", "StarfallEgg", "VoidEgg", "ChampionEgg" }
 
 Eggs.List = {
 	MeadowEgg = {
@@ -85,6 +85,38 @@ Eggs.List = {
 			{ Creature = "CelestialPegasus", Chance = 3.6 },
 			{ Creature = "StarDragon", Chance = 0.38 },
 			{ Creature = "VoidLeviathan", Chance = 0.02 },
+		},
+	},
+	StarfallEgg = {
+		Id = "StarfallEgg",
+		Name = "Starfall Egg",
+		Zone = 5,
+		Cost = 18000000,
+		Currency = "Essence",
+		Color = rgb(255, 190, 230),
+		Drops = {
+			{ Creature = "DuneScarab", Chance = 50 },
+			{ Creature = "MirageJackal", Chance = 32 },
+			{ Creature = "SandWyrm", Chance = 14 },
+			{ Creature = "CometHawk", Chance = 3.6 },
+			{ Creature = "SphinxGuardian", Chance = 0.38 },
+			{ Creature = "StarfallColossus", Chance = 0.02 },
+		},
+	},
+	VoidEgg = {
+		Id = "VoidEgg",
+		Name = "Void Egg",
+		Zone = 6,
+		Cost = 350000000,
+		Currency = "Essence",
+		Color = rgb(150, 80, 230),
+		Drops = {
+			{ Creature = "VoidMoth", Chance = 50 },
+			{ Creature = "ShadowLynx", Chance = 32 },
+			{ Creature = "EclipseRaven", Chance = 14 },
+			{ Creature = "NetherWyvern", Chance = 3.6 },
+			{ Creature = "AbyssalKraken", Chance = 0.38 },
+			{ Creature = "EternityPhoenix", Chance = 0.02 },
 		},
 	},
 	ChampionEgg = {

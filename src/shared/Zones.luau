@@ -1,9 +1,10 @@
---[[ The four worlds, laid out in a line from the hub. ]]
+--[[ The six realms, laid out in a line from the hub. Realms 5 and 6 also need Rebirths. ]]
 
 export type ZoneDef = {
 	Index: number,
 	Name: string,
 	UnlockCost: number,
+	RequiresRebirths: number?, -- Rebirths needed before the gate opens (late realms)
 	CrystalHP: number,
 	CrystalReward: number,
 	EggId: string,
@@ -65,6 +66,32 @@ Zones.List = {
 		GroundMaterial = Enum.Material.Marble,
 		CrystalColor = rgb(255, 225, 110),
 		DecorColor = rgb(255, 255, 255),
+	},
+	{
+		Index = 5,
+		Name = "Starfall Desert",
+		UnlockCost = 30000000,
+		RequiresRebirths = 1,
+		CrystalHP = 3000000,
+		CrystalReward = 800000,
+		EggId = "StarfallEgg",
+		GroundColor = rgb(235, 195, 120),
+		GroundMaterial = Enum.Material.Sand,
+		CrystalColor = rgb(255, 160, 220),
+		DecorColor = rgb(255, 220, 140),
+	},
+	{
+		Index = 6,
+		Name = "Void Abyss",
+		UnlockCost = 600000000,
+		RequiresRebirths = 3,
+		CrystalHP = 60000000,
+		CrystalReward = 16000000,
+		EggId = "VoidEgg",
+		GroundColor = rgb(40, 25, 60),
+		GroundMaterial = Enum.Material.Slate,
+		CrystalColor = rgb(170, 90, 255),
+		DecorColor = rgb(120, 60, 200),
 	},
 } :: { ZoneDef }
 

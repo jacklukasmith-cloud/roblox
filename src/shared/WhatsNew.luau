@@ -45,6 +45,11 @@ WhatsNew.List = {
 		Text = "A treasure chest on your island opens once a day. Higher island levels give better loot.",
 	},
 	{
+		Icon = "🏜️",
+		Title = "Two new realms",
+		Text = "The Starfall Desert (after 1 Rebirth) and the Void Abyss (after 3) wait past Sky Sanctum, with 12 new creatures.",
+	},
+	{
 		Icon = "🐘",
 		Title = "HUGE pets",
 		Text = "A 1 in 50,000 chance on every egg: a giant version with x12 power. The whole game hears about it.",

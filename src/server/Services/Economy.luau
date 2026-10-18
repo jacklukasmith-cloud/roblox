@@ -391,6 +391,10 @@ function Economy.UnlockZone(player: Player, zoneIndex: number): (boolean, string
 	if data.ZonesUnlocked < zoneIndex - 1 then
 		return false, "Unlock the previous zone first"
 	end
+	if (zone.RequiresRebirths or 0) > (data.Rebirths or 0) then
+		return false,
+			`{zone.Name} needs {zone.RequiresRebirths} Rebirth{if zone.RequiresRebirths == 1 then "" else "s"} (you have {data.Rebirths or 0})`
+	end
 	if data.Essence < zone.UnlockCost then
 		return false, `You need {Format.Number(zone.UnlockCost)} Essence`
 	end

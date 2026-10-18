@@ -19,9 +19,11 @@ Breaking works like Pet Simulator:
 | 2 | Ember Rift | 2.5K | 250 | 90 | Ember Egg (1.5K) | Phoenix 0.3% |
 | 3 | Frostpeak | 60K | 6K | 1.8K | Frost Egg (35K) | Aurora Kirin (Mythic) 0.02% |
 | 4 | Sky Sanctum | 1.5M | 150K | 40K | Sky Egg (900K) | Void Leviathan (Mythic) 0.02% |
+| 5 | Starfall Desert | 30M + 1 Rebirth | 3M | 800K | Starfall Egg (18M) | Starfall Colossus (Mythic) 0.02% |
+| 6 | Void Abyss | 600M + 3 Rebirths | 60M | 16M | Void Egg (350M) | Eternity Phoenix (Mythic) 0.02% |
 | hub | Champion Egg | - | - | - | **15 Trophies** | Titan Unicorn 5% |
 
-25 creatures across 7 rarities: Common, Uncommon, Rare, Epic, Legendary, Mythic, and Champion
+37 creatures across 7 rarities: Common, Uncommon, Rare, Epic, Legendary, Mythic, and Champion
 (Champion creatures come only from Trophies). Each egg shows its odds above it.
 
 **Variants:** each hatch can be **Shiny** (1/40, x2 power) or **Rainbow** (1/400, x5 power). Aurora

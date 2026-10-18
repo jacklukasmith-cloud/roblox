@@ -63,6 +63,24 @@ Done items move to the bottom.
 | `FrostStag` | Pale stag with glowing ice antlers |
 | `ShadowWisp` | Floating ghostly flame |
 
+### Realms 5 and 6 (Starfall Desert, Void Abyss)
+| Model name | What | Replaces |
+|---|---|---|
+| `StarfallEgg` | Pink-gold egg with star speckles | the block egg on its stand |
+| `VoidEgg` | Dark purple egg with a glowing crack | the block egg |
+| `StarfallCrystal` | Pink crystal with gold star flecks | block crystals |
+| `VoidCrystal` | Deep purple crystal with a black core | block crystals |
+| `StarCactus` | Tall cartoon cactus with a star on top | the block cacti |
+| `FallenStar` | Glowing pink star half-buried in sand | the neon cubes |
+| `DesertRuin` | Sandstone ruin arch | - |
+| `VoidShard` | Floating purple crystal shard | the neon shards |
+| `AbyssPillar` | Cracked dark obsidian pillar | the block pillars |
+| `WatchingEye` | Floating glowing eye orb | - |
+
+### Realm 5 and 6 creatures (12, see CREATURE_MESHES.md for the naming)
+Dune Scarab, Mirage Jackal, Sand Wyrm, Comet Hawk, Sphinx Guardian, Starfall Colossus, Void Moth, Shadow Lynx,
+Eclipse Raven, Nether Wyvern, Abyssal Kraken, Eternity Phoenix.
+
 ## Icons and UI images
 
 ### Game pass icons

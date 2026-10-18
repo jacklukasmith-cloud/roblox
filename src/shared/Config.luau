@@ -74,6 +74,8 @@ Config.GroundTextures = {
 	[2] = "rbxassetid://78449218687433", -- Ember Rift (lava rock)
 	[3] = "rbxassetid://104335708388109", -- Frostpeak (snow)
 	[4] = "rbxassetid://123790088154148", -- Sky Sanctum (marble)
+	[5] = "", -- Starfall Desert (sand)
+	[6] = "", -- Void Abyss (dark cracked stone)
 }
 
 -- UI images made with Higgsfield (docs/ICONS.md). Empty = the built-in drawn version.
@@ -447,6 +449,8 @@ Config.Sounds = {
 	MusicEmber = "",
 	MusicFrost = "",
 	MusicSky = "",
+	MusicStarfall = "",
+	MusicVoid = "",
 }
 
 -- Boost strengths (from potions, merchant items, products) ----------------------

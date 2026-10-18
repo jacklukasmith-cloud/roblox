@@ -369,7 +369,7 @@ Each step works by itself and makes the next one easier.
 | 6b | Gloomwood part 2: Deepwood (cliffs, caves), the Heart, Prismheart, Gloom Treant, Map Fragments | Where the hardest, rarest crystals are | L |
 | 7 | ~~Crafting: potions and teleport crystals~~ (done: the Cauldron brews 9 potions and 3 teleport crystals) | Gives forest crystals a use | M |
 | 8 | Vehicles: ~~hoverboards~~ (done: the Hangar, three boards, Board Skins pass), ~~then karts~~ (done: Mushroom Kart with a passenger seat; the 4-seat Gloom Wagon is still to come) | Fun to show off, and good with friends | M |
-| 9 | Realms 5 and 6, plus Rebirth requirements | Fixes "I finished it" for top players | M each |
+| 9 | ~~Realms 5 and 6, plus Rebirth requirements~~ (done: Starfall Desert needs 1 Rebirth, Void Abyss needs 3) | Fixes "I finished it" for top players | M each |
 | 10 | Joined-with-a-friend reward, co-op bonuses, friend quests | Builds on bases and vehicles | M |
 | 11 | Wild pets in the Gloomwood, realms 7 and 8 | Later content updates | M to L |
 

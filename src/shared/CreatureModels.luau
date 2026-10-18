@@ -143,6 +143,46 @@ local PLANS: { [string]: { [string]: any } } = {
 	},
 	VoidLeviathan = { Type = "Serpent", Horn = "Pair", Fins = true, Whiskers = true, Segments = 10, Aura = true },
 
+	-- Starfall Desert
+	DuneScarab = { Type = "Quadruped", Low = true, Ears = "None", Tail = "Short", Snout = "Flat", Antennae = true },
+	MirageJackal = { Type = "Quadruped", Ears = "Pointy", Tail = "Long", Snout = "Long", Glow = true },
+	SandWyrm = { Type = "Serpent", Horn = "Single", Segments = 8, Spikes = true },
+	CometHawk = { Type = "Bird", Crest = true, LongTail = true, Fire = "Tail" },
+	SphinxGuardian = {
+		Type = "Quadruped",
+		Ears = "Pointy",
+		Wings = "Feather",
+		Tail = "Long",
+		Snout = "Short",
+		Mane = true,
+		Aura = true,
+	},
+	StarfallColossus = {
+		Type = "Quadruped",
+		Ears = "None",
+		Horn = "Pair",
+		Tail = "Short",
+		Snout = "Flat",
+		Spikes = true,
+		Glow = true,
+		Aura = true,
+	},
+	-- Void Abyss
+	VoidMoth = { Type = "Sprite", Wings = "BigBug", Antennae = true, Fluff = true, Glow = true },
+	ShadowLynx = { Type = "Quadruped", Ears = "Tufts", Tail = "Short", Snout = "Short", Glow = true },
+	EclipseRaven = { Type = "Bird", Crest = true, LongTail = true, Aura = true },
+	NetherWyvern = {
+		Type = "Quadruped",
+		Ears = "None",
+		Horn = "Pair",
+		Wings = "Bat",
+		Tail = "Stinger",
+		Snout = "Long",
+		Spikes = true,
+	},
+	AbyssalKraken = { Type = "Serpent", Horn = "Pair", Fins = true, Whiskers = true, Segments = 12, Glow = true },
+	EternityPhoenix = { Type = "Bird", Crest = true, LongTail = true, Fire = "Body", Aura = true },
+
 	ArenaBasilisk = {
 		Type = "Quadruped",
 		Low = true,

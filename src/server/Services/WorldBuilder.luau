@@ -161,11 +161,15 @@ WorldBuilder.MeshNames = {
 	"EmberEgg",
 	"FrostEgg",
 	"SkyEgg",
+	"StarfallEgg",
+	"VoidEgg",
 	"ChampionEgg",
 	"MeadowCrystal",
 	"EmberCrystal",
 	"FrostCrystal",
 	"SkyCrystal",
+	"StarfallCrystal",
+	"VoidCrystal",
 	"ManaChest",
 	"MerchantStall",
 	"MagicTree",
@@ -186,6 +190,12 @@ WorldBuilder.MeshNames = {
 	"FloatingIsland",
 	"RuinedColumn",
 	"StarLantern",
+	"StarCactus",
+	"FallenStar",
+	"DesertRuin",
+	"VoidShard",
+	"AbyssPillar",
+	"WatchingEye",
 	-- Sanctuary stations (Services/Sanctuaries)
 	"AlchemyCauldron",
 	-- Sanctuary Hangar and its vehicles (Services/Hangar): "Vehicle<vehicle id>"
@@ -203,7 +213,7 @@ WorldBuilder.MeshNames = {
 	"VoidstoneCrystal",
 	"PrismheartCrystal",
 }
-local CRYSTAL_MESH = { "MeadowCrystal", "EmberCrystal", "FrostCrystal", "SkyCrystal" }
+local CRYSTAL_MESH = { "MeadowCrystal", "EmberCrystal", "FrostCrystal", "SkyCrystal", "StarfallCrystal", "VoidCrystal" }
 
 local function meshTemplate(name: string): Instance?
 	local folder = ReplicatedStorage:FindFirstChild("WorldMeshes")
@@ -332,6 +342,16 @@ local ZONE_DECOR: { [number]: { DecorDef } } = {
 		{ Name = "FloatingIsland", Count = 4, Size = 9, ByLongest = true, Lift = 12, Bob = 1.2 },
 		{ Name = "RuinedColumn", Count = 6, Size = 11 },
 		{ Name = "StarLantern", Count = 6, Size = 8, Glow = Color3.fromRGB(255, 220, 120) },
+	},
+	[5] = {
+		{ Name = "StarCactus", Count = 8, Size = 7 },
+		{ Name = "FallenStar", Count = 5, Size = 4, Glow = Color3.fromRGB(255, 170, 230) },
+		{ Name = "DesertRuin", Count = 4, Size = 12 },
+	},
+	[6] = {
+		{ Name = "VoidShard", Count = 8, Size = 9, Lift = 6, Bob = 1.5, Glow = Color3.fromRGB(170, 90, 255) },
+		{ Name = "AbyssPillar", Count = 6, Size = 14 },
+		{ Name = "WatchingEye", Count = 3, Size = 5, Lift = 10, Bob = 0.8, Glow = Color3.fromRGB(255, 80, 200) },
 	},
 }
 
@@ -1637,6 +1657,108 @@ decorators[4] = function(folder, zone, z0) -- Sky Sanctum: marble pillars, cloud
 	)
 end
 
+decorators[5] = function(folder, zone, z0) -- Starfall Desert: cacti, dunes and fallen stars
+	for _ = 1, 8 do
+		local p = sideSpot(z0, ZONE_LENGTH)
+		local h = rng:NextNumber(5, 9)
+		part({
+			Name = "Cactus",
+			Size = Vector3.new(1.6, h, 1.6),
+			Position = p + Vector3.new(0, h / 2, 0),
+			Color = rgb(110, 170, 90),
+			Material = Enum.Material.SmoothPlastic,
+			Parent = folder,
+		})
+		part({
+			Name = "CactusArm",
+			Size = Vector3.new(3.5, 1.2, 1.2),
+			Position = p + Vector3.new(1.2, h * 0.6, 0),
+			Color = rgb(110, 170, 90),
+			Material = Enum.Material.SmoothPlastic,
+			Parent = folder,
+		})
+	end
+	for _ = 1, 6 do
+		local p = sideSpot(z0, ZONE_LENGTH)
+		local w = rng:NextNumber(8, 16)
+		part({
+			Name = "Dune",
+			Shape = Enum.PartType.Ball,
+			Size = Vector3.new(w, w * 0.35, w),
+			Position = p + Vector3.new(0, -w * 0.1, 0),
+			Color = zone.GroundColor:Lerp(WHITE, 0.15),
+			Material = Enum.Material.Sand,
+			Parent = folder,
+		})
+	end
+	for _ = 1, 5 do
+		local p = sideSpot(z0, ZONE_LENGTH)
+		local star = part({
+			Name = "FallenStar",
+			Size = Vector3.new(2.2, 2.2, 2.2),
+			CFrame = CFrame.new(p + Vector3.new(0, 1.1, 0)) * CFrame.Angles(0.6, 0.4, 0.5),
+			Color = rgb(255, 170, 230),
+			Material = Enum.Material.Neon,
+			Parent = folder,
+		})
+		local light = Instance.new("PointLight")
+		light.Color = rgb(255, 170, 230)
+		light.Range = 14
+		light.Brightness = 1.5
+		light.Parent = star
+	end
+	-- falling stardust
+	ambientParticles(
+		folder,
+		Vector3.new(0, 14, z0 + ZONE_LENGTH / 2),
+		Vector3.new(WIDTH, 6, ZONE_LENGTH),
+		rgb(255, 190, 230),
+		"Fall"
+	)
+end
+
+decorators[6] = function(folder, zone, z0) -- Void Abyss: floating shards and dark pillars
+	for _ = 1, 8 do
+		local p = sideSpot(z0, ZONE_LENGTH)
+		local h = rng:NextNumber(6, 12)
+		local shard = part({
+			Name = "VoidShard",
+			Size = Vector3.new(2, h, 2),
+			CFrame = CFrame.new(p + Vector3.new(0, 6 + h / 2, 0))
+				* CFrame.Angles(rng:NextNumber(-0.3, 0.3), rng:NextNumber(0, 3), rng:NextNumber(-0.3, 0.3)),
+			Color = rgb(170, 90, 255),
+			Material = Enum.Material.Neon,
+			Transparency = 0.2,
+			Parent = folder,
+		})
+		local light = Instance.new("PointLight")
+		light.Color = rgb(170, 90, 255)
+		light.Range = 16
+		light.Brightness = 1.2
+		light.Parent = shard
+	end
+	for _ = 1, 6 do
+		local p = sideSpot(z0, ZONE_LENGTH)
+		local h = rng:NextNumber(14, 24)
+		part({
+			Name = "AbyssPillar",
+			Size = Vector3.new(4, h, 4),
+			Position = p + Vector3.new(0, h / 2, 0),
+			Color = rgb(28, 18, 45),
+			Material = Enum.Material.Slate,
+			Parent = folder,
+		})
+	end
+	-- rising void motes
+	ambientParticles(
+		folder,
+		Vector3.new(0, 4, z0 + ZONE_LENGTH / 2),
+		Vector3.new(WIDTH, 6, ZONE_LENGTH),
+		rgb(170, 90, 255),
+		"Rise"
+	)
+end
+
 -- Gates ------------------------------------------------------------------------------------------
 
 local function makeArch(folder: Instance, zone: Zones.ZoneDef, z: number)
@@ -1702,7 +1824,9 @@ local function makeGate(folder: Instance, zone: Zones.ZoneDef, z: number): BaseP
 		gui.LightInfluence = 0
 		gui.Parent = gate
 		label(gui, {
-			Text = `LOCKED\n{Format.Number(zone.UnlockCost)} Essence`,
+			Text = `LOCKED\n{Format.Number(zone.UnlockCost)} Essence` .. (if zone.RequiresRebirths
+				then `\n🌀 {zone.RequiresRebirths} Rebirth{if zone.RequiresRebirths == 1 then "" else "s"}`
+				else ""),
 			Size = UDim2.fromScale(0.5, 0.45),
 			Position = UDim2.fromScale(0.25, 0.3),
 		})
@@ -1726,7 +1850,9 @@ local function makeGate(folder: Instance, zone: Zones.ZoneDef, z: number): BaseP
 		Parent = gate,
 	})
 	local prompt = Instance.new("ProximityPrompt")
-	prompt.ActionText = `Unlock ({Format.Number(zone.UnlockCost)} Essence)`
+	prompt.ActionText = `Unlock ({Format.Number(zone.UnlockCost)} Essence{if zone.RequiresRebirths
+		then `, {zone.RequiresRebirths} Rebirth{if zone.RequiresRebirths == 1 then "" else "s"}`
+		else ""})`
 	prompt.ObjectText = zone.Name
 	prompt.HoldDuration = 0.3
 	prompt.MaxActivationDistance = 14

@@ -329,6 +329,14 @@ tile counts rewards ready to claim. Days roll over at midnight UTC.
 
 Rewards and the quest pool live in `src/shared/Daily.luau`; Essence rewards scale with your best zone.
 
+## Realms 5 and 6
+
+Past Sky Sanctum the line continues with the **Starfall Desert** (30M Essence and **1 Rebirth**) and the **Void
+Abyss** (600M Essence and **3 Rebirths**), each with its own egg of six creatures (`src/shared/Zones.luau`,
+`Eggs.luau`, `Creatures.luau`), crystals 20x and 400x tougher than Sky Sanctum's, and bosses from their own eggs.
+The gate shows the Rebirth requirement, so there's always a next goal after a Rebirth. Block decorations are built
+in; the Higgsfield 3D versions are on the list ([docs/HIGGSFIELD_TODO.md](docs/HIGGSFIELD_TODO.md)).
+
 ## HUGE pets
 
 Every egg has a **1 in 50,000** chance (doubled on Shiny Weekends and by Shiny Elixirs) of hatching a **HUGE**
@@ -360,7 +368,7 @@ src/
     Creatures.luau   creatures, rarities, Shiny/Rainbow variants
     CreatureModels.luau  procedural 3D creature models + animation + UI viewports
     Eggs.luau        eggs, drop tables, luck-aware rolling
-    Zones.luau       the 4 realms
+    Zones.luau       the 6 realms (5 and 6 need Rebirths)
     Weather.luau     global weather schedule (same in every server)
     Events.luau      weekend event schedule (same in every server)
     Merchant.luau    global restocking shop (same in every server)

@@ -50,6 +50,8 @@ local BY_EGG = {
 	EmberEgg = "FireBurst",
 	FrostEgg = "FrostShatter",
 	SkyEgg = "StormStrike",
+	StarfallEgg = "FireBurst",
+	VoidEgg = "SpiritFlame",
 	ChampionEgg = "Rally",
 }
 
