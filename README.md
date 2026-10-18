@@ -93,6 +93,7 @@ Broadcast to **every server** at once, like Grow a Garden's "admin abuse" events
 |---|---|
 | `!surge` | Start a Mana Surge right now |
 | `!weather ManaStorm 10` | Force a weather for N minutes (`Clear`, `Starfall`, `Aurora`, `Eclipse`, `ManaStorm`) |
+| `!event GloomRush 60` | Start a weekend event now for N minutes (`DoubleEssence`, `LuckyWeekend`, `HatchFest`, `GloomRush`, `ShinyWeekend`) |
 | `!announce Double luck weekend!` | Message every player |
 
 Testing commands (only affect you; everyone is an admin in Studio):
@@ -328,6 +329,14 @@ tile counts rewards ready to claim. Days roll over at midnight UTC.
 
 Rewards and the quest pool live in `src/shared/Daily.luau`; Essence rewards scale with your best zone.
 
+## Weekend events
+
+Every weekend (Saturday 00:00 to Monday 00:00 UTC) one event is on in every server, rotating through
+`src/shared/Events.luau`: **Double Essence Weekend**, **Lucky Weekend** (x2 luck), **Hatch Fest** (eggs 25% off,
+the egg stands show the sale price), **Gloom Rush** (every Gloom Crystal mined gives two) and **Shiny Weekend**.
+The HUD shows the event and how long is left, and counts down to the next one during the week. Admins can start
+any of them early with `!event`.
+
 ## Spin Wheel
 
 The **🎡 Spin** button next to Daily: one **free spin every 4 hours** (the tile gets a red bubble and pulses when it's
@@ -347,6 +356,7 @@ src/
     Eggs.luau        eggs, drop tables, luck-aware rolling
     Zones.luau       the 4 realms
     Weather.luau     global weather schedule (same in every server)
+    Events.luau      weekend event schedule (same in every server)
     Merchant.luau    global restocking shop (same in every server)
     Houses.luau      House War factions
     Format.luau      1.2K / 3.4M number formatting

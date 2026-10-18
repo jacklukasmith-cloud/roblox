@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Lighting = game:GetService("Lighting")
 
 local Weather = require(ReplicatedStorage.Shared.Weather)
+local Events = require(ReplicatedStorage.Shared.Events)
 local Merchant = require(ReplicatedStorage.Shared.Merchant)
 
 local WorldService = {}
@@ -31,6 +32,35 @@ function WorldService.SetOverride(id: string, endsAt: number)
 	if Weather.Types[id] then
 		override = { Id = id, EndsAt = endsAt }
 	end
+end
+
+-- Weekend events (Shared/Events), with an admin override
+local eventOverride: { Id: string, EndsAt: number }? = nil
+
+function WorldService.GetEvent(): Events.EventState
+	local now = os.time()
+	local scheduled = Events.GetState(now)
+	if eventOverride and now < eventOverride.EndsAt then
+		return {
+			Id = eventOverride.Id,
+			EndsAt = eventOverride.EndsAt,
+			NextId = scheduled.NextId,
+			NextAt = scheduled.NextAt,
+		}
+	end
+	return scheduled
+end
+
+function WorldService.GetEventDef(): Events.EventDef
+	return Events.Get(WorldService.GetEvent().Id) or Events.None
+end
+
+function WorldService.SetEventOverride(id: string, endsAt: number): boolean
+	if not Events.Get(id) then
+		return false
+	end
+	eventOverride = { Id = id, EndsAt = endsAt }
+	return true
 end
 
 function WorldService.GetMerchant()

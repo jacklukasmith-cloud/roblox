@@ -64,6 +64,33 @@ local function announceRare(player: Player, result)
 	Celebrations.Announce(player, result.Id, result.Variant)
 end
 
+-- An egg's price right now (weekend Hatch Fest makes them cheaper)
+function Hatching.EggCost(egg: any): number
+	return math.floor(egg.Cost * WorldService.GetEventDef().EggDiscount + 0.5)
+end
+
+-- Keeps the price labels on the egg stands in step with the weekend discount
+local lastDiscount = 1
+function Hatching.RefreshPrices()
+	local discount = WorldService.GetEventDef().EggDiscount
+	if discount == lastDiscount then
+		return
+	end
+	lastDiscount = discount
+	local world = workspace:FindFirstChild("World")
+	for _, d in if world then world:GetDescendants() else {} do
+		if d.Name == "EggPrice" and d:IsA("TextLabel") and d.Parent then
+			local pill = d.Parent
+			local egg = Eggs.Get(pill:GetAttribute("EggId"))
+			if egg then
+				local price = Format.Number(Hatching.EggCost(egg))
+				local sale = if discount < 1 then " 🥚SALE" else ""
+				d.Text = `{pill:GetAttribute("PriceIcon")} {price}{pill:GetAttribute("PriceSuffix") or ""}{sale}`
+			end
+		end
+	end
+end
+
 function Hatching.Hatch(player: Player, eggId: string, count: number): (boolean, string?)
 	local egg = Eggs.Get(eggId)
 	local data = PlayerData.Get(player)
@@ -89,7 +116,7 @@ function Hatching.Hatch(player: Player, eggId: string, count: number): (boolean,
 	if total + count > Config.MaxInventory then
 		return false, "Your creature storage is full - release some creatures"
 	end
-	local cost = egg.Cost * count
+	local cost = Hatching.EggCost(egg) * count
 	local balance = if egg.Currency == "Trophies" then data.Trophies else data.Essence
 	if balance < cost then
 		return false, `You need {Format.Number(cost)} {egg.Currency}`

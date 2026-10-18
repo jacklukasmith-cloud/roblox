@@ -45,6 +45,11 @@ WhatsNew.List = {
 		Text = "A treasure chest on your island opens once a day. Higher island levels give better loot.",
 	},
 	{
+		Icon = "🎉",
+		Title = "Weekend events",
+		Text = "Every weekend something's on: Double Essence, Lucky, Hatch Fest, Gloom Rush or Shiny. The HUD counts down.",
+	},
+	{
 		Icon = "❤️",
 		Title = "Like islands",
 		Text = "Visit friends' islands over the Sky Plaza and hold E on their heart sign. Weekly Most Liked board!",

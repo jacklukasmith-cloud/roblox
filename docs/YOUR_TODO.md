@@ -48,6 +48,7 @@ New since the last import:
   kart jitters, say so and it'll be rebuilt as a proper driven vehicle.
 - **Spin Wheel** animation and that the toast shows the right prize.
 - **Island chest:** hold E on it, check the prompt switches to "Opened · back tomorrow".
+- **Weekend events:** try `!event HatchFest 5` in chat and check the egg stands show the sale price and the HUD line.
 - **❤️ Likes:** like a friend's island, check their sign count goes up and the weekly board shows it.
 - **Teleport crystals** from the Bag: Home Crystal from the forest, Camp Crystal into the Deep Camp.
 - **Hoverboards** switching off at the realm edge and in the Deepwood.

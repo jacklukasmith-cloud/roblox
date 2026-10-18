@@ -782,7 +782,12 @@ local function makeEggStand(parent: Instance, eggId: string, position: Vector3):
 	pillStroke.Thickness = 1.5
 	pillStroke.Parent = pill
 	local requiredZone = egg.RequiresZone and Zones.Get(egg.RequiresZone)
+	-- Services/Hatching rewrites this label when a weekend Hatch Fest changes the price
+	pill:SetAttribute("EggId", egg.Id)
+	pill:SetAttribute("PriceIcon", priceIcon)
+	pill:SetAttribute("PriceSuffix", if requiredZone then ` · needs {requiredZone.Name}` else "")
 	label(pill, {
+		Name = "EggPrice",
 		Text = if requiredZone
 			then `{priceIcon} {Format.Number(egg.Cost)} · needs {requiredZone.Name}`
 			else `{priceIcon}  {Format.Number(egg.Cost)}`,

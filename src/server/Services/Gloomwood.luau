@@ -211,8 +211,13 @@ function Service.AddToSatchel(player: Player, id: string): boolean
 	if Gloomwood.SatchelCount(g.Satchel) >= Gloomwood.SatchelSize then
 		return false
 	end
-	g.Satchel[id] = (g.Satchel[id] or 0) + 1
-	data.Stats.GloomMined = (data.Stats.GloomMined or 0) + 1
+	-- Gloom Rush weekends: every crystal gives extra (if the satchel has room)
+	local WorldService = require(script.Parent.WorldService) :: any
+	local extra = (WorldService.GetEventDef and WorldService.GetEventDef().GloomDrops or 1) - 1
+	local room = Gloomwood.SatchelSize - Gloomwood.SatchelCount(g.Satchel) - 1
+	local n = 1 + math.clamp(extra, 0, math.max(room, 0))
+	g.Satchel[id] = (g.Satchel[id] or 0) + n
+	data.Stats.GloomMined = (data.Stats.GloomMined or 0) + n
 	local def = Gloomwood.Get(id)
 	if def and (def.Rarity == "Rare" or def.Rarity == "Epic" or def.Rarity == "Legendary") then
 		data.Stats.GloomRare = (data.Stats.GloomRare or 0) + 1

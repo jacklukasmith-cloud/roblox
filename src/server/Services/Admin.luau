@@ -236,6 +236,20 @@ local function run(command: string, args: { string })
 				)
 			end
 		end
+	elseif command == "event" then
+		local Events = require(ReplicatedStorage.Shared.Events)
+		local id = args[1]
+		local minutes = math.clamp(tonumber(args[2]) or 30, 1, 48 * 60)
+		local def = Events.Get(id)
+		if def and WorldService.SetEventOverride(id, os.time() + minutes * 60) then
+			for _, player in Players:GetPlayers() do
+				notify:FireClient(
+					player,
+					`{def.Icon} {def.Name} is on for {minutes} minutes! {def.Description}`,
+					def.Color
+				)
+			end
+		end
 	elseif command == "announce" then
 		local text = table.concat(args, " ")
 		for _, player in Players:GetPlayers() do

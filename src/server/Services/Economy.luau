@@ -145,6 +145,7 @@ function Economy.GetEssenceMultiplier(player: Player, data: PlayerData.Data): nu
 		m *= Config.Boosts.Essence
 	end
 	m *= WorldService.GetWeatherDef().Essence
+	m *= WorldService.GetEventDef().Essence
 	m *= FriendBoost.Multiplier(player)
 	m *= Sanctuary.EssenceBonus((data :: any).Sanctuary and (data :: any).Sanctuary.Level or 1)
 	if Surge.IsActive() then
@@ -161,11 +162,11 @@ function Economy.GetLuck(player: Player, data: PlayerData.Data): number
 	if boostActive(data, "Luck") then
 		luck *= Config.Boosts.Luck
 	end
-	return luck * WorldService.GetWeatherDef().Luck
+	return luck * WorldService.GetWeatherDef().Luck * WorldService.GetEventDef().Luck
 end
 
 function Economy.GetShinyMultiplier(data: PlayerData.Data): number
-	local m = WorldService.GetWeatherDef().Shiny
+	local m = WorldService.GetWeatherDef().Shiny * WorldService.GetEventDef().Shiny
 	if boostActive(data, "Shiny") then
 		m *= Config.Boosts.Shiny
 	end

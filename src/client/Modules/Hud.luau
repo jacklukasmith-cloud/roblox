@@ -15,6 +15,7 @@ local Shared = ReplicatedStorage.Shared
 local Format = require(Shared.Format)
 local Config = require(Shared.Config)
 local Weather = require(Shared.Weather)
+local Events = require(Shared.Events)
 local Houses = require(Shared.Houses)
 local Ui = require(script.Parent.Ui)
 local Layout = require(script.Parent.Layout)
@@ -209,8 +210,19 @@ function Hud.Build(root: Frame)
 		MaxTextSize = 13,
 		Parent = top,
 	})
-	local topList = Ui.glass({
+	-- weekend event line (shown while one is on; the countdown to the next one hides on phones)
+	local eventText = Ui.text({
 		LayoutOrder = 3,
+		Size = UDim2.fromOffset(420, 14),
+		Font = T.Font,
+		Text = "",
+		TextColor3 = T.SubText,
+		MaxTextSize = 13,
+		Visible = false,
+		Parent = top,
+	})
+	local topList = Ui.glass({
+		LayoutOrder = 4,
 		Size = UDim2.fromOffset(240, 20),
 		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundTransparency = 0.35,
@@ -507,6 +519,22 @@ function Hud.Build(root: Frame)
 		else
 			weatherText.Text = `{weather.Name}  ·  {weather.Description}  ·  {Format.Time(w.Weather.EndsAt - now)}`
 			weatherText.TextColor3 = weather.SkyTint
+		end
+		local ev = w.Event
+		if ev then
+			local def = Events.Get(ev.Id)
+			local nextDef = Events.Get(ev.NextId)
+			if def then
+				eventText.Visible = true
+				eventText.Text = `{def.Icon} {def.Name}: {def.Description}  ·  {Format.Time(ev.EndsAt - now)} left`
+				eventText.TextColor3 = def.Color
+			elseif nextDef and not Layout.Compact then
+				eventText.Visible = true
+				eventText.Text = `{nextDef.Icon} {nextDef.Name} starts in {Format.Time(ev.NextAt - now)}`
+				eventText.TextColor3 = T.SubText
+			else
+				eventText.Visible = false
+			end
 		end
 		local d = State.Data
 		local best = 1

@@ -251,12 +251,14 @@ task.spawn(function()
 	while true do
 		local state = {
 			Weather = WorldService.GetWeather(),
+			Event = WorldService.GetEvent(),
 			Merchant = WorldService.GetMerchant(),
 			Houses = HouseWar.GetStandings(),
 			HouseWeekEndsAt = HouseWar.WeekEndsAt(),
 			ServerTime = os.time(),
 		}
 		worldState:FireAllClients(state)
+		Hatching.RefreshPrices()
 		task.wait(2)
 	end
 end)
