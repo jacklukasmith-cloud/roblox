@@ -48,7 +48,6 @@ Done items move to the bottom.
 | `FrostglassCrystal` | Clear icy blue crystal |
 | `StormquartzCrystal` | Yellow crystal with lightning veins |
 | `VoidstoneCrystal` | Dark purple crystal with a black core |
-| `PrismheartCrystal` | Big rainbow prism crystal (legendary) |
 
 ### Gloomwood animals (these need rigging to walk; the block versions walk already)
 | Model name | What |
@@ -61,7 +60,6 @@ Done items move to the bottom.
 | `MossBear` | Big brown bear with moss growing on its back |
 | `FrostStag` | Pale stag with glowing ice antlers |
 | `ShadowWisp` | Floating ghostly flame |
-| `GloomTreant` | Huge walking tree boss with a glowing hollow chest |
 
 ## Icons and UI images
 
@@ -81,7 +79,6 @@ Moonshard, Emberheart, Frostglass, Stormquartz, Voidstone, Prismheart.
 ### Other
 | Image | Where |
 |---|---|
-| Gloomwood map background (a parchment-style top-down map of the forest rings) | the 🗺️ forest map window |
 | Sanctuary / Gloomwood update thumbnails | the experience page |
 | "The Sanctuary Update" banner | What's New pop-up header |
 
@@ -89,4 +86,7 @@ Moonshard, Emberheart, Frostglass, Stormquartz, Voidstone, Prismheart.
 | Name | What |
 |---|---|
 | `AlchemyCauldron` | The Cauldron on every island ([WORLD_MESHES.md](WORLD_MESHES.md)) |
+| `PrismheartCrystal` | The legendary crystal in the Heart (see WORLD_MESHES.md) |
+| `GloomTreant` | Static 3D model made (see WORLD_MESHES.md); it still needs rigging before it can replace the block treant that walks |
+| Gloomwood map parchment | Background for the 🗺️ forest map ([image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261017_235908_cd0256e5-ec3c-45fc-b808-7306ae8a2396.png)). Upload it to Roblox as a Decal and put its `rbxassetid://` in `Gloomwood.MapImage` (`src/shared/Gloomwood.luau`) |
 | Master Alchemist icon | Game pass icon ([ICONS.md](ICONS.md)) |

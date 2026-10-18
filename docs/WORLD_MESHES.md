@@ -56,6 +56,13 @@ free spots around the hub.
 If the brew's glow doesn't line up with the top of the imported pot, add a number attribute `Scale` to the model
 (e.g. 0.9 or 1.1) to make it smaller or bigger.
 
+## Gloomwood
+
+| Model name | Where | Preview image |
+|---|---|---|
+| `PrismheartCrystal` | The legendary Prismheart in the Heart of the Gloomwood (replaces the built-in shards; works for any crystal as `<Id>Crystal`) | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261017_235536_1f03c5e8-21e4-48e5-a477-3953fa38eee1.png) |
+| `GloomTreant` | Concept + static GLB only ([image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261017_235537_a16029f8-0693-4a3a-a5ca-08ee9b6e55a5.png)); the walking treant in the game stays the block one until it's rigged | |
+
 ## Add them to the game
 
 1. Run `powershell -ExecutionPolicy Bypass -File scripts\download-world.ps1` in the roblox
