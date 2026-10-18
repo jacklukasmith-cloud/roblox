@@ -22,6 +22,7 @@ local HouseWar = require(script.Parent.HouseWar)
 local Surge = require(script.Parent.Surge)
 local FriendBoost = require(script.Parent.FriendBoost)
 local DailyRewards = require(script.Parent.DailyRewards)
+local SpinWheel = require(script.Parent.SpinWheel)
 local Seasons = require(script.Parent.Seasons)
 
 local Economy = {}
@@ -472,6 +473,7 @@ function Economy.BuildSnapshot(player: Player)
 		Gloom = (data :: any).Gloom,
 		Cauldron = (data :: any).Cauldron,
 		Vehicles = (data :: any).Vehicles,
+		Spin = SpinWheel.Snapshot(data),
 	}
 end
 

@@ -159,8 +159,12 @@ all of this are listed in [docs/HIGGSFIELD_TODO.md](docs/HIGGSFIELD_TODO.md).
   Built once, kept forever. Press **🛹** (or **R**) to hop on or off your last board. Boards work in the hub, the
   forest's Edge and Midwood and on the islands, and switch off by themselves in the realms (farming stays the
   same) and in the Deepwood. The **Board Skins** game pass (`Config.GamePasses`, ID still 0) unlocks Neon, Ice,
-  Gold and Void colours. Karts with seats for friends are listed as coming soon. Code:
+  Gold and Void colours. The **Mushroom Kart** (6 Emberhearts + 20 Moonshards, x1.9) has a passenger **Seat** on
+  the back: a friend just sits on it and rides along with the driver. Code:
   `src/server/Services/Hangar.luau`, `src/client/Modules/HangarPanel.luau`.
+- **Island chest:** the 🧰 chest opposite the Upgrade Stone opens **once a day** (midnight UTC). It gives Essence
+  (worth 30 crystals of your best realm, +20 per island level) and one item; higher island levels unlock better
+  drops, up to a Mystic Egg at level 10 (`Sanctuary.ChestItems`). Only works on your own island.
 - **Settings:** in `src/shared/Sanctuary.luau` (island size, costs and bonus per level, habitat slots and XP, ring
   position); the building code is in `src/server/Services/Sanctuaries.luau`. The **Crystal Vault** is explained in
   the Gloomwood section below. All four stations are built now.
@@ -316,6 +320,14 @@ tile counts rewards ready to claim. Days roll over at midnight UTC.
 ![Daily](docs/images/ui-daily.png)
 
 Rewards and the quest pool live in `src/shared/Daily.luau`; Essence rewards scale with your best zone.
+
+## Spin Wheel
+
+The **🎡 Spin** button next to Daily: one **free spin every 4 hours** (the tile gets a red bubble and pulses when it's
+ready). The wheel has 9 slices (`src/shared/Spin.luau`): Essence, treats, potions, Trophies, a Mystery Gift, **+2
+bonus spins** and a rare **Mystic Egg jackpot**. The server picks the slice and gives the reward; the client just
+animates the wheel to it. Extra spins come from the **Spin Pack** product (5 spins, `Config.DevProducts`, ID still
+0) or the +2 slice. An optional Higgsfield wheel image goes in `Config.Images.SpinWheel`.
 
 ## Project layout
 

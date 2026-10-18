@@ -137,6 +137,64 @@ local function buildBoard(def: any, skinColor: Color3?): Model
 			weld.Parent = thruster
 		end
 	end
+	-- karts: a mushroom cap behind the driver (when there's no imported model) and a passenger Seat
+	if (def.Seats or 1) > 1 then
+		if not template then
+			deck.Size = Vector3.new(3.4, 0.6, 8)
+			for _, corner in
+				{
+					Vector3.new(-1.9, -0.4, -2.6),
+					Vector3.new(1.9, -0.4, -2.6),
+					Vector3.new(-1.9, -0.4, 2.6),
+					Vector3.new(1.9, -0.4, 2.6),
+				}
+			do
+				local wheel = Instance.new("Part")
+				wheel.Name = "Wheel"
+				wheel.Shape = Enum.PartType.Cylinder
+				wheel.Size = Vector3.new(0.7, 1.4, 1.4)
+				wheel.Color = rgb(60, 50, 50)
+				wheel.Material = Enum.Material.SmoothPlastic
+				wheel.CanCollide = false
+				wheel.Massless = true
+				wheel.CFrame = deck.CFrame * CFrame.new(corner)
+				wheel.Parent = model
+				local weld = Instance.new("WeldConstraint")
+				weld.Part0 = deck
+				weld.Part1 = wheel
+				weld.Parent = wheel
+			end
+			local cap = Instance.new("Part")
+			cap.Name = "Cap"
+			cap.Shape = Enum.PartType.Ball
+			cap.Size = Vector3.new(3.2, 3.2, 3.2)
+			cap.Color = color
+			cap.Material = Enum.Material.SmoothPlastic
+			cap.CanCollide = false
+			cap.Massless = true
+			cap.CFrame = deck.CFrame * CFrame.new(0, 0.9, 3.2)
+			cap.Parent = model
+			local weld = Instance.new("WeldConstraint")
+			weld.Part0 = deck
+			weld.Part1 = cap
+			weld.Parent = cap
+		end
+		for i = 2, def.Seats do
+			local seat = Instance.new("Seat")
+			seat.Name = "PassengerSeat"
+			seat.Size = Vector3.new(2, 0.5, 2)
+			seat.Color = rgb(255, 240, 220)
+			seat.Material = Enum.Material.Fabric
+			seat.CanCollide = false
+			seat.Massless = true
+			seat.CFrame = deck.CFrame * CFrame.new(0, 2.6, 2.4 + (i - 2) * 2.2)
+			seat.Parent = model
+			local weld = Instance.new("WeldConstraint")
+			weld.Part0 = deck
+			weld.Part1 = seat
+			weld.Parent = seat
+		end
+	end
 	local light = Instance.new("PointLight")
 	light.Color = color
 	light.Range = 8
@@ -218,7 +276,10 @@ function Hangar.Ride(player: Player, id: any): (boolean, string?)
 	humanoid.JumpPower = Vehicles.BaseJump * (def.Jump or 1)
 	g.LastRidden = id
 	PlayerData.MarkChanged(player)
-	return true, `{def.Icon} Riding the {def.Name}!`
+	return true,
+		if (def.Seats or 1) > 1
+			then `{def.Icon} Riding the {def.Name}! A friend can sit on the back`
+			else `{def.Icon} Riding the {def.Name}!`
 end
 
 -- Build a vehicle at the Hangar. Returns ok, message.

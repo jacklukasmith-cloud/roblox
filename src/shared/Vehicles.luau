@@ -5,6 +5,7 @@
 
 	Cost = Gloom Crystals from your Vault + Essence worth that many crystals of your best realm.
 	Speed = walk speed multiplier. Jump = jump power multiplier. Glide = slow falling.
+	Seats = 2 means a passenger Seat on the back: anyone can sit on it and ride along with the driver.
 	Skins are looks only (the Board Skins game pass unlocks the coloured ones).
 ]]
 
@@ -45,7 +46,7 @@ Vehicles.List = {
 		Jump = 1.7,
 		Glide = true,
 	},
-	-- karts with seats for friends come later
+	-- a kart with a passenger seat on the back: a friend sits on it and rides along
 	{
 		Id = "MushroomKart",
 		Name = "Mushroom Kart",
@@ -57,7 +58,6 @@ Vehicles.List = {
 		Speed = 1.9,
 		Jump = 1,
 		Seats = 2,
-		ComingSoon = true,
 	},
 }
 

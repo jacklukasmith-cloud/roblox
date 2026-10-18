@@ -16,6 +16,8 @@ local Sanctuary = require(Shared.Sanctuary)
 local Remotes = require(Shared.Remotes)
 
 local Format = require(Shared.Format)
+local Daily = require(Shared.Daily)
+local Items = require(Shared.Items)
 
 local PlayerData = require(script.Parent.PlayerData)
 local WorldBuilder = require(script.Parent.WorldBuilder)
@@ -31,6 +33,7 @@ local islands: { [Player]: Model } = {}
 local lastTravel: { [Player]: number } = {}
 local TRAVEL_COOLDOWN = 1.5
 local lastUpgrade: { [Player]: number } = {}
+local islandUnder: (Vector3) -> Model? -- defined further down
 
 local function folder(): Folder
 	local f = workspace:FindFirstChild("Sanctuaries")
@@ -331,6 +334,8 @@ local function build(player: Player, slot: number): Model
 		Size = UDim2.fromScale(1, 0.4),
 		TextColor3 = rgb(140, 230, 255),
 	})
+	-- the island chest, opposite the stone: opens once a day
+	Sanctuaries.BuildChest(model, player, CFrame.lookAt(at(-14, 1.6, 0), at(0, 1.6, 0)))
 	-- the stations (the ones not built yet say "coming soon")
 	for _, station in Sanctuary.Stations do
 		local spot = at(station.Spot.X * r, 1.75, station.Spot.Y * r)
@@ -505,6 +510,130 @@ local function build(player: Player, slot: number): Model
 	model.PrimaryPart = top
 	model.Parent = folder()
 	return model
+end
+
+-- Island chest ------------------------------------------------------------------------------
+
+local function chestReady(data: any): boolean
+	return (data.Sanctuary.ChestDay or -1) < Daily.Today()
+end
+
+-- Sets the chest's prompt and glow to open/ready
+local function refreshChest(model: Model, data: any)
+	local chest = model:FindFirstChild("IslandChest")
+	if not chest then
+		return
+	end
+	local ready = chestReady(data)
+	chest:SetAttribute("Ready", ready)
+	for _, d in chest:GetDescendants() do
+		if d:IsA("ProximityPrompt") then
+			d.ActionText = if ready then "Open" else "Opened · back tomorrow"
+			d.Enabled = ready
+		elseif d:IsA("PointLight") then
+			d.Enabled = ready
+		elseif d.Name == "ChestGlow" and d:IsA("BasePart") then
+			d.Transparency = if ready then 0.2 else 0.8
+		end
+	end
+end
+
+-- The chest: an imported "IslandChest" model or a wooden box with a gold band, with a prompt
+function Sanctuaries.BuildChest(model: Model, player: Player, cf: CFrame)
+	local helpers = WorldBuilder.Helpers
+	local holder = Instance.new("Model")
+	holder.Name = "IslandChest"
+	local base = cf.Position
+	local mesh = helpers.PlaceMesh(holder, "IslandChest", cf, 4.5, false, true)
+	local body: BasePart
+	if mesh then
+		body = mesh.PrimaryPart or mesh:FindFirstChildWhichIsA("BasePart") :: BasePart
+	else
+		body = part({
+			Name = "ChestBody",
+			Size = Vector3.new(4, 2.4, 2.8),
+			CFrame = cf * CFrame.new(0, 1.2, 0),
+			Color = rgb(130, 90, 55),
+			Material = Enum.Material.WoodPlanks,
+			Parent = holder,
+		})
+		part({
+			Name = "ChestLid",
+			Size = Vector3.new(4.2, 1, 3),
+			CFrame = cf * CFrame.new(0, 2.9, 0),
+			Color = rgb(110, 75, 45),
+			Material = Enum.Material.WoodPlanks,
+			Parent = holder,
+		})
+		part({
+			Name = "ChestBand",
+			Size = Vector3.new(0.8, 3.5, 3.1),
+			CFrame = cf * CFrame.new(0, 1.75, 0),
+			Color = rgb(255, 200, 80),
+			Material = Enum.Material.Metal,
+			Parent = holder,
+		})
+	end
+	part({
+		Name = "ChestGlow",
+		Size = Vector3.new(5, 0.2, 5),
+		CFrame = CFrame.new(base + Vector3.new(0, 0.12, 0)),
+		Color = rgb(255, 220, 120),
+		Material = Enum.Material.Neon,
+		Transparency = 0.2,
+		CanCollide = false,
+		Parent = holder,
+	})
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.Name = "ChestPrompt"
+	prompt.ObjectText = "Island Chest (daily)"
+	prompt.ActionText = "Open"
+	prompt.HoldDuration = 0.5
+	prompt.MaxActivationDistance = 10
+	prompt.RequiresLineOfSight = false
+	prompt.Parent = body
+	helpers.Light(body, rgb(255, 210, 120), 10, 1)
+	local tag = helpers.Billboard(body, UDim2.fromOffset(200, 40), Vector3.new(0, 3.2, 0), 60)
+	helpers.Label(tag, { Text = "🧰 Island Chest · once a day", Size = UDim2.fromScale(1, 1) })
+	holder.PrimaryPart = body
+	holder.Parent = model
+	local data = PlayerData.Get(player) :: any
+	if data then
+		refreshChest(model, data)
+	end
+end
+
+Sanctuaries.Rng = Random.new()
+
+-- Open your island's chest (once a day). Returns ok, message.
+function Sanctuaries.OpenChest(player: Player): (boolean, string?)
+	local data = PlayerData.Get(player) :: any
+	if not data then
+		return false, nil
+	end
+	if not chestReady(data) then
+		return false, "You've opened your chest today: it refills at midnight UTC"
+	end
+	local model = islands[player]
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	if not model or not root or islandUnder(root.Position) ~= model then
+		return false, "The chest is on your own island"
+	end
+	local Economy = require(script.Parent.Economy) :: any
+	local Bag = require(script.Parent.Bag) :: any
+	local level = math.clamp(data.Sanctuary.Level or 1, 1, Sanctuary.MaxLevel)
+	local crystals, item, count = Sanctuary.ChestLoot(level, Sanctuaries.Rng:NextNumber())
+	local essence = Economy.GetProductEssence(player, crystals)
+	Economy.AddEssence(player, essence)
+	Bag.Give(player, item, count, true)
+	data.Sanctuary.ChestDay = Daily.Today()
+	data.Stats.ChestsOpened = (data.Stats.ChestsOpened or 0) + 1
+	PlayerData.MarkChanged(player)
+	refreshChest(model, data)
+	local itemName = (Items.Get(item) or { Name = item }).Name
+	return true,
+		`🧰 Island chest: 💎 {Format.Number(essence)} + {count}x {itemName}! Level up your island for better loot`
 end
 
 -- The Sky Plaza in the middle of the ring: every island's bridge ends here. It has a circle back to
@@ -732,7 +861,7 @@ function Sanctuaries.Travel(player: Player, destination: any): (boolean, string?
 end
 
 -- Which island (if any) a position is above
-local function islandUnder(position: Vector3): Model?
+function islandUnder(position: Vector3): Model?
 	for _, model in islands do
 		local ground = model.PrimaryPart
 		if ground then
@@ -754,7 +883,14 @@ function Sanctuaries.Start()
 	Sanctuaries.EnsurePlaza()
 	-- the Upgrade Stone (only works on your own island)
 	folder().DescendantAdded:Connect(function(d)
-		if d:IsA("ProximityPrompt") and d.Name == "UpgradePrompt" then
+		if d:IsA("ProximityPrompt") and d.Name == "ChestPrompt" then
+			d.Triggered:Connect(function(player)
+				local ok, message = Sanctuaries.OpenChest(player)
+				if message then
+					notify:FireClient(player, message, if ok then rgb(255, 210, 120) else rgb(255, 170, 120))
+				end
+			end)
+		elseif d:IsA("ProximityPrompt") and d.Name == "UpgradePrompt" then
 			d.Triggered:Connect(function(player)
 				local model = d:FindFirstAncestorOfClass("Model")
 				if not model or model:GetAttribute("OwnerId") ~= player.UserId then

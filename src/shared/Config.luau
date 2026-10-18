@@ -76,6 +76,11 @@ Config.GroundTextures = {
 	[4] = "rbxassetid://123790088154148", -- Sky Sanctum (marble)
 }
 
+-- UI images made with Higgsfield (docs/ICONS.md). Empty = the built-in drawn version.
+Config.Images = {
+	SpinWheel = "", -- the wheel art behind the Spin Wheel's slices
+}
+
 -- Creature XP for each break you helped with (crystals also scale with their size: a Giant gives 12)
 Config.PetXP = { Crystal = 1, Chest = 6, Boss = 25 }
 
@@ -397,6 +402,15 @@ Config.DevProducts = {
 		PriceHint = 39, -- shown in the shop UI; set the real price on the Creator Hub
 		Icon = "", -- optional "rbxassetid://..." after uploading the icon
 		Grant = { Kind = "MerchantRestock" },
+	},
+	{
+		Key = "SpinPack",
+		Id = 0, -- create a Developer Product called "Spin Pack" and paste its ID here
+		Name = "Spin Pack",
+		Description = "5 extra spins on the Spin Wheel (a shot at the Mystic Egg jackpot!)",
+		PriceHint = 59,
+		Icon = "",
+		Grant = { Kind = "Spins", Count = 5 },
 	},
 	{
 		-- Robux-exclusive creature: featured at the top of the Shop. Can be bought more than once

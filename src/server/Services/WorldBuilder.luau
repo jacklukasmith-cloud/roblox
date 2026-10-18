@@ -193,6 +193,8 @@ WorldBuilder.MeshNames = {
 	"VehicleMossBoard",
 	"VehicleCrystalBoard",
 	"VehiclePrismGlider",
+	"VehicleMushroomKart",
+	"IslandChest",
 	-- Gloom Crystals (Services/Gloomwood): "<crystal id>Crystal"
 	"MoonshardCrystal",
 	"EmberheartCrystal",

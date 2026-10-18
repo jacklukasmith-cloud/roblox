@@ -166,7 +166,7 @@ function HangarPanel.Build(screen: Frame, root: Frame)
 			Position = UDim2.fromOffset(62, 28),
 			Size = UDim2.new(1, -200, 0, 18),
 			Text = `{def.Description}  ·  speed x{def.Speed}{if def.Glide then ", glides" else ""}{if def.Seats
-				then `, {def.Seats} seats`
+				then `, seat for a friend`
 				else ""}`,
 			Font = T.FontRegular,
 			TextColor3 = T.SubText,

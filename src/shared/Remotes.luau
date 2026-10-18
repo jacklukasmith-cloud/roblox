@@ -55,6 +55,8 @@ local FUNCTIONS = {
 	"BuildVehicle",
 	"Ride",
 	"SetSkin",
+	"SpinWheel",
+	"OpenChest",
 	"TradeRequest",
 	"TradeRespond",
 	"TradeSetPet",

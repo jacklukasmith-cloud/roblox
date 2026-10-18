@@ -77,6 +77,44 @@ end
 
 -- The four stations and the spots they'll stand on (offsets from the island centre, as a fraction of
 -- the radius). The Pet Habitat and Crystal Vault are built; the others are marked "coming soon" for now.
+-- The island chest: opens once a day (UTC days, like the Daily reward). Essence = this many crystals of
+-- your best realm, plus one item; better odds at higher island levels.
+Sanctuary.ChestEssence = { Base = 30, PerLevel = 20 }
+Sanctuary.ChestItems = {
+	-- MinLevel = island level needed before this can drop
+	{ Item = "PetTreat", Count = 3, Weight = 30 },
+	{ Item = "EssenceBag", Count = 1, Weight = 20 },
+	{ Item = "LuckPotion", Count = 1, Weight = 14 },
+	{ Item = "SpeedPotion", Count = 1, Weight = 10 },
+	{ Item = "EssencePotion", Count = 1, Weight = 10, MinLevel = 2 },
+	{ Item = "XPPotion", Count = 1, Weight = 8, MinLevel = 3 },
+	{ Item = "MysteryGift", Count = 1, Weight = 6, MinLevel = 4 },
+	{ Item = "GoldenTreat", Count = 1, Weight = 4, MinLevel = 6 },
+	{ Item = "ShinyElixir", Count = 1, Weight = 3, MinLevel = 8 },
+	{ Item = "MysticEgg", Count = 1, Weight = 2, MinLevel = 10 },
+}
+
+-- What the chest gives at an island level, from a roll in [0, 1): crystal-rewards worth of Essence + an item
+function Sanctuary.ChestLoot(level: number, roll: number): (number, string, number)
+	local essence = Sanctuary.ChestEssence.Base + Sanctuary.ChestEssence.PerLevel * (level - 1)
+	local pool, total = {}, 0
+	for _, entry in Sanctuary.ChestItems do
+		if level >= (entry.MinLevel or 1) then
+			table.insert(pool, entry)
+			total += entry.Weight
+		end
+	end
+	local target, acc = roll * total, 0
+	for _, entry in pool do
+		acc += entry.Weight
+		if target < acc then
+			return essence, entry.Item, entry.Count
+		end
+	end
+	local last = pool[#pool]
+	return essence, last.Item, last.Count
+end
+
 Sanctuary.Stations = {
 	{ Id = "PetHabitat", Name = "Pet Habitat", Icon = "🐾", Spot = Vector2.new(-0.5, -0.45) },
 	{ Id = "Cauldron", Name = "Alchemy Cauldron", Icon = "⚗️", Spot = Vector2.new(0.5, -0.45) },

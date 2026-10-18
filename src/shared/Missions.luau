@@ -111,6 +111,15 @@ Missions.List = {
 		Reward = { Essence = 200 },
 	},
 	{
+		Id = "Spin1",
+		Text = "Spin the Spin Wheel",
+		Stat = "Spins",
+		Kind = "Reach",
+		Goal = 1,
+		Hint = "Open 🎡 Spin in the top corner. A free spin every 4 hours!",
+		Reward = { Essence = 250 },
+	},
+	{
 		Id = "Zone2",
 		Text = "Unlock Ember Rift",
 		Stat = "ZonesUnlocked",

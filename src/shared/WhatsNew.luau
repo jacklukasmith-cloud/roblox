@@ -34,6 +34,21 @@ WhatsNew.List = {
 		Title = "Pet Habitat",
 		Text = "Pets you put on your island wander around and earn XP, even while you're offline.",
 	},
+	{
+		Icon = "🎡",
+		Title = "Spin Wheel",
+		Text = "A free spin every 4 hours in the top corner. Land on the 🥚 for a Mystic Egg!",
+	},
+	{
+		Icon = "🧰",
+		Title = "Island chest",
+		Text = "A treasure chest on your island opens once a day. Higher island levels give better loot.",
+	},
+	{
+		Icon = "🏎️",
+		Title = "Mushroom Kart",
+		Text = "Build a kart at your Hangar with a seat on the back for a friend.",
+	},
 	{ Icon = "🎯", Title = "Missions", Text = "Follow the mission card under the menu for rewards." },
 	{
 		Icon = "🎒",

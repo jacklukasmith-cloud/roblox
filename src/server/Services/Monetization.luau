@@ -144,6 +144,9 @@ local function grant(player: Player, product)
 		)
 		notify:FireClient(player, `Thank you! {product.Name} joined your team!`, Color3.fromRGB(255, 95, 200))
 		require(script.Parent.Celebrations).Announce(player, g.Creature, "Normal", "got")
+	elseif g.Kind == "Spins" then
+		require(script.Parent.SpinWheel).AddSpins(player, g.Count or 1)
+		notify:FireClient(player, `🎡 +{g.Count or 1} spins! Open the Spin Wheel`, Color3.fromRGB(255, 210, 120))
 	elseif g.Kind == "MerchantRestock" then
 		data.Merchant.Bought = {}
 		notify:FireClient(player, "The Merchant restocked just for you!", Color3.fromRGB(255, 200, 120))

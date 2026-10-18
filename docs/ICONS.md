@@ -15,6 +15,16 @@ subjects were kept centred for that).
 | Night Shift (24h offline) | `LongerOffline` | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261011_153724_07c5df6c-0692-44c0-825d-0e39b5d86573.png) |
 | Master Alchemist (2 Cauldron slots, 25% faster) | `MasterAlchemist` | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261017_201307_7c7f7908-0ec9-4764-a6ca-caac51a083fa.png) |
 | Board Skins (hoverboard colours) | `BoardSkins` | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_000841_ef008555-1cf6-493b-baec-d6f7fd22bb79.png) |
+| Spin Pack (product: 5 spins) | `SpinPack` in `Config.DevProducts` | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_084518_453041d1-0b78-46cf-89c3-fb86a6567d1a.png) |
+
+## Spin Wheel art
+
+Upload as a Decal/Image and paste the `rbxassetid://` into `Config.Images.SpinWheel` (`src/shared/Config.luau`).
+It sits behind the 9 reward tiles; without it the wheel is a plain dark disc.
+
+| Image | Link |
+|---|---|
+| Wheel (gold rim, purple slices) | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_084518_d12acb3b-c922-4350-8cc2-c9489869ee3b.png) |
 | Essence Pouch | `EssencePouch` | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261011_153723_f228189d-5efd-48c9-a680-32e4115711a3.png) |
 | Essence Chest | `EssenceChest` | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261011_153723_b3680bff-9e7c-421e-914a-3cf6b8204fe2.png) |
 | Luck Potion | `LuckPotion` | [link](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261011_153756_2bde36b0-56d6-4b26-b2cf-d762006be6df.png) |

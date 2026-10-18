@@ -20,6 +20,7 @@ Done items move to the bottom.
 | `IslandTree` | Round pastel tree (2-3 colour variants: green, pink) | the ball-on-trunk trees |
 | `Hangar` | Open workshop shed with a hoverboard rack | the plank shed on every island |
 | `VehiclePrismGlider` | A translucent rainbow-prism glider board | the glass board |
+| `GloomWagon` | A 4-seat party wagon (when it's added) | - |
 
 ### Gloomwood
 | Model name | What | Replaces |
@@ -70,6 +71,12 @@ Done items move to the bottom.
 | Master Alchemist | done ([ICONS.md](ICONS.md)) |
 | Board Skins | done ([ICONS.md](ICONS.md)) |
 
+### Product icons
+| Product | Done? |
+|---|---|
+| Spin Pack | done ([ICONS.md](ICONS.md)) |
+| Essence Pouch, Essence Chest, Luck Potion, Merchant Restock, Nebula Kitsune | to do |
+
 ### Item icons (the Bag uses emoji for now; proper icons would look much better)
 Luck Potion, Essence Potion, Shiny Elixir, Speed Potion, Owl Eye Potion, Gloom Ward, Power Potion, XP Potion,
 Rainbow Brew, Pet Treat, Golden Treat, Essence Bag, Mystic Egg, Mystery Gift, Treasure Map, Boss Horn.
@@ -94,3 +101,5 @@ Moonshard, Emberheart, Frostglass, Stormquartz, Voidstone, Prismheart.
 | Board Skins icon | Game pass icon ([ICONS.md](ICONS.md)) |
 | Gloomwood map parchment | Background for the 🗺️ forest map ([image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261017_235908_cd0256e5-ec3c-45fc-b808-7306ae8a2396.png)). Upload it to Roblox as a Decal and put its `rbxassetid://` in `Gloomwood.MapImage` (`src/shared/Gloomwood.luau`) |
 | Master Alchemist icon | Game pass icon ([ICONS.md](ICONS.md)) |
+| Spin Pack icon | Product icon ([ICONS.md](ICONS.md)) |
+| Spin Wheel art | Background image for the 🎡 wheel ([ICONS.md](ICONS.md)); paste its id in `Config.Images.SpinWheel` |

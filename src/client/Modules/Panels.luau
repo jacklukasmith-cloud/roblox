@@ -17,9 +17,11 @@ local Merchant = require(Shared.Merchant)
 local Items = require(Shared.Items)
 local Format = require(Shared.Format)
 local Remotes = require(Shared.Remotes)
+local Spin = require(Shared.Spin)
 local CreatureModels = require(Shared.CreatureModels)
 local Ui = require(script.Parent.Ui)
 local DailyPanel = require(script.Parent.DailyPanel)
+local SpinPanel = require(script.Parent.SpinPanel)
 local SeasonPanel = require(script.Parent.SeasonPanel)
 local BlacksmithPanel = require(script.Parent.BlacksmithPanel)
 local BagPanel = require(script.Parent.BagPanel)
@@ -135,6 +137,8 @@ function Panels.Waiting(panel: string): number
 	end
 	if panel == "Daily" then
 		return (d.Daily and d.Daily.ReadyCount) or 0
+	elseif panel == "Spin" then
+		return if d.Spin then Spin.Available(d.Spin, State.Now()) else 0
 	elseif panel == "Merchant" then
 		-- new stock since you last looked (and the Merchant has something you haven't bought)
 		local m = State.World and State.World.Merchant
@@ -179,6 +183,7 @@ local MENU = {
 	{ Panel = "Leaderboards", Label = "Top", Icon = "🏆", Color = Color3.fromRGB(255, 215, 90), Corner = true },
 	{ Panel = "Season", Label = "Season", Icon = "🏅", Color = Color3.fromRGB(255, 120, 90), Corner = true },
 	{ Panel = "Daily", Label = "Daily", Icon = "🎁", Color = Color3.fromRGB(255, 196, 64), Corner = true },
+	{ Panel = "Spin", Label = "Spin", Icon = "🎡", Color = Color3.fromRGB(255, 120, 170), Corner = true },
 }
 Panels.MenuButtons = {} :: { TextButton }
 
@@ -340,7 +345,7 @@ local function buildMenu(root: Frame)
 			local n = Panels.Waiting(entry.Panel)
 			bubble.Visible = n > 0
 			count.Text = if n > 9 then "9+" else tostring(n)
-			setPulse(n > 0 and entry.Panel == "Daily")
+			setPulse(n > 0 and (entry.Panel == "Daily" or entry.Panel == "Spin"))
 		end
 		State.Changed:Connect(function(key)
 			if key == "Data" or key == "World" or key == "Seen" then
@@ -1648,6 +1653,7 @@ function Panels.Build(screen: Frame)
 	buildBestiary(screen)
 	buildSettings(screen)
 	DailyPanel.Build(screen)
+	SpinPanel.Build(screen)
 	SeasonPanel.Build(screen)
 	BlacksmithPanel.Build(screen)
 	BagPanel.Build(screen)

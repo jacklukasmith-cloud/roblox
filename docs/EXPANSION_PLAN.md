@@ -46,7 +46,7 @@ Every player gets their own **Sanctuary**: a floating island they own, reached f
   - hoverboard and kart skins.
 - **Fun extras:**
   - visit and ❤️ like other players' bases, with a weekly "Most Liked Sanctuary" board and prize;
-  - a daily island chest;
+  - ~~a daily island chest~~ (done: the 🧰 chest by the Upgrade Stone, better loot per island level);
   - ~~a pet playground that earns pet XP while you're away~~ (done: it's part of the Pet Habitat);
   - a crystal garden where seeds grow over real time (like Grow a Garden).
 
@@ -340,7 +340,7 @@ and potions, Bee Swarm Simulator's treats and Grow a Garden's restocking shop.
 
 - **Rule for Robux:** mostly cosmetics and time-savers. Boosts stay modest, so free players can still reach the top.
 - **Weekend events:** limited event realms or eggs (Halloween, Snow festival) with pets that never come back.
-- **Spin wheel:** one free spin every 4 hours, and extra spins for Robux.
+- ~~**Spin wheel:** one free spin every 4 hours, and extra spins for Robux.~~ (done: 🎡 Spin, Spin Pack product)
 - **Huge pets:** ultra-rare giant versions of creatures (about 1 in 100,000).
 
 ## Missions for the new content
@@ -367,7 +367,7 @@ Each step works by itself and makes the next one easier.
 | 6a | ~~Gloomwood part 1: Edge and Midwood, Gloom Crystals, satchel, lanterns, Gloom meter, Deep Camp~~ (done, with the Crystal Vault and selling) | The main new adventure | L |
 | 6b | Gloomwood part 2: Deepwood (cliffs, caves), the Heart, Prismheart, Gloom Treant, Map Fragments | Where the hardest, rarest crystals are | L |
 | 7 | Crafting: potions and teleport crystals | Gives forest crystals a use | M |
-| 8 | Vehicles: ~~hoverboards~~ (done: the Hangar, three boards, Board Skins pass), then karts | Fun to show off, and good with friends | M |
+| 8 | Vehicles: ~~hoverboards~~ (done: the Hangar, three boards, Board Skins pass), ~~then karts~~ (done: Mushroom Kart with a passenger seat; the 4-seat Gloom Wagon is still to come) | Fun to show off, and good with friends | M |
 | 9 | Realms 5 and 6, plus Rebirth requirements | Fixes "I finished it" for top players | M each |
 | 10 | Joined-with-a-friend reward, co-op bonuses, friend quests | Builds on bases and vehicles | M |
 | 11 | Wild pets in the Gloomwood, realms 7 and 8 | Later content updates | M to L |
