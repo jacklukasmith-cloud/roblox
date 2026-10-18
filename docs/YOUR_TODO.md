@@ -34,6 +34,8 @@ New since the last import:
 | `VehicleMossBoard`, `VehicleCrystalBoard` | hoverboards under your feet |
 | `VehicleMushroomKart` | the kart (the game adds the passenger seat) |
 | `IslandChest` | the daily chest on every island |
+| `StarfallEgg`, `VoidEgg`, `StarfallCrystal`, `VoidCrystal` | realm 5 and 6 egg stands and crystals |
+| `StarfallColossus`, `EternityPhoenix` (run `download-creatures` too) | the two new Mythic creatures; import into `ReplicatedStorage.CreatureMeshes` |
 | `GloomTreant` | static only: needs rigging in Studio (or Higgsfield rigging) before it can replace the walking block treant |
 
 ## 3b. Optional art for realms 5 and 6

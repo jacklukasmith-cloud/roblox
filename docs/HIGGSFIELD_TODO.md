@@ -66,10 +66,7 @@ Done items move to the bottom.
 ### Realms 5 and 6 (Starfall Desert, Void Abyss)
 | Model name | What | Replaces |
 |---|---|---|
-| `StarfallEgg` | Pink-gold egg with star speckles | the block egg on its stand |
-| `VoidEgg` | Dark purple egg with a glowing crack | the block egg |
-| `StarfallCrystal` | Pink crystal with gold star flecks | block crystals |
-| `VoidCrystal` | Deep purple crystal with a black core | block crystals |
+
 | `StarCactus` | Tall cartoon cactus with a star on top | the block cacti |
 | `FallenStar` | Glowing pink star half-buried in sand | the neon cubes |
 | `DesertRuin` | Sandstone ruin arch | - |
@@ -77,9 +74,10 @@ Done items move to the bottom.
 | `AbyssPillar` | Cracked dark obsidian pillar | the block pillars |
 | `WatchingEye` | Floating glowing eye orb | - |
 
-### Realm 5 and 6 creatures (12, see CREATURE_MESHES.md for the naming)
-Dune Scarab, Mirage Jackal, Sand Wyrm, Comet Hawk, Sphinx Guardian, Starfall Colossus, Void Moth, Shadow Lynx,
-Eclipse Raven, Nether Wyvern, Abyssal Kraken, Eternity Phoenix.
+### Realm 5 and 6 creatures
+All 12 have concept art ([CREATURE_MESHES.md](CREATURE_MESHES.md)); the two Mythics have GLBs. Still to convert
+(30 credits each): Dune Scarab, Mirage Jackal, Sand Wyrm, Comet Hawk, Sphinx Guardian, Void Moth, Shadow Lynx,
+Eclipse Raven, Nether Wyvern, Abyssal Kraken.
 
 ## Icons and UI images
 
@@ -122,4 +120,6 @@ Moonshard, Emberheart, Frostglass, Stormquartz, Voidstone, Prismheart.
 | Gloomwood map parchment | Background for the 🗺️ forest map ([image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261017_235908_cd0256e5-ec3c-45fc-b808-7306ae8a2396.png)). Upload it to Roblox as a Decal and put its `rbxassetid://` in `Gloomwood.MapImage` (`src/shared/Gloomwood.luau`) |
 | Master Alchemist icon | Game pass icon ([ICONS.md](ICONS.md)) |
 | Spin Pack icon | Product icon ([ICONS.md](ICONS.md)) |
+| `StarfallEgg`, `VoidEgg`, `StarfallCrystal`, `VoidCrystal` | Realm 5/6 eggs and crystals (see WORLD_MESHES.md) |
+| `StarfallColossus`, `EternityPhoenix` | The two new Mythics, textured GLBs (see CREATURE_MESHES.md) |
 | Spin Wheel art | Background image for the 🎡 wheel ([ICONS.md](ICONS.md)); paste its id in `Config.Images.SpinWheel` |

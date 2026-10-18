@@ -10,10 +10,14 @@ block versions. Any prop without a model keeps its built-in look, so you can add
 | `FrostEgg` | Frostpeak egg | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195751_9d04f9b4-3f41-4620-bdcd-8866c5f33462.png) |
 | `SkyEgg` | Sky Sanctum egg | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195724_93ad102b-194b-4e81-a2a2-4999558398bf.png) |
 | `ChampionEgg` | Champion egg (hub) | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195724_af975e50-403f-4851-b15c-2a34458dd3aa.png) |
+| `StarfallEgg` | Starfall Desert egg | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135100_e93554dc-da95-4db2-b93c-faec025e45a1.png) |
+| `VoidEgg` | Void Abyss egg | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135100_de44255f-3d34-4d4a-8256-a93b8184c4f4.png) |
 | `MeadowCrystal` | Meadow crystals | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195724_2ab79892-5936-4121-98c4-f9342fdfcd31.png) |
 | `EmberCrystal` | Ember crystals | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195723_b0a134b6-39ca-4c35-8146-3c9dc31244db.png) |
 | `FrostCrystal` | Frostpeak crystals | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195723_721664e2-b21f-4b95-95e3-927fcd28f7d0.png) |
 | `SkyCrystal` | Sky crystals | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195751_46686232-b2c9-4972-94c7-5443c8b1ebe4.png) |
+| `StarfallCrystal` | Starfall Desert crystals | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135101_d1a65760-7ff9-4c72-b0f6-6c47dc4b40d8.png) |
+| `VoidCrystal` | Void Abyss crystals | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135059_dff758a1-0c2a-411f-a9df-cd4d8df93407.png) |
 | `ManaChest` | Mana Chests (every realm) | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195752_35745698-a1cc-414f-8a28-93f2b1e5e3ab.png) |
 | `MagicTree` | Enchanted Meadow trees | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195724_f6fd17c2-1b47-42ec-8ae8-2039d243e983.png) |
 

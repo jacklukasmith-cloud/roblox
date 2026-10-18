@@ -1,6 +1,7 @@
 # Creature 3D models
 
-All 26 creatures have a textured 3D model (GLB) made with Higgsfield:
+The first 26 creatures have a textured 3D model (GLB) made with Higgsfield (the 12 realm 5 and 6 creatures have
+concept art; the two Mythics also have GLBs, the rest can be converted for 30 credits each):
 first a concept image (GPT Image), then image to 3D with **SAM 3D (Meta)**.
 
 The game already supports them. Any creature whose model is in **ReplicatedStorage → CreatureMeshes**
@@ -81,3 +82,20 @@ Shiny creatures get a reflective sheen and sparkles; Rainbow creatures get a col
 - Single-image 3D has to guess the back of the creature, so check each model from behind.
 - Mesh creatures don't flap or wag like the built-in models; they sway as one piece.
   For real animation, rig them in Blender or use Higgsfield's rigging tool.
+
+## Realms 5 and 6 (Starfall Desert, Void Abyss)
+
+| Creature | Name to use | 3D model | Concept art |
+|---|---|---|---|
+| Dune Scarab | `DuneScarab` | concept only | [concept](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135026_b185352a-86d5-42fc-894e-e885e60dbb16.png) |
+| Mirage Jackal | `MirageJackal` | concept only | [concept](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135027_cf25fe41-7ad7-4ec3-b89e-cb50c3bd2720.png) |
+| Sand Wyrm | `SandWyrm` | concept only | [concept](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135026_149e4447-0a05-4597-b472-19971e5a6230.png) |
+| Comet Hawk | `CometHawk` | concept only | [concept](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135025_8b1581e2-6446-4baf-b79d-1cfb8d968a38.png) |
+| Sphinx Guardian | `SphinxGuardian` | concept only | [concept](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135100_e4bd70e0-b696-4565-9296-65bad3840a13.png) |
+| Starfall Colossus | `StarfallColossus` | [GLB](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135110_0a239448-a26c-4e29-8faf-bdfcfe3d0e50.glb) | [concept](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135026_af1e8dae-86f1-44b7-bc09-643ad2cccc6a.png) |
+| Void Moth | `VoidMoth` | concept only | [concept](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135100_ed079942-3f66-44e7-b071-1c5bfaf51d6a.png) |
+| Shadow Lynx | `ShadowLynx` | concept only | [concept](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135101_5a528e73-28c0-4355-bc85-910e21991c61.png) |
+| Eclipse Raven | `EclipseRaven` | concept only | [concept](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135026_4e194239-6748-4665-85c4-229a00052e89.png) |
+| Nether Wyvern | `NetherWyvern` | concept only | [concept](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135026_0d9bc738-320e-4b44-84c8-fd1e5f7cee4b.png) |
+| Abyssal Kraken | `AbyssalKraken` | concept only | [concept](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135100_005fcd33-d297-42d4-a5bf-4dd6b9a95193.png) |
+| Eternity Phoenix | `EternityPhoenix` | [GLB](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135112_3305adc5-766e-4e0d-ade5-d7b776fbcd59.glb) | [concept](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135027_b8811f22-c469-4657-b350-b82d635b0bcd.png) |

@@ -15,6 +15,10 @@ ChampionEgg https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVnt
 MeadowCrystal https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195802_69456b91-7a08-4d07-88f5-5697322a69d3.glb
 EmberCrystal https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195803_c2988a59-36cb-4c0c-8060-dd731e765b3f.glb
 FrostCrystal https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195805_679dd176-85aa-43ba-b6a3-5bd1d8a60d29.glb
+StarfallEgg https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135125_855168bd-20ed-44b3-8779-8866f5163fb2.glb
+VoidEgg https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135127_0b8a648b-5c1d-4133-a935-411706b915da.glb
+StarfallCrystal https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135129_dc25a401-edfb-46e9-b278-3ecd560f9ad1.glb
+VoidCrystal https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_135131_3ef7da71-2e6d-4da9-b713-fc65d3fd77d4.glb
 SkyCrystal https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195816_03d8f104-d738-4ab2-bbfe-12f2bbaddf9d.glb
 ManaChest https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195817_afb64682-f37c-48e2-9869-3020e9b82f45.glb
 MagicTree https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261014_195806_00114dae-20c2-4644-bd48-1e1fd4c2d472.glb
