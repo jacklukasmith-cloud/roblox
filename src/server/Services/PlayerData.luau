@@ -122,6 +122,8 @@ local function defaultData(): Data
 			VehiclesBuilt = 0,
 			Spins = 0,
 			ChestsOpened = 0,
+			Likes = 0,
+			LikesGiven = 0,
 		},
 		Items = {},
 		RedeemedCodes = {},

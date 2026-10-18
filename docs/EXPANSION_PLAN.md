@@ -45,7 +45,8 @@ Every player gets their own **Sanctuary**: a floating island they own, reached f
   - a faster-crafting pass (2 cauldron slots, 25% faster) plus a small "finish brew now" product;
   - hoverboard and kart skins.
 - **Fun extras:**
-  - visit and ❤️ like other players' bases, with a weekly "Most Liked Sanctuary" board and prize;
+  - ~~visit and ❤️ like other players' bases, with a weekly "Most Liked Sanctuary" board~~ (done; a prize for the
+    weekly top 3 is still to come);
   - ~~a daily island chest~~ (done: the 🧰 chest by the Upgrade Stone, better loot per island level);
   - ~~a pet playground that earns pet XP while you're away~~ (done: it's part of the Pet Habitat);
   - a crystal garden where seeds grow over real time (like Grow a Garden).

@@ -45,6 +45,11 @@ WhatsNew.List = {
 		Text = "A treasure chest on your island opens once a day. Higher island levels give better loot.",
 	},
 	{
+		Icon = "❤️",
+		Title = "Like islands",
+		Text = "Visit friends' islands over the Sky Plaza and hold E on their heart sign. Weekly Most Liked board!",
+	},
+	{
 		Icon = "🏠",
 		Title = "Teleport crystals",
 		Text = "Brew Home, Gloom and Camp Crystals at your Cauldron and warp there from your Bag.",

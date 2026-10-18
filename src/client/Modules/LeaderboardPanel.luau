@@ -62,7 +62,7 @@ function LeaderboardPanel.Build(screen: Frame)
 		Parent = content,
 	}, {
 		Ui.new("UIGridLayout", {
-			CellSize = UDim2.new(1 / 3, -6, 0, 34),
+			CellSize = UDim2.new(1 / 4, -6, 0, 34),
 			CellPadding = UDim2.fromOffset(6, 6),
 			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),

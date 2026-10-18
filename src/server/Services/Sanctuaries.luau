@@ -334,6 +334,8 @@ local function build(player: Player, slot: number): Model
 		Size = UDim2.fromScale(1, 0.4),
 		TextColor3 = rgb(140, 230, 255),
 	})
+	-- the ❤️ heart sign by the home spot: visitors like your island here
+	Sanctuaries.BuildLikeSign(model, player, at(0, 1.6, -11))
 	-- the island chest, opposite the stone: opens once a day
 	Sanctuaries.BuildChest(model, player, CFrame.lookAt(at(-14, 1.6, 0), at(0, 1.6, 0)))
 	-- the stations (the ones not built yet say "coming soon")
@@ -601,6 +603,95 @@ function Sanctuaries.BuildChest(model: Model, player: Player, cf: CFrame)
 	if data then
 		refreshChest(model, data)
 	end
+end
+
+-- ❤️ Likes ------------------------------------------------------------------------------------
+
+function Sanctuaries.BuildLikeSign(model: Model, player: Player, position: Vector3)
+	local helpers = WorldBuilder.Helpers
+	local data = PlayerData.Get(player) :: any
+	local likes = data and data.Stats and data.Stats.Likes or 0
+	local post = part({
+		Name = "LikeSign",
+		Size = Vector3.new(0.6, 4, 0.6),
+		Position = position + Vector3.new(0, 2, 0),
+		Color = rgb(140, 100, 70),
+		Material = Enum.Material.Wood,
+		Parent = model,
+	})
+	local heart = part({
+		Name = "LikeHeart",
+		Size = Vector3.new(1.8, 1.8, 0.6),
+		CFrame = CFrame.new(position + Vector3.new(0, 4.6, 0)) * CFrame.Angles(0, 0, math.pi / 4),
+		Color = rgb(255, 90, 140),
+		Material = Enum.Material.Neon,
+		CanCollide = false,
+		Parent = model,
+	})
+	helpers.Light(heart, rgb(255, 120, 160), 8, 0.8)
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.Name = "LikePrompt"
+	prompt.ObjectText = `{player.DisplayName}'s Sanctuary`
+	prompt.ActionText = "❤️ Like"
+	prompt.HoldDuration = 0.4
+	prompt.MaxActivationDistance = 10
+	prompt.RequiresLineOfSight = false
+	prompt.Parent = post
+	local tag = helpers.Billboard(heart, UDim2.fromOffset(160, 36), Vector3.new(0, 1.8, 0), 70)
+	helpers.Label(tag, { Name = "LikesText", Text = `❤️ {Format.Number(likes)}`, Size = UDim2.fromScale(1, 1) })
+end
+
+local function refreshLikes(model: Model, likes: number)
+	for _, d in model:GetDescendants() do
+		if d.Name == "LikesText" and d:IsA("TextLabel") then
+			d.Text = `❤️ {Format.Number(likes)}`
+		end
+	end
+end
+
+-- A visitor likes the island they're standing on. Returns ok, message.
+function Sanctuaries.Like(player: Player, model: Model?): (boolean, string?)
+	local data = PlayerData.Get(player) :: any
+	if not data then
+		return false, nil
+	end
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart") :: BasePart?
+	model = model or (root and islandUnder(root.Position))
+	if not model then
+		return false, nil
+	end
+	local ownerId = model:GetAttribute("OwnerId")
+	if ownerId == player.UserId then
+		return false, "That's your own island! Like your friends' islands instead"
+	end
+	local today = Daily.Today()
+	data.Sanctuary.Liked = data.Sanctuary.Liked or {}
+	local key = tostring(ownerId)
+	if data.Sanctuary.Liked[key] == today then
+		return false, "You've liked this island today already"
+	end
+	-- tidy old days out
+	for k, day in data.Sanctuary.Liked do
+		if day ~= today then
+			data.Sanctuary.Liked[k] = nil
+		end
+	end
+	data.Sanctuary.Liked[key] = today
+	data.Stats.LikesGiven = (data.Stats.LikesGiven or 0) + 1
+	local Economy = require(script.Parent.Economy) :: any
+	local essence = Economy.GetProductEssence(player, Sanctuary.LikeReward)
+	Economy.AddEssence(player, essence)
+	PlayerData.MarkChanged(player)
+	-- the owner (online: they're in this server, since their island is)
+	local owner = Players:GetPlayerByUserId(ownerId)
+	local ownerData = owner and PlayerData.Get(owner) :: any
+	if ownerData then
+		ownerData.Stats.Likes = (ownerData.Stats.Likes or 0) + 1
+		PlayerData.MarkChanged(owner)
+		refreshLikes(model, ownerData.Stats.Likes)
+		notify:FireClient(owner, `❤️ {player.DisplayName} liked your Sanctuary!`, rgb(255, 120, 160))
+	end
+	return true, `❤️ Liked! +💎 {Format.Number(essence)}`
 end
 
 Sanctuaries.Rng = Random.new()
@@ -883,7 +974,14 @@ function Sanctuaries.Start()
 	Sanctuaries.EnsurePlaza()
 	-- the Upgrade Stone (only works on your own island)
 	folder().DescendantAdded:Connect(function(d)
-		if d:IsA("ProximityPrompt") and d.Name == "ChestPrompt" then
+		if d:IsA("ProximityPrompt") and d.Name == "LikePrompt" then
+			d.Triggered:Connect(function(player)
+				local ok, message = Sanctuaries.Like(player, d:FindFirstAncestorOfClass("Model"))
+				if message then
+					notify:FireClient(player, message, if ok then rgb(255, 120, 160) else rgb(255, 170, 120))
+				end
+			end)
+		elseif d:IsA("ProximityPrompt") and d.Name == "ChestPrompt" then
 			d.Triggered:Connect(function(player)
 				local ok, message = Sanctuaries.OpenChest(player)
 				if message then

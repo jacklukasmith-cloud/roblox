@@ -165,6 +165,9 @@ all of this are listed in [docs/HIGGSFIELD_TODO.md](docs/HIGGSFIELD_TODO.md).
   Gold and Void colours. The **Mushroom Kart** (6 Emberhearts + 20 Moonshards, x1.9) has a passenger **Seat** on
   the back: a friend just sits on it and rides along with the driver. Code:
   `src/server/Services/Hangar.luau`, `src/client/Modules/HangarPanel.luau`.
+- **❤️ Likes:** visitors hold E on the heart sign by your home spot to like your island (once per island per day).
+  They get Essence for it, you get a Like on your sign and a place on the weekly **Most Liked Sanctuary**
+  leaderboard. Cross the Sky Plaza bridges to reach other players' islands.
 - **Island chest:** the 🧰 chest opposite the Upgrade Stone opens **once a day** (midnight UTC). It gives Essence
   (worth 30 crystals of your best realm, +20 per island level) and one item; higher island levels unlock better
   drops, up to a Mystic Egg at level 10 (`Sanctuary.ChestItems`). Only works on your own island.

@@ -305,6 +305,15 @@ Missions.List = {
 		Reward = { Essence = 20000 },
 	},
 	{
+		Id = "Like1",
+		Text = "❤️ Like another player's Sanctuary",
+		Stat = "LikesGiven",
+		Kind = "Reach",
+		Goal = 1,
+		Hint = "Cross the Sky Plaza to a friend's island and hold E on the heart sign by their home spot",
+		Reward = { Essence = 20000 },
+	},
+	{
 		Id = "Sanctuary3",
 		Text = "Upgrade your Sanctuary to level 3",
 		Stat = "SanctuaryLevel",

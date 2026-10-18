@@ -97,6 +97,16 @@ Boards.List = {
 			return weekly(d, "CreaturesHatched")
 		end,
 	},
+	{
+		Id = "WeekLikes",
+		Name = "Most Liked Sanctuary",
+		Icon = "❤️",
+		Store = "MythicTamers_WeekLikes_v1_",
+		Weekly = true,
+		Value = function(d)
+			return weekly(d, "Likes")
+		end,
+	},
 } :: { Board }
 
 function Boards.Get(id: string): Board?
@@ -116,7 +126,11 @@ function Boards.RollWeek(data: any)
 		local stats = data.Stats or {}
 		data.WeekStats = {
 			Week = week,
-			Base = { CrystalsBroken = stats.CrystalsBroken or 0, CreaturesHatched = stats.CreaturesHatched or 0 },
+			Base = {
+				CrystalsBroken = stats.CrystalsBroken or 0,
+				CreaturesHatched = stats.CreaturesHatched or 0,
+				Likes = stats.Likes or 0,
+			},
 		}
 	end
 end

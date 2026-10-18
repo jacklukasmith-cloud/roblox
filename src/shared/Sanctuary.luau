@@ -115,6 +115,11 @@ function Sanctuary.ChestLoot(level: number, roll: number): (number, string, numb
 	return essence, last.Item, last.Count
 end
 
+-- ❤️ Likes: visitors hold E on the heart sign by your home spot, once per island per day. The liker gets Essence
+-- (worth this many crystals of their best realm); the owner gets a Like, counted on the weekly "Most Liked
+-- Sanctuary" leaderboard and the lifetime total on their sign.
+Sanctuary.LikeReward = 10
+
 Sanctuary.Stations = {
 	{ Id = "PetHabitat", Name = "Pet Habitat", Icon = "🐾", Spot = Vector2.new(-0.5, -0.45) },
 	{ Id = "Cauldron", Name = "Alchemy Cauldron", Icon = "⚗️", Spot = Vector2.new(0.5, -0.45) },
