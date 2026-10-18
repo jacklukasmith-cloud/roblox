@@ -224,6 +224,12 @@ the card to turn the arrow on or off; this also shows a tip. To add, remove or r
 and players stay on the mission they were on. Anything they've already done (like realms unlocked)
 completes straight away.
 
+## Red bubbles on the menu
+
+The menu buttons show a small red bubble when something's waiting: Daily rewards to claim, new Merchant stock you
+haven't looked at, new items in your Bag, and Rebirth when you can afford it. Opening the menu clears it. Logic:
+`Panels.Waiting` in `src/client/Modules/Panels.luau`.
+
 ## What's New pop-up
 
 After an update, players see a **What's New** window once when they join (`src/shared/WhatsNew.luau`). They can

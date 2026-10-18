@@ -63,6 +63,16 @@ If the brew's glow doesn't line up with the top of the imported pot, add a numbe
 | `PrismheartCrystal` | The legendary Prismheart in the Heart of the Gloomwood (replaces the built-in shards; works for any crystal as `<Id>Crystal`) | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261017_235536_1f03c5e8-21e4-48e5-a477-3953fa38eee1.png) |
 | `GloomTreant` | Not placed by the game yet: a static model ([GLB](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261017_235601_9af95ab7-f85a-4ef1-9302-75eb634d8ced.glb), [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261017_235537_a16029f8-0693-4a3a-a5ca-08ee9b6e55a5.png)) to rig later; the walking treant stays the block one until then | |
 
+## Vehicles (the Hangar)
+
+| Model name | Where | Preview image |
+|---|---|---|
+| `VehicleMossBoard` | The Moss Board under your feet while riding (replaces the glowing plank) | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_000838_d646bbaa-00b7-4340-bea3-4faa85341b2a.png) |
+| `VehicleCrystalBoard` | The Crystal Hoverboard | [image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261018_000840_9fa8857d-2b38-4e24-b9f8-30933921cf9b.png) |
+
+Boards are scaled to 6 studs long automatically. If one sits too high or low under the character, it's the
+pivot of the imported model: in Studio, move the model's pivot to its bottom centre.
+
 ## Add them to the game
 
 1. Run `powershell -ExecutionPolicy Bypass -File scripts\download-world.ps1` in the roblox

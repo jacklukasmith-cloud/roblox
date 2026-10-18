@@ -23,42 +23,43 @@ local BossBar = {}
 
 function BossBar.Build(root: Frame)
 	local player = Players.LocalPlayer
+	-- a slim two-line bar: name + timer, then the health bar with Join at the end
 	local bar = Ui.glass({
 		Name = "BossBar",
 		AnchorPoint = Vector2.new(0.5, 0),
-		Size = UDim2.fromOffset(420, 86),
+		Size = UDim2.fromOffset(300, 60),
 		Visible = false,
 		Parent = root,
-	}, { Ui.corner(14) })
+	}, { Ui.corner(12) })
 	local edge = bar:FindFirstChildOfClass("UIStroke")
 	if edge then
 		edge.Color = BOSS
 		edge.Transparency = 0.3
 	end
 	local title = Ui.text({
-		Position = UDim2.fromOffset(12, 6),
-		Size = UDim2.new(1, -170, 0, 22),
+		Position = UDim2.fromOffset(10, 4),
+		Size = UDim2.new(1, -80, 0, 18),
 		Text = "",
 		Font = T.FontHeavy,
 		TextColor3 = Color3.fromRGB(255, 220, 90),
 		TextXAlignment = Enum.TextXAlignment.Left,
-		MaxTextSize = 18,
+		MaxTextSize = 15,
 		Parent = bar,
 	})
 	local timer = Ui.text({
 		AnchorPoint = Vector2.new(1, 0),
-		Position = UDim2.new(1, -96, 0, 6),
-		Size = UDim2.fromOffset(60, 22),
+		Position = UDim2.new(1, -10, 0, 4),
+		Size = UDim2.fromOffset(64, 18),
 		Text = "",
 		Font = T.Font,
 		TextColor3 = T.SubText,
 		TextXAlignment = Enum.TextXAlignment.Right,
-		MaxTextSize = 16,
+		MaxTextSize = 14,
 		Parent = bar,
 	})
 	local back = Ui.new("Frame", {
-		Position = UDim2.fromOffset(12, 32),
-		Size = UDim2.new(1, -110, 0, 16),
+		Position = UDim2.fromOffset(10, 30),
+		Size = UDim2.new(1, -108, 0, 16),
 		BackgroundColor3 = T.Background,
 		Parent = bar,
 	}, { Ui.round() })
@@ -72,23 +73,13 @@ function BossBar.Build(root: Frame)
 		Text = "",
 		Font = T.Font,
 		ZIndex = 2,
-		MaxTextSize = 12,
+		MaxTextSize = 11,
 		Parent = back,
 	})
-	local top = Ui.text({
-		Position = UDim2.fromOffset(12, 54),
-		Size = UDim2.new(1, -110, 0, 24),
-		Text = "",
-		Font = T.FontRegular,
-		TextColor3 = T.SubText,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		MaxTextSize = 13,
-		Parent = bar,
-	})
 	Ui.button({
-		AnchorPoint = Vector2.new(1, 0.5),
-		Position = UDim2.new(1, -10, 0.5, 0),
-		Size = UDim2.fromOffset(84, 56),
+		AnchorPoint = Vector2.new(1, 1),
+		Position = UDim2.new(1, -8, 1, -6),
+		Size = UDim2.fromOffset(88, 28),
 		Text = "⚔️ Join",
 		Variant = "Danger",
 		Parent = bar,
@@ -105,7 +96,7 @@ function BossBar.Build(root: Frame)
 	local pill = Ui.glass({
 		Name = "BossTimer",
 		AnchorPoint = Vector2.new(0.5, 0),
-		Size = UDim2.fromOffset(170, 28),
+		Size = UDim2.fromOffset(150, 24),
 		Visible = false,
 		Parent = root,
 	}, { Ui.round() })
@@ -144,30 +135,23 @@ function BossBar.Build(root: Frame)
 			scale.Scale = 0.6
 			TweenService:Create(scale, TweenInfo.new(0.35, Enum.EasingStyle.Back), { Scale = 1 }):Play()
 		end
-		title.Text = `⚔️ {s.Name}  ·  {s.ZoneName}`
-		timer.Text = Format.Time(math.max(0, s.EndsAt - State.Now()))
-		local pct = if s.MaxHP > 0 then math.clamp(s.HP / s.MaxHP, 0, 1) else 0
-		TweenService:Create(fill, TweenInfo.new(0.3), { Size = UDim2.fromScale(pct, 1) }):Play()
-		hpText.Text = `{Format.Number(math.ceil(s.HP))} / {Format.Number(s.MaxHP)}`
-		local parts, mine = {}, nil
+		-- your rank goes in the title when you've hit it
+		local mine
 		for i, entry in s.Top do
-			if i <= 3 then
-				table.insert(parts, `{i}. {entry.Name} {Format.Number(entry.Damage)}`)
-			end
 			if entry.UserId == player.UserId then
 				mine = i
 			end
 		end
-		local line = if #parts > 0 then table.concat(parts, "   ") else "Be the first to hit it!"
-		if mine then
-			line ..= `   ·   You: #{mine}`
-		end
-		top.Text = line
+		title.Text = `⚔️ {s.Name}{if mine then `  ·  You #{mine}` else ""}`
+		timer.Text = Format.Time(math.max(0, s.EndsAt - State.Now()))
+		local pct = if s.MaxHP > 0 then math.clamp(s.HP / s.MaxHP, 0, 1) else 0
+		TweenService:Create(fill, TweenInfo.new(0.3), { Size = UDim2.fromScale(pct, 1) }):Play()
+		hpText.Text = `{Format.Number(math.ceil(s.HP))} / {Format.Number(s.MaxHP)}`
 	end
 
 	local function arrange()
 		local c = Layout.Compact
-		bar.Size = UDim2.fromOffset(if c then 360 else 420, if c then 78 else 86)
+		bar.Size = UDim2.fromOffset(if c then 270 else 300, if c then 56 else 60)
 		-- just under the top-centre Mana Surge banner (which sits in the top bar on phones)
 		local y = if c then 30 else 60
 		bar.Position = UDim2.new(0.5, 0, 0, y)

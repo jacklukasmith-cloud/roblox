@@ -113,6 +113,58 @@ local function creatureIcon(
 end
 
 -- A small egg model in a viewport; returns a function that shakes it (0 = still, 1 = wild).
+-- What's waiting in each menu (for the red bubbles). The "seen" marks live for this session only.
+local seen: { [string]: any } = {}
+function Panels.MarkSeen(panel: string)
+	local d = State.Data
+	if panel == "Merchant" then
+		seen.MerchantSlot = State.World and State.World.Merchant and State.World.Merchant.Slot
+	elseif panel == "Bag" then
+		seen.BagCount = 0
+		for _, n in (d and d.Items) or {} do
+			seen.BagCount += n
+		end
+	end
+	State.Set("Seen", (State.Seen or 0) + 1)
+end
+
+function Panels.Waiting(panel: string): number
+	local d = State.Data
+	if not d then
+		return 0
+	end
+	if panel == "Daily" then
+		return (d.Daily and d.Daily.ReadyCount) or 0
+	elseif panel == "Merchant" then
+		-- new stock since you last looked (and the Merchant has something you haven't bought)
+		local m = State.World and State.World.Merchant
+		if not m or seen.MerchantSlot == m.Slot then
+			return 0
+		end
+		local n = 0
+		local bought = d.Merchant and d.Merchant.Slot == m.Slot and d.Merchant.Bought or {}
+		for id in m.Stock or {} do
+			if not bought[id] then
+				n += 1
+			end
+		end
+		return n
+	elseif panel == "Bag" then
+		-- only items that arrived since you last looked (what you had when you joined doesn't count)
+		local total = 0
+		for _, n in d.Items or {} do
+			total += n
+		end
+		if seen.BagCount == nil then
+			seen.BagCount = total
+		end
+		return math.max(0, total - seen.BagCount)
+	elseif panel == "Rebirth" then
+		return if d.RebirthCost and d.Essence >= d.RebirthCost then 1 else 0
+	end
+	return 0
+end
+
 -- Menu ---------------------------------------------------------------------------------
 local MENU = {
 	{ Panel = "Creatures", Label = "Pets", Icon = "🐾", Color = Color3.fromRGB(90, 170, 255) },
@@ -245,56 +297,68 @@ local function buildMenu(root: Frame)
 		else
 			badge.Visible = false -- only keys 1-9 and 0
 		end
-		if entry.Panel == "Daily" then
-			-- red bubble with the number of rewards waiting to be claimed
-			local bubble = Ui.new("Frame", {
-				Name = "Ready",
-				AnchorPoint = Vector2.new(0.5, 0.5),
-				Position = UDim2.new(1, -4, 0, 4),
-				Size = UDim2.fromOffset(22, 22),
-				BackgroundColor3 = T.Bad,
-				Visible = false,
-				ZIndex = 5,
-				Parent = tile,
-			}, { Ui.round(), Ui.stroke(Color3.new(1, 1, 1), 1.5, 0.2) })
-			local count = Ui.text({
-				Size = UDim2.fromScale(1, 1),
-				Text = "",
-				Font = T.FontHeavy,
-				ZIndex = 6,
-				MaxTextSize = 13,
-				Parent = bubble,
-			})
-			-- gentle pulse while something is waiting, so it catches the eye
-			local pulseScale = Ui.new("UIScale", { Parent = tile:FindFirstChild("Chip") })
-			local pulse = TweenService:Create(
-				pulseScale,
-				TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
-				{ Scale = 1.12 }
-			)
-			local pulsing = false
-			local function setPulse(on: boolean)
-				if on == pulsing then
-					return
-				end
-				pulsing = on
-				if on then
-					pulse:Play()
-				else
-					pulse:Cancel()
-					pulseScale.Scale = 1
-				end
+		-- red bubble: something's waiting in this menu (a reward, new stock, a potion ready...)
+		local bubble = Ui.new("Frame", {
+			Name = "Ready",
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			Position = UDim2.new(1, -4, 0, 4),
+			Size = UDim2.fromOffset(22, 22),
+			BackgroundColor3 = T.Bad,
+			Visible = false,
+			ZIndex = 5,
+			Parent = tile,
+		}, { Ui.round(), Ui.stroke(Color3.new(1, 1, 1), 1.5, 0.2) })
+		local count = Ui.text({
+			Size = UDim2.fromScale(1, 1),
+			Text = "",
+			Font = T.FontHeavy,
+			ZIndex = 6,
+			MaxTextSize = 13,
+			Parent = bubble,
+		})
+		-- gentle pulse while something is waiting, so it catches the eye
+		local pulseScale = Ui.new("UIScale", { Parent = tile:FindFirstChild("Chip") })
+		local pulse = TweenService:Create(
+			pulseScale,
+			TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+			{ Scale = 1.12 }
+		)
+		local pulsing = false
+		local function setPulse(on: boolean)
+			if on == pulsing then
+				return
 			end
-			State.Changed:Connect(function(key)
-				local d = State.Data
-				if key == "Data" and d and d.Daily then
-					local ready = d.Daily.ReadyCount > 0
-					bubble.Visible = ready
-					count.Text = tostring(d.Daily.ReadyCount)
-					setPulse(ready)
-				end
-			end)
+			pulsing = on
+			if on then
+				pulse:Play()
+			else
+				pulse:Cancel()
+				pulseScale.Scale = 1
+			end
 		end
+		local function refreshBubble()
+			local n = Panels.Waiting(entry.Panel)
+			bubble.Visible = n > 0
+			count.Text = if n > 9 then "9+" else tostring(n)
+			setPulse(n > 0 and entry.Panel == "Daily")
+		end
+		State.Changed:Connect(function(key)
+			if key == "Data" or key == "World" or key == "Seen" then
+				refreshBubble()
+			end
+		end)
+		-- some bubbles depend on the clock (brews finishing, the Merchant restocking)
+		task.spawn(function()
+			while true do
+				task.wait(5)
+				refreshBubble()
+			end
+		end)
+		-- opening the menu clears the "new things" bubbles
+		Ui.onPanelOpen(entry.Panel, function()
+			Panels.MarkSeen(entry.Panel)
+			refreshBubble()
+		end)
 		table.insert(Panels.MenuButtons, tile)
 	end
 	-- Gamepad hint (outside the grid so it isn't laid out as a tile)

@@ -89,7 +89,8 @@ Moonshard, Emberheart, Frostglass, Stormquartz, Voidstone, Prismheart.
 | `AlchemyCauldron` | The Cauldron on every island ([WORLD_MESHES.md](WORLD_MESHES.md)) |
 | `PrismheartCrystal` | The legendary crystal in the Heart (see WORLD_MESHES.md) |
 | `GloomTreant` | Static 3D model made (see WORLD_MESHES.md); it still needs rigging before it can replace the block treant that walks |
-| `VehicleMossBoard` | The starter hoverboard (see WORLD_MESHES.md) |
-| `VehicleCrystalBoard` | The Crystal Hoverboard (see WORLD_MESHES.md) |
+| `VehicleMossBoard` | The Moss Board, textured 3D model (see WORLD_MESHES.md) |
+| `VehicleCrystalBoard` | The Crystal Hoverboard, textured 3D model (see WORLD_MESHES.md) |
+| Board Skins icon | Game pass icon ([ICONS.md](ICONS.md)) |
 | Gloomwood map parchment | Background for the 🗺️ forest map ([image](https://d8j0ntlcm91z4.cloudfront.net/user_3KYQFgB4C3XHu6lUsXw00hrVntX/hf_20261017_235908_cd0256e5-ec3c-45fc-b808-7306ae8a2396.png)). Upload it to Roblox as a Decal and put its `rbxassetid://` in `Gloomwood.MapImage` (`src/shared/Gloomwood.luau`) |
 | Master Alchemist icon | Game pass icon ([ICONS.md](ICONS.md)) |
