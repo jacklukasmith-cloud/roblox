@@ -1,0 +1,31 @@
+{
+  "name": "BloomBattles",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "BloomShared": {
+        "$path": "src/shared"
+      }
+    },
+    "ServerScriptService": {
+      "BloomServer": {
+        "$path": "src/server"
+      }
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "BloomClient": {
+          "$path": "src/client"
+        }
+      }
+    },
+    "Lighting": {
+      "$properties": {
+        "Technology": "Future",
+        "GlobalShadows": true,
+        "ClockTime": 14.5,
+        "Brightness": 2.2
+      }
+    }
+  }
+}

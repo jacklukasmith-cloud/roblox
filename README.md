@@ -4,6 +4,8 @@ A Roblox **magical creature simulator** with a competitive layer. Players click 
 Essence, hatch magical creatures from eggs, unlock new realms, rebirth for permanent multipliers, and
 compete in server-wide **Mana Surges** and a weekly cross-server **House War**.
 
+> **New:** a second, separate game lives in [games/bloom-battles](games/bloom-battles/README.md): *+1 Bloom Every Second: Bloom Battles*, a calm low-poly garden take on the "+1 every second" battle games.
+
 - **[docs/GAME_DESIGN.md](docs/GAME_DESIGN.md)**: every system, the economy numbers and the monetization plan
 - **[docs/MARKET_RESEARCH.md](docs/MARKET_RESEARCH.md)**: what makes the top simulators different, and which ideas we borrowed
 - **[docs/ICONS.md](docs/ICONS.md)**: generated icons for every game pass and product
